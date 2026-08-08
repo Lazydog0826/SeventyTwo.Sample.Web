@@ -7,6 +7,12 @@ const defaultRouter: RouteRecordRaw[] = [
     meta: {},
     component: () => import("@/views/login.vue"),
   },
+  {
+    path: "/home",
+    name: "hoe",
+    meta: {},
+    component: () => import("@/layout/index.vue"),
+  },
 ];
 
 const router = createRouter({
