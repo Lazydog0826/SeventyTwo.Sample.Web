@@ -14,6 +14,12 @@ const defaultRouter: RouteRecordRaw[] = [
     meta: {},
     component: () => import("@/layout/index.vue"),
   },
+  {
+    path: "/404",
+    name: "404",
+    meta: {},
+    component: () => import("@/views/404.vue"),
+  },
 ];
 
 const router = createRouter({
