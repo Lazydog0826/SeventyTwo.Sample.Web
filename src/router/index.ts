@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router";
+import { routeGuard } from "@/router/routeGuard";
 
 const defaultRouter: RouteRecordRaw[] = [
   {
@@ -8,8 +9,8 @@ const defaultRouter: RouteRecordRaw[] = [
     component: () => import("@/views/login.vue"),
   },
   {
-    path: "/home",
-    name: "hoe",
+    path: "/",
+    name: "layout",
     meta: {},
     component: () => import("@/layout/index.vue"),
   },
@@ -19,5 +20,7 @@ const router = createRouter({
   routes: defaultRouter,
   history: createWebHistory(),
 });
+
+routeGuard(router);
 
 export default router;

@@ -35,13 +35,32 @@
           <n-text depth="3">{{ t("login.subtitle") }}</n-text>
         </header>
 
-        <n-form label-placement="top" size="large" :show-require-mark="false">
-          <n-form-item :label="t('login.account')">
-            <n-input :placeholder="t('login.accountPlaceholder')" clearable></n-input>
+        <n-form
+          ref="formRef"
+          :model="formValue"
+          :rules="rules"
+          label-placement="top"
+          size="large"
+          :show-require-mark="false"
+          @submit.prevent="handleLogin"
+        >
+          <n-form-item path="account" :label="t('login.account')">
+            <n-input
+              v-model:value="formValue.account"
+              :placeholder="t('login.accountPlaceholder')"
+              autocomplete="username"
+              clearable
+            ></n-input>
           </n-form-item>
 
-          <n-form-item :label="t('login.password')">
-            <n-input type="password" :placeholder="t('login.passwordPlaceholder')" show-password-on="click"></n-input>
+          <n-form-item path="password" :label="t('login.password')">
+            <n-input
+              v-model:value="formValue.password"
+              type="password"
+              :placeholder="t('login.passwordPlaceholder')"
+              autocomplete="current-password"
+              show-password-on="click"
+            ></n-input>
           </n-form-item>
 
           <div class="form-options">
@@ -51,7 +70,7 @@
             </n-button>
           </div>
 
-          <n-button type="primary" size="large" block>
+          <n-button type="primary" attr-type="submit" size="large" :loading="loading" block>
             {{ t("common.login") }}
           </n-button>
         </n-form>
@@ -71,11 +90,25 @@
 
 <script setup lang="ts">
 import { NButton, NCard, NCheckbox, NDropdown, NForm, NFormItem, NIcon, NInput, NText } from "naive-ui";
+import type { FormInst, FormRules } from "naive-ui";
 import { Languages, Moon, Sun } from "@lucide/vue";
-import { inject, type Ref } from "vue";
+import { computed, inject, reactive, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
+import { login } from "@/api/users";
 
 const { t, locale } = useI18n();
+const router = useRouter();
+const formRef = ref<FormInst | null>(null);
+const loading = ref(false);
+const formValue = reactive({
+  account: "superadmin",
+  password: "123456",
+});
+const rules = computed<FormRules>(() => ({
+  account: { required: true, message: t("login.accountRequired"), trigger: ["input", "blur"] },
+  password: { required: true, message: t("login.passwordRequired"), trigger: ["input", "blur"] },
+}));
 const { isDark, toggleTheme } = inject<{
   isDark: Ref<boolean>;
   toggleTheme: () => void;
@@ -89,6 +122,34 @@ const languageOptions = [
 const handleLanguageChange = (key: string | number) => {
   locale.value = String(key);
   localStorage.setItem("locale", locale.value);
+};
+
+const handleLogin = async () => {
+  if (loading.value) {
+    return;
+  }
+
+  try {
+    await formRef.value?.validate();
+  } catch {
+    return;
+  }
+
+  loading.value = true;
+  try {
+    const accessToken = await login(formValue);
+    if (!accessToken) {
+      window.$message.error(t("login.invalidToken"));
+      return;
+    }
+
+    window.$accessToken = accessToken;
+    await router.push("/home");
+  } catch {
+    // 请求层已统一展示接口错误。
+  } finally {
+    loading.value = false;
+  }
 };
 </script>
 

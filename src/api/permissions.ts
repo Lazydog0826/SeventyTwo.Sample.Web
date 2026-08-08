@@ -1,7 +1,7 @@
 import http from "@/utils/request";
 
 /** 权限类型：目录、页面、按钮。 */
-export type PermissionType = 1 | 2 | 3;
+export type PermissionType = "Page" | "Directory" | "Button";
 
 /** 路由元数据。 */
 export interface PermissionMetaData {
@@ -15,10 +15,10 @@ export interface PermissionMenuOutput {
   code: string;
   title: string;
   type: PermissionType;
-  icon: string | null;
-  vueComponentPath: string | null;
-  routePath: string | null;
-  routeName: string | null;
+  icon: string;
+  vueComponentPath: string;
+  routePath: string;
+  routeName: string;
   metaData: PermissionMetaData;
   parentId: string | null;
 }

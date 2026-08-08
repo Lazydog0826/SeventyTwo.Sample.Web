@@ -25,7 +25,13 @@ export const usePermissionsStore = defineStore("permissions", () => {
     return permissions;
   };
 
+  const hasPermission = async (code: string) => {
+    const temPermissions = await getPermissions();
+    return temPermissions.buttonCodes.includes(code);
+  };
+
   return {
     getPermissions,
+    hasPermission,
   };
 });
