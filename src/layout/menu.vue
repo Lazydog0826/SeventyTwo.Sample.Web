@@ -18,6 +18,7 @@
       :collapsed-width="64"
       :collapsed-icon-size="22"
       :options="menuOptions"
+      @update:value="handleUpdateValue"
     ></n-menu>
   </n-layout-sider>
 </template>
@@ -26,7 +27,7 @@
 <script setup lang="ts">
 import { NLayoutSider, NMenu, type MenuOption, NIcon } from "naive-ui";
 import { type Component, computed, h, onMounted, ref } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { usePermissionsStore } from "@/stores/permissions.ts";
 import * as LucideIcons from "@lucide/vue";
 
@@ -35,8 +36,8 @@ defineProps<{
 }>();
 
 const route = useRoute();
+const router = useRouter();
 const activeMenu = computed(() => route.path);
-console.log(route.path, "route.path");
 const menuOptions = ref<MenuOption[]>([]);
 
 function renderIcon(name?: string): MenuOption["icon"] {
@@ -59,28 +60,43 @@ function renderIcon(name?: string): MenuOption["icon"] {
 onMounted(async () => {
   const permissionsStore = usePermissionsStore();
   const permissions = await permissionsStore.getPermissions();
-  console.log(permissions, "555");
-  const temMenuOptions: Array<MenuOption> = [];
+  const menuOptionMap = new Map<string, MenuOption>();
+
+  // 第一轮设置映射
   permissions.menus.forEach(x => {
-    const temMenu: MenuOption = {
+    const newMenuOption: MenuOption = {
       label: x.title,
       key: x.routePath,
       icon: renderIcon(x.icon),
       show: x.metaData.isShow,
-      children: [],
+      children: undefined,
     };
-    temMenuOptions.push(temMenu);
-    if (x.parentId == null) {
-      menuOptions.value.push(temMenu);
-    }
+    menuOptionMap.set(x.id, newMenuOption);
   });
 
-  temMenuOptions.forEach(x => {
-    if (x.children?.length === 0) {
-      x.children = undefined;
+  // 第二轮设置上下级关系
+  permissions.menus.forEach(x => {
+    const temMenuOption = menuOptionMap.get(x.id);
+
+    if (x.parentId) {
+      const parentMenuOption = menuOptionMap.get(x.parentId);
+      if (parentMenuOption && temMenuOption) {
+        parentMenuOption.children ??= [];
+        parentMenuOption.children.push(temMenuOption);
+      }
+    } else {
+      if (temMenuOption) {
+        menuOptions.value.push(temMenuOption);
+      }
     }
   });
 });
+
+function handleUpdateValue(key: string, _: MenuOption) {
+  if (route.path !== key) {
+    router.push(key);
+  }
+}
 </script>
 
 <!--suppress SpellCheckingInspection -->
