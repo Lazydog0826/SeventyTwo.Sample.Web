@@ -2,6 +2,7 @@
 
 import ky, { type Options } from "ky";
 import router from "@/router";
+import type { MessageReactive } from "naive-ui";
 
 interface WebApiResponse<T = any> {
   code: number;
@@ -20,6 +21,24 @@ const AuthPagePath = "/login";
 let isRefreshing = false;
 // 存储待重试的请求
 let requestsQueue: Array<PendingRequest> = [];
+// 存储当前正在显示的错误提示
+const activeErrorMessages = new Map<string, MessageReactive>();
+
+function showErrorMessage(content: string) {
+  if (activeErrorMessages.has(content)) {
+    return;
+  }
+
+  let messageReactive: MessageReactive;
+  messageReactive = window.$message.error(content, {
+    onAfterLeave: () => {
+      if (activeErrorMessages.get(content) === messageReactive) {
+        activeErrorMessages.delete(content);
+      }
+    },
+  });
+  activeErrorMessages.set(content, messageReactive);
+}
 
 export const kyInstance = ky.create({
   baseUrl: import.meta.env.VITE_API_BASE_URL,
@@ -45,7 +64,7 @@ export const kyInstance = ky.create({
           // 刷新 token 接口返回 401 代表授权 token 和刷新 token 都无效了，需要重新登录
           if (new URL(request.url).pathname === RefreshTokenApiPath) {
             window.$accessToken = "";
-            window.$message.error("登录已过期,请重新登录");
+            showErrorMessage("登录已过期,请重新登录");
             // 携带当前路由地址
             const currentPath = router.currentRoute.value.fullPath;
             await router.push({ path: AuthPagePath, query: { redirect: currentPath } });
@@ -116,7 +135,7 @@ export const kyInstance = ky.create({
     beforeError: [
       async ({ error }) => {
         const message = `${error.name}：${error.message}`;
-        window.$message?.error(message);
+        showErrorMessage(message);
         return Promise.reject(error);
       },
     ],
