@@ -1,4 +1,4 @@
-// noinspection JSUnusedGlobalSymbols
+// noinspection JSUnusedGlobalSymbols,ExceptionCaughtLocallyJS
 
 import ky, { type Options } from "ky";
 import router from "@/router";
@@ -8,14 +8,13 @@ interface WebApiResponse<T = any> {
   message: string;
   data: T | null | undefined;
 }
-
 interface PendingRequest {
   retry: () => void;
   reject: (reason?: unknown) => void;
 }
 
 const RefreshTokenApiPath = "/api/users/refreshToken";
-const AuthPagePath = "/api/users/auth";
+const AuthPagePath = "/login";
 
 // 用于标记是否正在刷新 token
 let isRefreshing = false;
@@ -26,7 +25,10 @@ export const kyInstance = ky.create({
   baseUrl: import.meta.env.VITE_API_BASE_URL,
   timeout: 5000,
   credentials: "include",
-  retry: 0,
+  retry: {
+    limit: 1,
+    shouldRetry: () => false,
+  },
   hooks: {
     beforeRequest: [
       ({ request }) => {
@@ -38,15 +40,21 @@ export const kyInstance = ky.create({
       },
     ],
     afterResponse: [
-      async ({ request, response }) => {
+      async ({ request, response, retryCount }) => {
         if (response.status === 401) {
           // 刷新 token 接口返回 401 代表授权 token 和刷新 token 都无效了，需要重新登录
           if (new URL(request.url).pathname === RefreshTokenApiPath) {
+            window.$accessToken = "";
             window.$message.error("登录已过期,请重新登录");
             // 携带当前路由地址
             const currentPath = router.currentRoute.value.fullPath;
             await router.push({ path: AuthPagePath, query: { redirect: currentPath } });
-            return Promise.reject(null);
+            return Promise.reject(new Error("登录已过期"));
+          }
+
+          if (retryCount > 0) {
+            window.$accessToken = "";
+            return Promise.reject(new Error("刷新 Token 后请求仍返回 401"));
           }
 
           // 其他情况代表授权 token 失效，尝试用刷新 token 换取新的授权 token
@@ -55,9 +63,18 @@ export const kyInstance = ky.create({
             return new Promise((resolve, reject) => {
               requestsQueue.push({
                 retry: () => {
-                  const headers = new Headers(request.headers);
-                  headers.set("Authorization", `Bearer ${window.$accessToken}`);
-                  resolve(kyInstance(new Request(request, { headers })));
+                  try {
+                    const headers = new Headers(request.headers);
+                    headers.set("Authorization", `Bearer ${window.$accessToken}`);
+                    resolve(
+                      ky.retry({
+                        request: new Request(request, { headers }),
+                        code: "TOKEN_REFRESHED",
+                      })
+                    );
+                  } catch (error) {
+                    reject(error);
+                  }
                 },
                 reject: reject,
               });
@@ -69,10 +86,14 @@ export const kyInstance = ky.create({
             // 刷新 token 操作
             try {
               window.$accessToken = (await kyInstance.post<WebApiResponse<string>>(RefreshTokenApiPath).json()).data;
+              if (!window.$accessToken) {
+                throw new Error("授权 Token 无效");
+              }
             } catch (error) {
               // 触发失败
               requestsQueue.forEach(cb => cb.reject(error));
               requestsQueue.splice(0);
+              window.$accessToken = "";
               throw error;
             } finally {
               isRefreshing = false;
@@ -83,7 +104,10 @@ export const kyInstance = ky.create({
             requestsQueue.splice(0);
             const headers = new Headers(request.headers);
             headers.set("Authorization", `Bearer ${window.$accessToken}`);
-            return Promise.resolve(kyInstance(new Request(request, { headers })));
+            return ky.retry({
+              request: new Request(request, { headers }),
+              code: "TOKEN_REFRESHED",
+            });
           }
         }
         return Promise.resolve(response);
