@@ -94,10 +94,11 @@ import type { FormInst, FormRules } from "naive-ui";
 import { Languages, Moon, Sun } from "@lucide/vue";
 import { computed, inject, reactive, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { login } from "@/api/users";
 
 const { t, locale } = useI18n();
+const route = useRoute();
 const router = useRouter();
 const formRef = ref<FormInst | null>(null);
 const loading = ref(false);
@@ -144,7 +145,8 @@ const handleLogin = async () => {
     }
 
     window.$accessToken = accessToken;
-    await router.push("/home");
+    const redirect = route.query.redirect;
+    await router.push(typeof redirect === "string" ? redirect : "/home");
   } catch {
     // 请求层已统一展示接口错误。
   } finally {
