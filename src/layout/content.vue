@@ -16,8 +16,9 @@ import { NLayoutContent } from "naive-ui";
 
 <style scoped lang="scss">
 .layout-content {
-  min-height: calc(100vh - 64px);
-  background: rgba(128, 128, 128, 0.06);
+  background-color: var(--color-bg-page);
+  height: calc(100vh - 64px);
+  min-height: 0;
 }
 
 .content-route-page {

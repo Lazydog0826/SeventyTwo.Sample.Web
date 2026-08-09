@@ -2,7 +2,6 @@ import { viewModules } from "@/router/viewModules.ts";
 import type { Router, RouteRecordRaw } from "vue-router";
 import { usePermissionsStore } from "@/stores/permissions.ts";
 import type { PermissionMenuOutput } from "@/api/permissions.ts";
-import "@bprogress/core/css";
 import { BProgress } from "@bprogress/core";
 
 BProgress.configure({
