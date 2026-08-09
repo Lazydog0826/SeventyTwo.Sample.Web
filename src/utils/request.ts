@@ -25,7 +25,7 @@ interface PendingRequest {
 }
 
 // 刷新 Token 的后端接口路径，用于区分普通接口 401 和刷新接口自身的 401。
-const RefreshTokenApiPath = "/api/users/refreshToken";
+const RefreshTokenApiPath = "/api/users/RefreshToken";
 // 前端登录页路径，认证彻底失效时跳转到此页面。
 const AuthPagePath = "/login";
 

@@ -2,7 +2,7 @@
   <div class="dashboard">
     <section class="dashboard-heading">
       <div>
-        <h1>欢迎回来，SeventyTwo</h1>
+        <h1>欢迎回来，{{ userStore.user.username }}</h1>
       </div>
       <div class="updated-at">
         <span class="status-dot"></span>
@@ -118,10 +118,12 @@ import {
   TrendingUp,
   Users,
 } from "@lucide/vue";
+import { useUserStore } from "@/stores/users.ts";
 
 use([CanvasRenderer, LineChart, BarChart, PieChart, GridComponent, TooltipComponent]);
 
 const { isDark } = inject<{ isDark: Ref<boolean> }>("theme")!;
+const userStore = useUserStore();
 
 interface Metric {
   label: string;

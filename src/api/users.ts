@@ -19,20 +19,20 @@ export interface UserOutput {
 
 /** 获取当前登录用户信息。 */
 export function getInfo() {
-  return http.get<UserOutput>("/api/users/info");
+  return http.get<UserOutput>("/api/users/Info");
 }
 
 /** 用户登录并返回访问令牌。 */
 export function login(request: LoginRequest) {
-  return http.post<string>("/api/users/login", { json: request });
+  return http.post<string>("/api/users/Login", { json: request });
 }
 
 /** 使用刷新令牌获取新的访问令牌。 */
 export function refreshToken() {
-  return http.post<string>("/api/users/refreshToken");
+  return http.post<string>("/api/users/RefreshToken");
 }
 
 /** 退出登录。 */
 export function logout() {
-  return http.post<void>("/api/users/logout");
+  return http.post<void>("/api/users/Logout");
 }

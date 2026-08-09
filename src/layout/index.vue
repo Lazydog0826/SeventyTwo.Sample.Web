@@ -23,10 +23,12 @@
           </template>
         </n-button>
 
-        <div class="user-summary">
-          <n-avatar round size="small">S</n-avatar>
-          <span>SeventyTwo</span>
-        </div>
+        <n-dropdown trigger="click" :options="userOptions" @select="handleUserAction">
+          <button class="user-summary" type="button" :aria-label="userStore.user.username">
+            <n-avatar round size="small">S</n-avatar>
+            <span>{{ userStore.user.username }}</span>
+          </button>
+        </n-dropdown>
       </div>
     </n-layout-header>
 
@@ -38,20 +40,49 @@
 </template>
 
 <script setup lang="ts">
-import { NAvatar, NButton, NIcon, NLayout, NLayoutHeader } from "naive-ui";
+import { NAvatar, NButton, NDropdown, NIcon, NLayout, NLayoutHeader, type DropdownOption } from "naive-ui";
 import { Moon, Sun } from "@lucide/vue";
-import { inject, ref, type Ref } from "vue";
+import { computed, inject, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { logout as logoutApi } from "@/api/users.ts";
 import logoUrl from "@/assets/seventytwo-logo.svg";
 import LayoutContent from "./content.vue";
 import LayoutMenu from "@/layout/menu.vue";
+import { useUserStore } from "@/stores/users.ts";
 
 const { t } = useI18n();
 const collapsed = ref(false);
+const isLoggingOut = ref(false);
+const userStore = useUserStore();
+const userOptions = computed<Array<DropdownOption>>(() => [
+  {
+    label: t("common.logout"),
+    key: "logout",
+    disabled: isLoggingOut.value,
+  },
+]);
 const { isDark, toggleTheme } = inject<{
   isDark: Ref<boolean>;
   toggleTheme: () => void;
 }>("theme")!;
+
+void userStore.getInfo();
+
+async function handleUserAction(key: string | number) {
+  if (key !== "logout" || isLoggingOut.value) {
+    return;
+  }
+
+  isLoggingOut.value = true;
+  try {
+    await logoutApi();
+  } catch {
+    // 请求层已统一展示接口错误，前端仍需清除本地登录态。
+  } finally {
+    window.$accessToken = "";
+    window.location.replace("/login");
+  }
+}
 </script>
 
 <style scoped lang="scss">
@@ -84,7 +115,18 @@ const { isDark, toggleTheme } = inject<{
 
 .user-summary {
   gap: 8px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 6px;
+  color: inherit;
+  background: transparent;
+  font: inherit;
   white-space: nowrap;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--color-gray-2);
+  }
 }
 
 .brand {

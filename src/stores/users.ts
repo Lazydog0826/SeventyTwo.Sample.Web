@@ -25,11 +25,13 @@ export const useUserStore = defineStore("users", () => {
       user.displayName = r.displayName;
       user.phone = r.phone;
       user.email = r.email;
+      isLoad.value = true;
     }
     return user;
   };
 
   return {
+    user,
     getInfo,
   };
 });
