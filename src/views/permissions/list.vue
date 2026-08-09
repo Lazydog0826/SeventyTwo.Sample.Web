@@ -1,28 +1,33 @@
 <template>
   <div class="permission-list-page">
     <n-card :bordered="false" :title="t('permissions.title')">
-      <n-space class="filters" :wrap="true">
-        <n-input
-          v-model:value="keyword"
-          clearable
-          :placeholder="t('permissions.filters.keyword')"
-          class="keyword-input"
-        />
-        <n-select
-          v-model:value="typeFilter"
-          clearable
-          :placeholder="t('permissions.filters.type')"
-          :options="typeOptions"
-          class="filter-select"
-        />
-        <n-select
-          v-model:value="statusFilter"
-          clearable
-          :placeholder="t('permissions.filters.status')"
-          :options="statusOptions"
-          class="filter-select"
-        />
-      </n-space>
+      <div class="toolbar">
+        <n-space class="filters" :wrap="true">
+          <n-input
+            v-model:value="keyword"
+            clearable
+            :placeholder="t('permissions.filters.keyword')"
+            class="keyword-input"
+          />
+          <n-select
+            v-model:value="typeFilter"
+            clearable
+            :placeholder="t('permissions.filters.type')"
+            :options="typeOptions"
+            class="filter-select"
+          />
+          <n-select
+            v-model:value="statusFilter"
+            clearable
+            :placeholder="t('permissions.filters.status')"
+            :options="statusOptions"
+            class="filter-select"
+          />
+        </n-space>
+        <n-button v-if="canCreate" type="primary" @click="openCreate">
+          {{ t("permissions.actions.create") }}
+        </n-button>
+      </div>
 
       <n-data-table
         v-model:expanded-row-keys="expandedRowKeys"
@@ -30,7 +35,7 @@
         :data="filteredTree"
         :loading="loading"
         :row-key="row => row.id"
-        :scroll-x="1540"
+        :scroll-x="hasActions ? 1720 : 1540"
         :single-line="false"
         striped
       >
@@ -39,43 +44,140 @@
         </template>
       </n-data-table>
     </n-card>
+
+    <n-modal v-model:show="showEditor" preset="card" :title="editorTitle" class="permission-editor">
+      <n-form ref="formRef" :model="formModel" :rules="formRules" label-placement="left" label-width="auto">
+        <n-form-item :label="t('permissions.form.code')" path="code">
+          <n-input v-model:value="formModel.code" />
+        </n-form-item>
+        <n-form-item :label="t('permissions.form.title')" path="title">
+          <n-input v-model:value="formModel.title" />
+        </n-form-item>
+        <n-form-item :label="t('permissions.form.type')" path="type">
+          <n-select v-model:value="formModel.type" :options="typeOptions" />
+        </n-form-item>
+        <n-form-item :label="t('permissions.form.parent')" path="parentId">
+          <n-select
+            v-model:value="formModel.parentId"
+            clearable
+            filterable
+            :options="parentOptions"
+            :placeholder="t('permissions.form.root')"
+          />
+        </n-form-item>
+        <n-form-item :label="t('permissions.form.sortOrder')" path="sortOrder">
+          <n-input-number v-model:value="formModel.sortOrder" :min="0" />
+        </n-form-item>
+        <n-form-item :label="t('permissions.form.enable')" path="enable">
+          <n-switch v-model:value="formModel.enable" />
+        </n-form-item>
+        <n-form-item v-if="formModel.type !== 'Button'" :label="t('permissions.form.icon')" path="icon">
+          <n-input v-model:value="formModel.icon" />
+        </n-form-item>
+        <template v-if="formModel.type !== 'Button'">
+          <n-form-item :label="t('permissions.form.componentPath')" path="vueComponentPath">
+            <n-input v-model:value="formModel.vueComponentPath" />
+          </n-form-item>
+          <n-form-item :label="t('permissions.form.routePath')" path="routePath">
+            <n-input v-model:value="formModel.routePath" />
+          </n-form-item>
+          <n-form-item :label="t('permissions.form.routeName')" path="routeName">
+            <n-input v-model:value="formModel.routeName" />
+          </n-form-item>
+          <n-form-item :label="t('permissions.form.isShow')" path="isShow">
+            <n-switch v-model:value="formModel.isShow" />
+          </n-form-item>
+        </template>
+      </n-form>
+      <template #footer>
+        <n-space justify="end">
+          <n-button @click="showEditor = false">{{ t("permissions.actions.cancel") }}</n-button>
+          <n-button type="primary" :loading="submitting" @click="submitEditor">
+            {{ t("permissions.actions.save") }}
+          </n-button>
+        </n-space>
+      </template>
+    </n-modal>
+
+    <n-modal v-model:show="showDeleteConfirm" preset="dialog" type="warning" :title="t('permissions.delete.title')">
+      {{ t("permissions.delete.content", { title: deletingPermission?.title ?? "" }) }}
+      <template #action>
+        <n-space justify="end">
+          <n-button @click="showDeleteConfirm = false">{{ t("permissions.actions.cancel") }}</n-button>
+          <n-button type="error" :loading="deleting" @click="confirmDelete">
+            {{ t("permissions.actions.delete") }}
+          </n-button>
+        </n-space>
+      </template>
+    </n-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, h, onMounted, ref, watch } from "vue";
+import { computed, h, onMounted, reactive, ref, watch } from "vue";
 import {
+  NButton,
   NCard,
   NDataTable,
   NEllipsis,
   NEmpty,
+  NForm,
+  NFormItem,
   NInput,
+  NInputNumber,
+  NModal,
   NSelect,
   NSpace,
+  NSwitch,
   NTag,
   type DataTableColumns,
   type DataTableRowKey,
+  type FormInst,
+  type FormRules,
+  type SelectOption,
 } from "naive-ui";
 import {
+  createPermission,
+  deletePermission,
   getPermissionList,
+  updatePermission,
   type PermissionListOutput,
+  type PermissionMutationInput,
   type PermissionType,
 } from "@/api/permissions.ts";
+import { usePermissionsStore } from "@/stores/permissions.ts";
 import { useI18n } from "vue-i18n";
 
 interface PermissionTreeNode extends PermissionListOutput {
   children?: PermissionTreeNode[];
 }
 
+interface PermissionFormModel extends PermissionMutationInput {
+  id: string | null;
+  version: string | null;
+  isShow: boolean;
+}
+
 type StatusFilter = "enabled" | "disabled";
 
 const { t } = useI18n();
+const permissionsStore = usePermissionsStore();
 const keyword = ref("");
 const typeFilter = ref<PermissionType | null>(null);
 const statusFilter = ref<StatusFilter | null>(null);
 const loading = ref(false);
+const submitting = ref(false);
+const deleting = ref(false);
 const permissions = ref<PermissionListOutput[]>([]);
 const expandedRowKeys = ref<DataTableRowKey[]>([]);
+const canCreate = ref(false);
+const canUpdate = ref(false);
+const canDelete = ref(false);
+const showEditor = ref(false);
+const showDeleteConfirm = ref(false);
+const deletingPermission = ref<PermissionListOutput | null>(null);
+const formRef = ref<FormInst | null>(null);
+const formModel = reactive<PermissionFormModel>(createEmptyForm());
 
 const typeOptions = computed(() => [
   { label: t("permissions.types.directory"), value: "Directory" },
@@ -95,150 +197,236 @@ const typeTagTypes: Record<PermissionType, "default" | "info" | "warning"> = {
 };
 
 const permissionTree = computed(() => buildPermissionTree(permissions.value));
+const hasActions = computed(() => canUpdate.value || canDelete.value);
 const hasFilter = computed(
   () => Boolean(keyword.value.trim()) || typeFilter.value !== null || statusFilter.value !== null
 );
-const filteredTree = computed(() => {
-  if (!hasFilter.value) {
-    return permissionTree.value;
-  }
-  return filterPermissionTree(permissionTree.value);
-});
-const emptyDescription = computed(() =>
-  t(hasFilter.value ? "permissions.empty.filtered" : "permissions.empty.data")
+const filteredTree = computed(() => (hasFilter.value ? filterPermissionTree(permissionTree.value) : permissionTree.value));
+const emptyDescription = computed(() => t(hasFilter.value ? "permissions.empty.filtered" : "permissions.empty.data"));
+const editorTitle = computed(() =>
+  t(formModel.id ? "permissions.editor.updateTitle" : "permissions.editor.createTitle")
 );
+// 编辑时禁止选择自身及任意后代作为上级，前端提前避免构造循环权限树。
+const excludedParentIds = computed(() => {
+  if (!formModel.id) return new Set<string>();
+  return new Set([formModel.id, ...collectDescendantIds(formModel.id)]);
+});
+const parentOptions = computed<SelectOption[]>(() =>
+  flattenTree(permissionTree.value)
+    .filter(item => !excludedParentIds.value.has(item.node.id))
+    .map(item => ({ label: `${"　".repeat(item.depth)}${item.node.title} (${item.node.code})`, value: item.node.id }))
+);
+const formRules = computed<FormRules>(() => ({
+  code: { required: true, message: t("permissions.validation.code"), trigger: ["input", "blur"] },
+  title: { required: true, message: t("permissions.validation.title"), trigger: ["input", "blur"] },
+  type: { required: true, message: t("permissions.validation.type"), trigger: "change" },
+  sortOrder: {
+    required: true,
+    trigger: ["input", "blur"],
+    validator: (_rule, value) =>
+      typeof value === "number" && value >= 0 ? true : new Error(t("permissions.validation.sortOrder")),
+  },
+  icon: {
+    trigger: ["input", "blur"],
+    validator: (_rule, value) =>
+      formModel.type !== "Directory" || String(value ?? "").trim()
+        ? true
+        : new Error(t("permissions.validation.icon")),
+  },
+  vueComponentPath: requiredForPage("componentPath"),
+  routePath: requiredForPage("routePath"),
+  routeName: requiredForPage("routeName"),
+  parentId: {
+    trigger: "change",
+    validator: (_rule, value) =>
+      formModel.type !== "Button" || value ? true : new Error(t("permissions.validation.parent")),
+  },
+}));
 
-const columns = computed<DataTableColumns<PermissionTreeNode>>(() => [
-  {
-    title: t("permissions.columns.title"),
-    key: "title",
-    width: 190,
-    fixed: "left",
-    ellipsis: { tooltip: true },
-  },
-  {
-    title: t("permissions.columns.code"),
-    key: "code",
-    width: 180,
-    render: row => renderText(row.code, 160),
-  },
-  {
-    title: t("permissions.columns.type"),
-    key: "type",
-    width: 90,
-    render: row =>
-      h(
-        NTag,
-        { type: typeTagTypes[row.type], bordered: false },
-        { default: () => t(`permissions.types.${row.type.toLocaleLowerCase()}`) }
-      ),
-  },
-  {
-    title: t("permissions.columns.status"),
-    key: "enable",
-    width: 90,
-    render: row =>
-      h(
-        NTag,
-        { type: row.enable ? "success" : "error", bordered: false },
-        { default: () => t(row.enable ? "permissions.statuses.enabled" : "permissions.statuses.disabled") }
-      ),
-  },
-  { title: t("permissions.columns.sortOrder"), key: "sortOrder", width: 80 },
-  {
-    title: t("permissions.columns.icon"),
-    key: "icon",
-    width: 120,
-    render: row => renderText(row.icon, 100),
-  },
-  {
-    title: t("permissions.columns.routePath"),
-    key: "routePath",
-    width: 190,
-    render: row => renderText(row.routePath, 170),
-  },
-  {
-    title: t("permissions.columns.routeName"),
-    key: "routeName",
-    width: 170,
-    render: row => renderText(row.routeName, 150),
-  },
-  {
-    title: t("permissions.columns.componentPath"),
-    key: "vueComponentPath",
-    width: 260,
-    render: row => renderText(row.vueComponentPath, 240),
-  },
-  {
-    title: t("permissions.columns.metaData"),
-    key: "metaData",
-    width: 170,
-    render: row => t(row.metaData.isShow ? "permissions.metaData.show" : "permissions.metaData.hide"),
-  },
-]);
+const columns = computed<DataTableColumns<PermissionTreeNode>>(() => {
+  const result: DataTableColumns<PermissionTreeNode> = [
+    { title: t("permissions.columns.title"), key: "title", width: 190, fixed: "left", ellipsis: { tooltip: true } },
+    { title: t("permissions.columns.code"), key: "code", width: 180, render: row => renderText(row.code, 160) },
+    {
+      title: t("permissions.columns.type"),
+      key: "type",
+      width: 90,
+      render: row => h(NTag, { type: typeTagTypes[row.type], bordered: false }, { default: () => t(`permissions.types.${row.type.toLocaleLowerCase()}`) }),
+    },
+    {
+      title: t("permissions.columns.status"),
+      key: "enable",
+      width: 90,
+      render: row => h(NTag, { type: row.enable ? "success" : "error", bordered: false }, { default: () => t(row.enable ? "permissions.statuses.enabled" : "permissions.statuses.disabled") }),
+    },
+    { title: t("permissions.columns.sortOrder"), key: "sortOrder", width: 80 },
+    { title: t("permissions.columns.icon"), key: "icon", width: 120, render: row => renderText(row.icon, 100) },
+    { title: t("permissions.columns.routePath"), key: "routePath", width: 190, render: row => renderText(row.routePath, 170) },
+    { title: t("permissions.columns.routeName"), key: "routeName", width: 170, render: row => renderText(row.routeName, 150) },
+    { title: t("permissions.columns.componentPath"), key: "vueComponentPath", width: 260, render: row => renderText(row.vueComponentPath, 240) },
+    { title: t("permissions.columns.metaData"), key: "metaData", width: 170, render: row => t(row.metaData.isShow ? "permissions.metaData.show" : "permissions.metaData.hide") },
+  ];
+  if (hasActions.value) {
+    result.push({
+      title: t("permissions.columns.actions"),
+      key: "actions",
+      width: 180,
+      fixed: "right",
+      render: row =>
+        h(NSpace, null, {
+          default: () => [
+            canUpdate.value
+              ? h(NButton, { text: true, type: "primary", onClick: () => openEdit(row) }, { default: () => t("permissions.actions.edit") })
+              : null,
+            canDelete.value
+              ? h(NButton, { text: true, type: "error", onClick: () => openDelete(row) }, { default: () => t("permissions.actions.delete") })
+              : null,
+          ],
+        }),
+    });
+  }
+  return result;
+});
+
+function createEmptyForm(): PermissionFormModel {
+  return {
+    id: null,
+    version: null,
+    code: "",
+    title: "",
+    type: "Page",
+    enable: true,
+    sortOrder: 0,
+    icon: "",
+    vueComponentPath: "",
+    routePath: "",
+    routeName: "",
+    parentId: null,
+    metaData: { isShow: true },
+    isShow: true,
+  };
+}
+
+function requiredForPage(field: "componentPath" | "routePath" | "routeName") {
+  return {
+    trigger: ["input", "blur"],
+    validator: (_rule: unknown, value: unknown) =>
+      formModel.type !== "Page" || String(value ?? "").trim()
+        ? true
+        : new Error(t(`permissions.validation.${field}`)),
+  };
+}
 
 function renderText(value: string, maxWidth: number) {
-  return h(
-    NEllipsis,
-    { tooltip: true, style: { maxWidth: `${maxWidth}px` } },
-    { default: () => value || "-" }
-  );
+  return h(NEllipsis, { tooltip: true, style: { maxWidth: `${maxWidth}px` } }, { default: () => value || "-" });
 }
 
 function buildPermissionTree(items: PermissionListOutput[]): PermissionTreeNode[] {
+  // 接口返回扁平数据；通过两次遍历复用节点对象并恢复父子关系。
   const nodes = new Map<string, PermissionTreeNode>();
   const roots: PermissionTreeNode[] = [];
-
   items.forEach(item => nodes.set(item.id, { ...item }));
   items.forEach(item => {
     const node = nodes.get(item.id)!;
     const parent = item.parentId ? nodes.get(item.parentId) : undefined;
-    if (!parent) {
-      roots.push(node);
-      return;
-    }
-    (parent.children ??= []).push(node);
+    if (!parent) roots.push(node);
+    else (parent.children ??= []).push(node);
   });
-
   sortTree(roots);
   return roots;
 }
 
 function sortTree(nodes: PermissionTreeNode[]) {
   nodes.sort((left, right) => left.sortOrder - right.sortOrder || left.id.localeCompare(right.id));
-  nodes.forEach(node => {
-    if (node.children) {
-      sortTree(node.children);
-    }
-  });
+  nodes.forEach(node => node.children && sortTree(node.children));
+}
+
+function flattenTree(nodes: PermissionTreeNode[], depth = 0): Array<{ node: PermissionTreeNode; depth: number }> {
+  return nodes.flatMap(node => [{ node, depth }, ...flattenTree(node.children ?? [], depth + 1)]);
+}
+
+function collectDescendantIds(id: string): string[] {
+  const children = permissions.value.filter(permission => permission.parentId === id);
+  return children.flatMap(child => [child.id, ...collectDescendantIds(child.id)]);
 }
 
 function filterPermissionTree(nodes: PermissionTreeNode[]): PermissionTreeNode[] {
   const normalizedKeyword = keyword.value.trim().toLocaleLowerCase();
   return nodes.flatMap(node => {
     const children = node.children ? filterPermissionTree(node.children) : [];
-    const matchesKeyword =
-      !normalizedKeyword ||
-      node.title.toLocaleLowerCase().includes(normalizedKeyword) ||
-      node.code.toLocaleLowerCase().includes(normalizedKeyword);
+    const matchesKeyword = !normalizedKeyword || node.title.toLocaleLowerCase().includes(normalizedKeyword) || node.code.toLocaleLowerCase().includes(normalizedKeyword);
     const matchesType = typeFilter.value === null || node.type === typeFilter.value;
-    const matchesStatus =
-      statusFilter.value === null ||
-      (statusFilter.value === "enabled" ? node.enable : !node.enable);
-    if (!(matchesKeyword && matchesType && matchesStatus) && children.length === 0) {
-      return [];
-    }
+    const matchesStatus = statusFilter.value === null || (statusFilter.value === "enabled" ? node.enable : !node.enable);
+    if (!(matchesKeyword && matchesType && matchesStatus) && children.length === 0) return [];
     return [{ ...node, children: children.length > 0 ? children : undefined }];
   });
 }
 
 function collectExpandableKeys(nodes: PermissionTreeNode[]): DataTableRowKey[] {
-  return nodes.flatMap(node => {
-    if (!node.children?.length) {
-      return [];
-    }
-    return [node.id, ...collectExpandableKeys(node.children)];
+  return nodes.flatMap(node => (node.children?.length ? [node.id, ...collectExpandableKeys(node.children)] : []));
+}
+
+function openCreate() {
+  Object.assign(formModel, createEmptyForm());
+  showEditor.value = true;
+}
+
+function openEdit(permission: PermissionListOutput) {
+  Object.assign(formModel, {
+    ...permission,
+    isShow: permission.metaData.isShow,
   });
+  showEditor.value = true;
+}
+
+function openDelete(permission: PermissionListOutput) {
+  deletingPermission.value = permission;
+  showDeleteConfirm.value = true;
+}
+
+async function submitEditor() {
+  await formRef.value?.validate();
+  submitting.value = true;
+  try {
+    const input: PermissionMutationInput = {
+      code: formModel.code,
+      title: formModel.title,
+      type: formModel.type,
+      enable: formModel.enable,
+      sortOrder: formModel.sortOrder,
+      icon: formModel.type === "Button" ? "" : formModel.icon,
+      vueComponentPath: formModel.type === "Button" ? "" : formModel.vueComponentPath,
+      routePath: formModel.type === "Button" ? "" : formModel.routePath,
+      routeName: formModel.type === "Button" ? "" : formModel.routeName,
+      parentId: formModel.parentId,
+      metaData: { isShow: formModel.type === "Button" ? false : formModel.isShow },
+    };
+    if (formModel.id && formModel.version) {
+      await updatePermission({ ...input, id: formModel.id, version: formModel.version });
+      window.$message.success(t("permissions.messages.updated"));
+    } else {
+      await createPermission(input);
+      window.$message.success(t("permissions.messages.created"));
+    }
+    showEditor.value = false;
+    await refreshAfterMutation();
+  } finally {
+    submitting.value = false;
+  }
+}
+
+async function confirmDelete() {
+  if (!deletingPermission.value) return;
+  deleting.value = true;
+  try {
+    await deletePermission(deletingPermission.value.id);
+    window.$message.success(t("permissions.messages.deleted"));
+    showDeleteConfirm.value = false;
+    deletingPermission.value = null;
+    await refreshAfterMutation();
+  } finally {
+    deleting.value = false;
+  }
 }
 
 async function loadPermissions() {
@@ -251,34 +439,33 @@ async function loadPermissions() {
   }
 }
 
+async function loadActionPermissions(force = false) {
+  // 变更权限后强制刷新当前用户权限，确保操作按钮与后端缓存状态同步。
+  const current = force ? await permissionsStore.reloadPermissions() : await permissionsStore.getPermissions();
+  canCreate.value = current.buttonCodes.includes("Permissions.Create");
+  canUpdate.value = current.buttonCodes.includes("Permissions.Update");
+  canDelete.value = current.buttonCodes.includes("Permissions.Delete");
+}
+
+async function refreshAfterMutation() {
+  await Promise.all([loadPermissions(), loadActionPermissions(true)]);
+}
+
 watch([keyword, typeFilter, statusFilter], () => {
   expandedRowKeys.value = collectExpandableKeys(filteredTree.value);
 });
 
-onMounted(loadPermissions);
+onMounted(() => Promise.all([loadPermissions(), loadActionPermissions()]));
 </script>
 
 <style scoped lang="scss">
-.permission-list-page {
-  min-width: 0;
-}
-
-.filters {
-  margin-bottom: 20px;
-}
-
-.keyword-input {
-  width: 280px;
-}
-
-.filter-select {
-  width: 160px;
-}
-
+.permission-list-page { min-width: 0; }
+.toolbar { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.keyword-input { width: 280px; }
+.filter-select { width: 160px; }
+:deep(.permission-editor) { width: min(680px, calc(100vw - 32px)); }
 @media (max-width: 640px) {
-  .keyword-input,
-  .filter-select {
-    width: 100%;
-  }
+  .toolbar { align-items: stretch; flex-direction: column; }
+  .keyword-input, .filter-select { width: 100%; }
 }
 </style>

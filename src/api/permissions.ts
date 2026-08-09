@@ -43,6 +43,26 @@ export interface PermissionListOutput {
   routeName: string;
   metaData: PermissionMetaData;
   parentId: string | null;
+  version: string;
+}
+
+export interface PermissionMutationInput {
+  code: string;
+  title: string;
+  type: PermissionType;
+  enable: boolean;
+  sortOrder: number;
+  icon: string;
+  vueComponentPath: string;
+  routePath: string;
+  routeName: string;
+  parentId: string | null;
+  metaData: PermissionMetaData;
+}
+
+export interface UpdatePermissionInput extends PermissionMutationInput {
+  id: string;
+  version: string;
 }
 
 /** 获取当前登录用户的权限。 */
@@ -53,4 +73,16 @@ export function getPermissions() {
 /** 获取权限管理列表，包含已禁用权限。 */
 export function getPermissionList() {
   return http.get<PermissionListOutput[]>("/api/permissions/list");
+}
+
+export function createPermission(input: PermissionMutationInput) {
+  return http.post<PermissionListOutput>("/api/permissions/create", { json: input });
+}
+
+export function updatePermission(input: UpdatePermissionInput) {
+  return http.post<void>("/api/permissions/update", { json: input });
+}
+
+export function deletePermission(id: string) {
+  return http.post<void>("/api/permissions/delete", { json: { id } });
 }

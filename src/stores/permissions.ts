@@ -30,8 +30,14 @@ export const usePermissionsStore = defineStore("permissions", () => {
     return temPermissions.buttonCodes.includes(code);
   };
 
+  const reloadPermissions = async () => {
+    isLoad.value = false;
+    return getPermissions();
+  };
+
   return {
     getPermissions,
     hasPermission,
+    reloadPermissions,
   };
 });
