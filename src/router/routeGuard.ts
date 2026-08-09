@@ -4,22 +4,26 @@ import { usePermissionsStore } from "@/stores/permissions.ts";
 import type { PermissionMenuOutput } from "@/api/permissions.ts";
 
 export function routeGuard(router: Router) {
-  console.log(viewModules);
-  router.beforeEach(async (to, from, next) => {
+  router.beforeEach(async (to, _, next) => {
     // 匹配不到，动态添加路由
     if (to.matched.length === 0) {
+      // 获取权限注册路由
       const permissionsStore = usePermissionsStore();
       const permissions = await permissionsStore.getPermissions();
       await registerRoute(permissions.menus, router);
-      next({
+
+      // 注册后仍匹配不到则跳转到 404 页面
+      const resolved = router.resolve(to.fullPath);
+      if (resolved.matched.length === 0) {
+        return next("/404");
+      }
+
+      return next({
         path: to.fullPath,
         replace: true,
       });
     }
-    console.log(123);
-    next();
-
-    console.log("routeGuard", to, from, next);
+    return next();
   });
 }
 
