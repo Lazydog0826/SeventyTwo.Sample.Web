@@ -15,6 +15,7 @@ export interface PermissionMenuOutput {
   code: string;
   title: string;
   type: PermissionType;
+  sortOrder: number;
   icon: string;
   vueComponentPath: string;
   routePath: string;

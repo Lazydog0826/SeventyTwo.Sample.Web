@@ -53,17 +53,18 @@ function renderIcon(name?: string): MenuOption["icon"] {
 
   return () =>
     h(NIcon, null, {
-      default: () => h(icon),
+      default: () => h(icon, { size: 16, strokeWidth: 1 }),
     });
 }
 
 onMounted(async () => {
   const permissionsStore = usePermissionsStore();
   const permissions = await permissionsStore.getPermissions();
+  const menus = [...permissions.menus].sort((a, b) => a.sortOrder - b.sortOrder);
   const menuOptionMap = new Map<string, MenuOption>();
 
   // 第一轮设置映射
-  permissions.menus.forEach(x => {
+  menus.forEach(x => {
     const newMenuOption: MenuOption = {
       label: x.title,
       key: x.routePath,
@@ -75,7 +76,7 @@ onMounted(async () => {
   });
 
   // 第二轮设置上下级关系
-  permissions.menus.forEach(x => {
+  menus.forEach(x => {
     const temMenuOption = menuOptionMap.get(x.id);
 
     if (x.parentId) {
