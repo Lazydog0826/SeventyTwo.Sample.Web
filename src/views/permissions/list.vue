@@ -201,7 +201,9 @@ const hasActions = computed(() => canUpdate.value || canDelete.value);
 const hasFilter = computed(
   () => Boolean(keyword.value.trim()) || typeFilter.value !== null || statusFilter.value !== null
 );
-const filteredTree = computed(() => (hasFilter.value ? filterPermissionTree(permissionTree.value) : permissionTree.value));
+const filteredTree = computed(() =>
+  hasFilter.value ? filterPermissionTree(permissionTree.value) : permissionTree.value
+);
 const emptyDescription = computed(() => t(hasFilter.value ? "permissions.empty.filtered" : "permissions.empty.data"));
 const editorTitle = computed(() =>
   t(formModel.id ? "permissions.editor.updateTitle" : "permissions.editor.createTitle")
@@ -229,9 +231,7 @@ const formRules = computed<FormRules>(() => ({
   icon: {
     trigger: ["input", "blur"],
     validator: (_rule, value) =>
-      formModel.type !== "Directory" || String(value ?? "").trim()
-        ? true
-        : new Error(t("permissions.validation.icon")),
+      formModel.type !== "Directory" || String(value ?? "").trim() ? true : new Error(t("permissions.validation.icon")),
   },
   vueComponentPath: requiredForPage("componentPath"),
   routePath: requiredForPage("routePath"),
@@ -251,20 +251,50 @@ const columns = computed<DataTableColumns<PermissionTreeNode>>(() => {
       title: t("permissions.columns.type"),
       key: "type",
       width: 90,
-      render: row => h(NTag, { type: typeTagTypes[row.type], bordered: false }, { default: () => t(`permissions.types.${row.type.toLocaleLowerCase()}`) }),
+      render: row =>
+        h(
+          NTag,
+          { type: typeTagTypes[row.type], bordered: false },
+          { default: () => t(`permissions.types.${row.type.toLocaleLowerCase()}`) }
+        ),
     },
     {
       title: t("permissions.columns.status"),
       key: "enable",
       width: 90,
-      render: row => h(NTag, { type: row.enable ? "success" : "error", bordered: false }, { default: () => t(row.enable ? "permissions.statuses.enabled" : "permissions.statuses.disabled") }),
+      render: row =>
+        h(
+          NTag,
+          { type: row.enable ? "success" : "error", bordered: false },
+          { default: () => t(row.enable ? "permissions.statuses.enabled" : "permissions.statuses.disabled") }
+        ),
     },
     { title: t("permissions.columns.sortOrder"), key: "sortOrder", width: 80 },
     { title: t("permissions.columns.icon"), key: "icon", width: 120, render: row => renderText(row.icon, 100) },
-    { title: t("permissions.columns.routePath"), key: "routePath", width: 190, render: row => renderText(row.routePath, 170) },
-    { title: t("permissions.columns.routeName"), key: "routeName", width: 170, render: row => renderText(row.routeName, 150) },
-    { title: t("permissions.columns.componentPath"), key: "vueComponentPath", width: 260, render: row => renderText(row.vueComponentPath, 240) },
-    { title: t("permissions.columns.metaData"), key: "metaData", width: 170, render: row => t(row.metaData.isShow ? "permissions.metaData.show" : "permissions.metaData.hide") },
+    {
+      title: t("permissions.columns.routePath"),
+      key: "routePath",
+      width: 190,
+      render: row => renderText(row.routePath, 170),
+    },
+    {
+      title: t("permissions.columns.routeName"),
+      key: "routeName",
+      width: 170,
+      render: row => renderText(row.routeName, 150),
+    },
+    {
+      title: t("permissions.columns.componentPath"),
+      key: "vueComponentPath",
+      width: 260,
+      render: row => renderText(row.vueComponentPath, 240),
+    },
+    {
+      title: t("permissions.columns.metaData"),
+      key: "metaData",
+      width: 170,
+      render: row => t(row.metaData.isShow ? "permissions.metaData.show" : "permissions.metaData.hide"),
+    },
   ];
   if (hasActions.value) {
     result.push({
@@ -276,10 +306,18 @@ const columns = computed<DataTableColumns<PermissionTreeNode>>(() => {
         h(NSpace, null, {
           default: () => [
             canUpdate.value
-              ? h(NButton, { text: true, type: "primary", onClick: () => openEdit(row) }, { default: () => t("permissions.actions.edit") })
+              ? h(
+                  NButton,
+                  { text: true, type: "primary", onClick: () => openEdit(row) },
+                  { default: () => t("permissions.actions.edit") }
+                )
               : null,
             canDelete.value
-              ? h(NButton, { text: true, type: "error", onClick: () => openDelete(row) }, { default: () => t("permissions.actions.delete") })
+              ? h(
+                  NButton,
+                  { text: true, type: "error", onClick: () => openDelete(row) },
+                  { default: () => t("permissions.actions.delete") }
+                )
               : null,
           ],
         }),
@@ -311,9 +349,7 @@ function requiredForPage(field: "componentPath" | "routePath" | "routeName") {
   return {
     trigger: ["input", "blur"],
     validator: (_rule: unknown, value: unknown) =>
-      formModel.type !== "Page" || String(value ?? "").trim()
-        ? true
-        : new Error(t(`permissions.validation.${field}`)),
+      formModel.type !== "Page" || String(value ?? "").trim() ? true : new Error(t(`permissions.validation.${field}`)),
   };
 }
 
@@ -354,9 +390,13 @@ function filterPermissionTree(nodes: PermissionTreeNode[]): PermissionTreeNode[]
   const normalizedKeyword = keyword.value.trim().toLocaleLowerCase();
   return nodes.flatMap(node => {
     const children = node.children ? filterPermissionTree(node.children) : [];
-    const matchesKeyword = !normalizedKeyword || node.title.toLocaleLowerCase().includes(normalizedKeyword) || node.code.toLocaleLowerCase().includes(normalizedKeyword);
+    const matchesKeyword =
+      !normalizedKeyword ||
+      node.title.toLocaleLowerCase().includes(normalizedKeyword) ||
+      node.code.toLocaleLowerCase().includes(normalizedKeyword);
     const matchesType = typeFilter.value === null || node.type === typeFilter.value;
-    const matchesStatus = statusFilter.value === null || (statusFilter.value === "enabled" ? node.enable : !node.enable);
+    const matchesStatus =
+      statusFilter.value === null || (statusFilter.value === "enabled" ? node.enable : !node.enable);
     if (!(matchesKeyword && matchesType && matchesStatus) && children.length === 0) return [];
     return [{ ...node, children: children.length > 0 ? children : undefined }];
   });
@@ -459,13 +499,32 @@ onMounted(() => Promise.all([loadPermissions(), loadActionPermissions()]));
 </script>
 
 <style scoped lang="scss">
-.permission-list-page { min-width: 0; }
-.toolbar { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
-.keyword-input { width: 280px; }
-.filter-select { width: 160px; }
-:deep(.permission-editor) { width: min(680px, calc(100vw - 32px)); }
+.permission-list-page {
+  min-width: 0;
+}
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.keyword-input {
+  width: 280px;
+}
+.filter-select {
+  width: 160px;
+}
+:deep(.permission-editor) {
+  width: min(680px, calc(100vw - 32px));
+}
 @media (max-width: 640px) {
-  .toolbar { align-items: stretch; flex-direction: column; }
-  .keyword-input, .filter-select { width: 100%; }
+  .toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .keyword-input,
+  .filter-select {
+    width: 100%;
+  }
 }
 </style>
