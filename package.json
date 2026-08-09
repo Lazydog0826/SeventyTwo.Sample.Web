@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@bprogress/core": "^1.3.4",
     "@lucide/vue": "^1.30.0",
     "@vueuse/core": "^14.4.0",
     "ky": "^2.0.2",

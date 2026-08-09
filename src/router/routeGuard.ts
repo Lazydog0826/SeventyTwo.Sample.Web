@@ -2,9 +2,18 @@ import { viewModules } from "@/router/viewModules.ts";
 import type { Router, RouteRecordRaw } from "vue-router";
 import { usePermissionsStore } from "@/stores/permissions.ts";
 import type { PermissionMenuOutput } from "@/api/permissions.ts";
+import "@bprogress/core/css";
+import { BProgress } from "@bprogress/core";
+
+BProgress.configure({
+  showSpinner: false,
+});
 
 export function routeGuard(router: Router) {
-  router.beforeEach(async (to, _, next) => {
+  router.beforeEach(async (to, _from, next) => {
+    // 进度条组件
+    BProgress.start();
+
     // 匹配不到，动态添加路由
     if (to.matched.length === 0) {
       // 获取权限注册路由
@@ -24,6 +33,15 @@ export function routeGuard(router: Router) {
       });
     }
     return next();
+  });
+
+  router.afterEach(async (_to, _from, _next) => {
+    // 进度条组件
+    BProgress.done();
+  });
+
+  router.onError(() => {
+    BProgress.done();
   });
 }
 
