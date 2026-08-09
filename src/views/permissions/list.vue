@@ -449,7 +449,7 @@ async function submitEditor() {
       window.$message.success(t("permissions.messages.created"));
     }
     showEditor.value = false;
-    await refreshAfterMutation();
+    await loadPermissions();
   } finally {
     submitting.value = false;
   }
@@ -463,7 +463,7 @@ async function confirmDelete() {
     window.$message.success(t("permissions.messages.deleted"));
     showDeleteConfirm.value = false;
     deletingPermission.value = null;
-    await refreshAfterMutation();
+    await loadPermissions();
   } finally {
     deleting.value = false;
   }
@@ -479,16 +479,11 @@ async function loadPermissions() {
   }
 }
 
-async function loadActionPermissions(force = false) {
-  // 变更权限后强制刷新当前用户权限，确保操作按钮与后端缓存状态同步。
-  const current = force ? await permissionsStore.reloadPermissions() : await permissionsStore.getPermissions();
+async function loadActionPermissions() {
+  const current = await permissionsStore.getPermissions();
   canCreate.value = current.buttonCodes.includes("Permissions.Create");
   canUpdate.value = current.buttonCodes.includes("Permissions.Update");
   canDelete.value = current.buttonCodes.includes("Permissions.Delete");
-}
-
-async function refreshAfterMutation() {
-  await Promise.all([loadPermissions(), loadActionPermissions(true)]);
 }
 
 watch([keyword, typeFilter, statusFilter], () => {
