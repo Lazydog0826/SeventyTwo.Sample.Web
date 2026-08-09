@@ -1,41 +1,37 @@
 <template>
-  <n-layout class="app-layout" has-sider>
-    <layout-menu :collapsed="collapsed"></layout-menu>
+  <n-layout class="app-layout">
+    <n-layout-header class="app-header" bordered>
+      <div class="header-main">
+        <div class="brand">
+          <img class="brand-logo" :src="logoUrl" alt="SeventyTwo" />
+        </div>
+      </div>
 
-    <n-layout>
-      <n-layout-header class="app-header" bordered>
-        <n-button quaternary circle aria-label="切换侧边栏" @click="collapsed = !collapsed">
+      <div class="header-actions">
+        <n-button
+          quaternary
+          circle
+          :title="t(isDark ? 'theme.switchToLight' : 'theme.switchToDark')"
+          :aria-label="t(isDark ? 'theme.switchToLight' : 'theme.switchToDark')"
+          @click="toggleTheme"
+        >
           <template #icon>
             <n-icon>
-              <PanelLeftOpen v-if="collapsed"></PanelLeftOpen>
-              <PanelLeftClose v-else></PanelLeftClose>
+              <Sun v-if="isDark"></Sun>
+              <Moon v-else></Moon>
             </n-icon>
           </template>
         </n-button>
 
-        <div class="header-actions">
-          <n-button
-            quaternary
-            circle
-            :title="t(isDark ? 'theme.switchToLight' : 'theme.switchToDark')"
-            :aria-label="t(isDark ? 'theme.switchToLight' : 'theme.switchToDark')"
-            @click="toggleTheme"
-          >
-            <template #icon>
-              <n-icon>
-                <Sun v-if="isDark"></Sun>
-                <Moon v-else></Moon>
-              </n-icon>
-            </template>
-          </n-button>
-
-          <div class="user-summary">
-            <n-avatar round size="small">S</n-avatar>
-            <span>SeventyTwo</span>
-          </div>
+        <div class="user-summary">
+          <n-avatar round size="small">S</n-avatar>
+          <span>SeventyTwo</span>
         </div>
-      </n-layout-header>
+      </div>
+    </n-layout-header>
 
+    <n-layout class="app-body" has-sider>
+      <layout-menu :collapsed="collapsed" @toggle="collapsed = !collapsed"></layout-menu>
       <layout-content></layout-content>
     </n-layout>
   </n-layout>
@@ -43,9 +39,10 @@
 
 <script setup lang="ts">
 import { NAvatar, NButton, NIcon, NLayout, NLayoutHeader } from "naive-ui";
-import { Moon, PanelLeftClose, PanelLeftOpen, Sun } from "@lucide/vue";
+import { Moon, Sun } from "@lucide/vue";
 import { inject, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
+import logoUrl from "@/assets/seventytwo-logo.svg";
 import LayoutContent from "./content.vue";
 import LayoutMenu from "@/layout/menu.vue";
 
@@ -59,7 +56,11 @@ const { isDark, toggleTheme } = inject<{
 
 <style scoped lang="scss">
 .app-layout {
-  min-height: 100vh;
+  height: 100vh;
+}
+
+.app-body {
+  height: calc(100vh - 64px);
 }
 
 .app-header {
@@ -70,6 +71,7 @@ const { isDark, toggleTheme } = inject<{
   justify-content: space-between;
 }
 
+.header-main,
 .header-actions,
 .user-summary {
   display: flex;
@@ -85,6 +87,21 @@ const { isDark, toggleTheme } = inject<{
   white-space: nowrap;
 }
 
+.brand {
+  width: 204px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.brand-logo {
+  display: block;
+  width: 160px;
+  height: 48px;
+  flex: 0 0 160px;
+}
+
 @media (max-width: 640px) {
   .app-header {
     padding: 0 12px;
@@ -92,6 +109,10 @@ const { isDark, toggleTheme } = inject<{
 
   .user-summary span {
     display: none;
+  }
+
+  .brand {
+    width: 44px;
   }
 }
 </style>

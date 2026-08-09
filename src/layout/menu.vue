@@ -7,27 +7,36 @@
     :width="240"
     :native-scrollbar="false"
   >
-    <div class="brand" :class="{ 'brand--collapsed': collapsed }">
-      <div class="brand-mark">72</div>
-      <span v-if="!collapsed">SeventyTwo</span>
-    </div>
+    <div class="sidebar-content">
+      <n-menu
+        :default-expanded-keys="defaultExpandedKeys"
+        :watch-props="['defaultExpandedKeys']"
+        :value="activeMenu"
+        :collapsed="collapsed"
+        :collapsed-width="64"
+        :collapsed-icon-size="22"
+        :options="menuOptions"
+        @update:value="handleUpdateValue"
+      ></n-menu>
 
-    <n-menu
-      :default-expanded-keys="defaultExpandedKeys"
-      :watch-props="['defaultExpandedKeys']"
-      :value="activeMenu"
-      :collapsed="collapsed"
-      :collapsed-width="64"
-      :collapsed-icon-size="22"
-      :options="menuOptions"
-      @update:value="handleUpdateValue"
-    ></n-menu>
+      <div class="sidebar-footer" :class="{ 'sidebar-footer--collapsed': collapsed }">
+        <n-button quaternary circle aria-label="切换侧边栏" @click="emit('toggle')">
+          <template #icon>
+            <n-icon>
+              <PanelLeftOpen v-if="collapsed"></PanelLeftOpen>
+              <PanelLeftClose v-else></PanelLeftClose>
+            </n-icon>
+          </template>
+        </n-button>
+      </div>
+    </div>
   </n-layout-sider>
 </template>
 
 <!--suppress SpellCheckingInspection -->
 <script setup lang="ts">
-import { NLayoutSider, NMenu, type MenuOption, NIcon } from "naive-ui";
+import { NButton, NLayoutSider, NMenu, type MenuOption, NIcon } from "naive-ui";
+import { PanelLeftClose, PanelLeftOpen } from "@lucide/vue";
 import { type Component, computed, h, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { usePermissionsStore } from "@/stores/permissions.ts";
@@ -36,6 +45,10 @@ import type { PermissionMenuOutput } from "@/api/permissions.ts";
 
 defineProps<{
   collapsed: boolean;
+}>();
+
+const emit = defineEmits<{
+  toggle: [];
 }>();
 
 const route = useRoute();
@@ -124,36 +137,35 @@ function handleUpdateValue(key: string, _: MenuOption) {
 <!--suppress SpellCheckingInspection -->
 <style scoped lang="scss">
 .n-layout-sider {
-  min-height: 100vh;
+  height: calc(100vh - 64px);
 }
 
-.brand {
-  height: 64px;
-  padding: 0 18px;
+.sidebar-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.n-menu {
+  flex: 1;
+  min-height: 0;
+  padding-bottom: 82px;
+  overflow-y: auto;
+}
+
+.sidebar-footer {
+  position: fixed;
+  bottom: 24px;
+  left: 0;
+  z-index: 1;
+  width: 240px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  overflow: hidden;
-  font-size: 18px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.brand--collapsed {
   justify-content: center;
-  padding: 0;
+  transition: width 0.3s var(--n-bezier);
 }
 
-.brand-mark {
-  width: 32px;
-  height: 32px;
-  flex: 0 0 32px;
-  display: grid;
-  place-items: center;
-  border-radius: 8px;
-  color: #fff;
-  background: #18a058;
-  font-size: 14px;
-  font-weight: 700;
+.sidebar-footer--collapsed {
+  width: 64px;
 }
 </style>

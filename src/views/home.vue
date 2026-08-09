@@ -2,7 +2,6 @@
   <div class="dashboard">
     <section class="dashboard-heading">
       <div>
-        <p class="eyebrow">数据概览</p>
         <h1>欢迎回来，SeventyTwo</h1>
       </div>
       <div class="updated-at">
