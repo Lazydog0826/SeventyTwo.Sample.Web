@@ -62,13 +62,14 @@ function showErrorMessage(content: string) {
  * 或形成 `/login?redirect=/login...` 形式的嵌套重定向。
  */
 async function redirectToAuthPage() {
-  const currentRoute = router.currentRoute.value;
+  const currentRoute = router.resolve(router.options.history.location);
   if (currentRoute.path === AuthPagePath) {
     return;
   }
-
-  // 保留当前地址，登录成功后可返回原页面
-  await router.push({ path: AuthPagePath, query: { redirect: currentRoute.fullPath } });
+  await router.push({
+    path: AuthPagePath,
+    query: { redirect: currentRoute.fullPath },
+  });
 }
 
 export const kyInstance = ky.create({

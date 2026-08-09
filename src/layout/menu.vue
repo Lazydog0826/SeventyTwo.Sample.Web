@@ -13,6 +13,8 @@
     </div>
 
     <n-menu
+      :default-expanded-keys="defaultExpandedKeys"
+      :watch-props="['defaultExpandedKeys']"
       :value="activeMenu"
       :collapsed="collapsed"
       :collapsed-width="64"
@@ -30,6 +32,7 @@ import { type Component, computed, h, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { usePermissionsStore } from "@/stores/permissions.ts";
 import * as LucideIcons from "@lucide/vue";
+import type { PermissionMenuOutput } from "@/api/permissions.ts";
 
 defineProps<{
   collapsed: boolean;
@@ -38,7 +41,10 @@ defineProps<{
 const route = useRoute();
 const router = useRouter();
 const activeMenu = computed(() => route.path);
+const defaultExpandedKeys = ref<Array<string>>([]);
 const menuOptions = ref<MenuOption[]>([]);
+const menuOptionMap = new Map<string, MenuOption>();
+const menus = ref<Array<PermissionMenuOutput>>([]);
 
 function renderIcon(name?: string): MenuOption["icon"] {
   if (!name) {
@@ -60,11 +66,10 @@ function renderIcon(name?: string): MenuOption["icon"] {
 onMounted(async () => {
   const permissionsStore = usePermissionsStore();
   const permissions = await permissionsStore.getPermissions();
-  const menus = [...permissions.menus].sort((a, b) => a.sortOrder - b.sortOrder);
-  const menuOptionMap = new Map<string, MenuOption>();
+  menus.value = [...permissions.menus].sort((a, b) => a.sortOrder - b.sortOrder);
 
   // 第一轮设置映射
-  menus.forEach(x => {
+  menus.value.forEach(x => {
     const newMenuOption: MenuOption = {
       label: x.title,
       key: x.routePath,
@@ -76,7 +81,7 @@ onMounted(async () => {
   });
 
   // 第二轮设置上下级关系
-  menus.forEach(x => {
+  menus.value.forEach(x => {
     const temMenuOption = menuOptionMap.get(x.id);
 
     if (x.parentId) {
@@ -91,6 +96,22 @@ onMounted(async () => {
       }
     }
   });
+
+  // 处理默认展开
+  let loopCount = 0;
+  const currRoutePath = route.path;
+  let currMenu = menus.value.find(x => x.routePath === currRoutePath);
+  let currParentId: string | null | undefined = null;
+  if (currMenu) {
+    // 当前业务菜单层级不会超过 10 层，同时以此限制异常父级循环
+    while (loopCount < 10) {
+      loopCount++;
+      currParentId = currMenu?.parentId;
+      if (currParentId === null) break;
+      currMenu = menus.value.find(x => x.id === currParentId);
+      if (currMenu) defaultExpandedKeys.value.push(currMenu?.routePath);
+    }
+  }
 });
 
 function handleUpdateValue(key: string, _: MenuOption) {
