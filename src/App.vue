@@ -2,10 +2,7 @@
   <n-config-provider :theme="isDark ? darkTheme : null">
     <router-view v-slot="{ Component, route }">
       <transition name="app-route" mode="out-in">
-        <component
-          :is="Component"
-          :key="route.matched[0]?.path ?? route.path"
-        />
+        <component :is="Component" :key="route.matched[0]?.path ?? route.path" />
       </transition>
     </router-view>
   </n-config-provider>

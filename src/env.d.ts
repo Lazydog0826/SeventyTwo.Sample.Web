@@ -9,4 +9,3 @@ declare global {
     $accessToken: string | null | undefined;
   }
 }
-

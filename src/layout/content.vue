@@ -2,10 +2,7 @@
   <n-layout-content class="layout-content" content-style="padding: 24px;">
     <router-view v-slot="{ Component, route }">
       <transition name="content-route" mode="out-in">
-        <div
-          :key="route.matched[route.matched.length - 1]?.path ?? route.path"
-          class="content-route-page"
-        >
+        <div :key="route.matched[route.matched.length - 1]?.path ?? route.path" class="content-route-page">
           <component :is="Component" />
         </div>
       </transition>
