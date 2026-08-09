@@ -1,0 +1,66 @@
+export default {
+  welcome: "欢迎回来，{username}",
+  updatedAt: "更新于 {time}",
+  comparedToYesterday: "较昨日",
+  metrics: {
+    sales: "今日销售额",
+    orders: "订单总量",
+    customers: "新增客户",
+    refunds: "退款订单",
+  },
+  salesTrend: {
+    title: "销售趋势",
+    description: "近 7 天销售额与订单量",
+  },
+  orderSource: {
+    title: "订单来源",
+    description: "各渠道订单占比",
+  },
+  channelConversion: {
+    title: "渠道转化",
+    description: "本月各渠道访问与转化情况",
+  },
+  recentOrders: {
+    title: "最近订单",
+    description: "今日最新成交记录",
+  },
+  salesAmount: "销售额",
+  orderCount: "订单量",
+  totalOrders: "总订单",
+  conversionRate: "转化率",
+  viewMore: "查看更多",
+  viewAll: "查看全部",
+  weekdays: {
+    monday: "周一",
+    tuesday: "周二",
+    wednesday: "周三",
+    thursday: "周四",
+    friday: "周五",
+    saturday: "周六",
+    sunday: "周日",
+  },
+  sources: {
+    miniProgram: "小程序",
+    website: "官方网站",
+    store: "线下门店",
+    other: "其他渠道",
+  },
+  channels: {
+    organicSearch: "自然搜索",
+    paidPromotion: "付费推广",
+    socialMedia: "社交媒体",
+    direct: "直接访问",
+    partners: "合作渠道",
+  },
+  status: {
+    completed: "已完成",
+    processing: "处理中",
+    pendingPayment: "待付款",
+  },
+  orders: {
+    first: { customer: "林晓雨", product: "企业专业版" },
+    second: { customer: "周亦辰", product: "团队协作版" },
+    third: { customer: "陈知夏", product: "个人年度版" },
+    fourth: { customer: "沈星河", product: "企业旗舰版" },
+  },
+};

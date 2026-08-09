@@ -2,16 +2,16 @@
   <div class="dashboard">
     <section class="dashboard-heading">
       <div>
-        <h1>欢迎回来，{{ userStore.user.username }}</h1>
+        <h1>{{ t("home.welcome", { username: userStore.user.username }) }}</h1>
       </div>
       <div class="updated-at">
         <span class="status-dot"></span>
-        更新于 10:24
+        {{ t("home.updatedAt", { time: "10:24" }) }}
       </div>
     </section>
 
     <section class="metric-grid">
-      <article v-for="item in metrics" :key="item.label" class="metric-card">
+      <article v-for="item in metrics" :key="item.id" class="metric-card">
         <div class="metric-card__top">
           <span>{{ item.label }}</span>
           <span class="metric-icon" :style="{ color: item.color, backgroundColor: item.background }">
@@ -25,7 +25,7 @@
             <TrendingDown v-else :size="14" />
             {{ Math.abs(item.trend) }}%
           </span>
-          <span>较昨日</span>
+          <span>{{ t("home.comparedToYesterday") }}</span>
         </div>
       </article>
     </section>
@@ -34,12 +34,12 @@
       <article class="panel trend-panel">
         <div class="panel-heading">
           <div>
-            <h2>销售趋势</h2>
-            <p>近 7 天销售额与订单量</p>
+            <h2>{{ t("home.salesTrend.title") }}</h2>
+            <p>{{ t("home.salesTrend.description") }}</p>
           </div>
           <div class="legend-summary">
-            <span><i class="legend-dot legend-dot--blue"></i>销售额</span>
-            <span><i class="legend-dot legend-dot--cyan"></i>订单量</span>
+            <span><i class="legend-dot legend-dot--blue"></i>{{ t("home.salesAmount") }}</span>
+            <span><i class="legend-dot legend-dot--cyan"></i>{{ t("home.orderCount") }}</span>
           </div>
         </div>
         <v-chart class="chart chart--trend" :option="salesOption" autoresize />
@@ -48,10 +48,10 @@
       <article class="panel">
         <div class="panel-heading">
           <div>
-            <h2>订单来源</h2>
-            <p>各渠道订单占比</p>
+            <h2>{{ t("home.orderSource.title") }}</h2>
+            <p>{{ t("home.orderSource.description") }}</p>
           </div>
-          <button class="more-button" type="button" aria-label="查看更多">
+          <button class="more-button" type="button" :aria-label="t('home.viewMore')">
             <Ellipsis :size="20" />
           </button>
         </div>
@@ -69,8 +69,8 @@
       <article class="panel">
         <div class="panel-heading">
           <div>
-            <h2>渠道转化</h2>
-            <p>本月各渠道访问与转化情况</p>
+            <h2>{{ t("home.channelConversion.title") }}</h2>
+            <p>{{ t("home.channelConversion.description") }}</p>
           </div>
         </div>
         <v-chart class="chart chart--bar" :option="channelOption" autoresize />
@@ -79,10 +79,10 @@
       <article class="panel order-panel">
         <div class="panel-heading">
           <div>
-            <h2>最近订单</h2>
-            <p>今日最新成交记录</p>
+            <h2>{{ t("home.recentOrders.title") }}</h2>
+            <p>{{ t("home.recentOrders.description") }}</p>
           </div>
-          <button class="text-button" type="button">查看全部 <ChevronRight :size="15" /></button>
+          <button class="text-button" type="button">{{ t("home.viewAll") }} <ChevronRight :size="15" /></button>
         </div>
         <div class="order-list">
           <div v-for="order in recentOrders" :key="order.id" class="order-row">
@@ -103,6 +103,7 @@
 
 <script setup lang="ts">
 import { computed, inject, type Component, type Ref } from "vue";
+import { useI18n } from "vue-i18n";
 import VChart from "vue-echarts";
 import { use } from "echarts/core";
 import { BarChart, LineChart, PieChart } from "echarts/charts";
@@ -123,9 +124,11 @@ import { useUserStore } from "@/stores/users.ts";
 use([CanvasRenderer, LineChart, BarChart, PieChart, GridComponent, TooltipComponent]);
 
 const { isDark } = inject<{ isDark: Ref<boolean> }>("theme")!;
+const { t } = useI18n();
 const userStore = useUserStore();
 
 interface Metric {
+  id: string;
   label: string;
   value: string;
   trend: number;
@@ -134,19 +137,44 @@ interface Metric {
   background: string;
 }
 
-const metrics: Metric[] = [
+const metrics = computed<Metric[]>(() => [
   {
-    label: "今日销售额",
+    id: "sales",
+    label: t("home.metrics.sales"),
     value: "¥128,560",
     trend: 12.5,
     icon: CircleDollarSign,
     color: "#165dff",
     background: "#e8f3ff",
   },
-  { label: "订单总量", value: "1,284", trend: 8.2, icon: ShoppingCart, color: "#00b42a", background: "#e8ffea" },
-  { label: "新增客户", value: "368", trend: 6.4, icon: Users, color: "#722ed1", background: "#f5e8ff" },
-  { label: "退款订单", value: "24", trend: -2.1, icon: PackageCheck, color: "#f77234", background: "#fff3e8" },
-];
+  {
+    id: "orders",
+    label: t("home.metrics.orders"),
+    value: "1,284",
+    trend: 8.2,
+    icon: ShoppingCart,
+    color: "#00b42a",
+    background: "#e8ffea",
+  },
+  {
+    id: "customers",
+    label: t("home.metrics.customers"),
+    value: "368",
+    trend: 6.4,
+    icon: Users,
+    color: "#722ed1",
+    background: "#f5e8ff",
+  },
+  {
+    id: "refunds",
+    label: t("home.metrics.refunds"),
+    value: "24",
+    trend: -2.1,
+    icon: PackageCheck,
+    color: "#f77234",
+    background: "#fff3e8",
+  },
+]);
 
 const axisColor = computed(() => (isDark.value ? "#6b7785" : "#c9cdd4"));
 const labelColor = computed(() => (isDark.value ? "#a9aeb8" : "#86909c"));
@@ -164,7 +192,15 @@ const salesOption = computed(() => ({
   xAxis: {
     type: "category",
     boundaryGap: false,
-    data: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
+    data: [
+      t("home.weekdays.monday"),
+      t("home.weekdays.tuesday"),
+      t("home.weekdays.wednesday"),
+      t("home.weekdays.thursday"),
+      t("home.weekdays.friday"),
+      t("home.weekdays.saturday"),
+      t("home.weekdays.sunday"),
+    ],
     axisTick: { show: false },
     axisLine: { lineStyle: { color: axisColor.value } },
     axisLabel: { color: labelColor.value, margin: 14 },
@@ -187,7 +223,7 @@ const salesOption = computed(() => ({
   ],
   series: [
     {
-      name: "销售额",
+      name: t("home.salesAmount"),
       type: "line",
       smooth: true,
       symbol: "circle",
@@ -211,7 +247,7 @@ const salesOption = computed(() => ({
       },
     },
     {
-      name: "订单量",
+      name: t("home.orderCount"),
       type: "line",
       yAxisIndex: 1,
       smooth: true,
@@ -225,12 +261,12 @@ const salesOption = computed(() => ({
   ],
 }));
 
-const sourceData = [
-  { value: 42, name: "小程序", itemStyle: { color: "#165dff" } },
-  { value: 28, name: "官方网站", itemStyle: { color: "#14c9c9" } },
-  { value: 18, name: "线下门店", itemStyle: { color: "#722ed1" } },
-  { value: 12, name: "其他渠道", itemStyle: { color: "#f7ba1e" } },
-];
+const sourceData = computed(() => [
+  { value: 42, name: t("home.sources.miniProgram"), itemStyle: { color: "#165dff" } },
+  { value: 28, name: t("home.sources.website"), itemStyle: { color: "#14c9c9" } },
+  { value: 18, name: t("home.sources.store"), itemStyle: { color: "#722ed1" } },
+  { value: 12, name: t("home.sources.other"), itemStyle: { color: "#f7ba1e" } },
+]);
 
 const sourceOption = computed(() => ({
   tooltip: { trigger: "item", formatter: "{b}<br/>{c}%" },
@@ -243,7 +279,7 @@ const sourceOption = computed(() => ({
       label: {
         show: true,
         position: "center",
-        formatter: "1,284\n{total|总订单}",
+        formatter: `1,284\n{total|${t("home.totalOrders")}}`,
         color: isDark.value ? "#f2f3f5" : "#1d2129",
         fontSize: 24,
         fontWeight: 700,
@@ -251,7 +287,7 @@ const sourceOption = computed(() => ({
         rich: { total: { color: labelColor.value, fontSize: 12, fontWeight: 400, lineHeight: 20 } },
       },
       labelLine: { show: false },
-      data: sourceData,
+      data: sourceData.value,
       itemStyle: { borderColor: isDark.value ? "#18181c" : "#fff", borderWidth: 4, borderRadius: 8 },
     },
   ],
@@ -262,7 +298,13 @@ const channelOption = computed(() => ({
   grid: { top: 18, right: 12, bottom: 8, left: 4, containLabel: true },
   xAxis: {
     type: "category",
-    data: ["自然搜索", "付费推广", "社交媒体", "直接访问", "合作渠道"],
+    data: [
+      t("home.channels.organicSearch"),
+      t("home.channels.paidPromotion"),
+      t("home.channels.socialMedia"),
+      t("home.channels.direct"),
+      t("home.channels.partners"),
+    ],
     axisTick: { show: false },
     axisLine: { lineStyle: { color: axisColor.value } },
     axisLabel: { color: labelColor.value, margin: 13 },
@@ -274,7 +316,7 @@ const channelOption = computed(() => ({
   },
   series: [
     {
-      name: "转化率",
+      name: t("home.conversionRate"),
       type: "bar",
       barWidth: 24,
       data: [68, 52, 46, 63, 38],
@@ -283,44 +325,44 @@ const channelOption = computed(() => ({
   ],
 }));
 
-const recentOrders = [
+const recentOrders = computed(() => [
   {
     id: "#SO2026080901",
-    customer: "林晓雨",
-    product: "企业专业版",
+    customer: t("home.orders.first.customer"),
+    product: t("home.orders.first.product"),
     amount: "2,999",
-    status: "已完成",
+    status: t("home.status.completed"),
     statusType: "success",
     avatarColor: "#e8f3ff",
   },
   {
     id: "#SO2026080902",
-    customer: "周亦辰",
-    product: "团队协作版",
+    customer: t("home.orders.second.customer"),
+    product: t("home.orders.second.product"),
     amount: "1,688",
-    status: "处理中",
+    status: t("home.status.processing"),
     statusType: "pending",
     avatarColor: "#f5e8ff",
   },
   {
     id: "#SO2026080903",
-    customer: "陈知夏",
-    product: "个人年度版",
+    customer: t("home.orders.third.customer"),
+    product: t("home.orders.third.product"),
     amount: "599",
-    status: "已完成",
+    status: t("home.status.completed"),
     statusType: "success",
     avatarColor: "#e8ffea",
   },
   {
     id: "#SO2026080904",
-    customer: "沈星河",
-    product: "企业旗舰版",
+    customer: t("home.orders.fourth.customer"),
+    product: t("home.orders.fourth.product"),
     amount: "5,899",
-    status: "待付款",
+    status: t("home.status.pendingPayment"),
     statusType: "warning",
     avatarColor: "#fff3e8",
   },
-];
+]);
 </script>
 
 <style scoped lang="scss">

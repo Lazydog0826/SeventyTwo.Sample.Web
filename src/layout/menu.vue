@@ -38,6 +38,7 @@
 import { NButton, NLayoutSider, NMenu, type MenuOption, NIcon } from "naive-ui";
 import { PanelLeftClose, PanelLeftOpen } from "@lucide/vue";
 import { type Component, computed, h, onMounted, ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import { usePermissionsStore } from "@/stores/permissions.ts";
 import * as LucideIcons from "@lucide/vue";
@@ -53,11 +54,18 @@ const emit = defineEmits<{
 
 const route = useRoute();
 const router = useRouter();
+const { rt, tm } = useI18n();
 const activeMenu = computed(() => route.path);
 const defaultExpandedKeys = ref<Array<string>>([]);
 const menuOptions = ref<MenuOption[]>([]);
 const menuOptionMap = new Map<string, MenuOption>();
 const menus = ref<Array<PermissionMenuOutput>>([]);
+
+function translateMenuTitle(code: string, fallback: string) {
+  const menuMessages = tm("menu") as Record<string, unknown>;
+  const message = menuMessages[code];
+  return typeof message === "string" ? rt(message) : fallback;
+}
 
 function renderIcon(name?: string): MenuOption["icon"] {
   if (!name) {
@@ -84,7 +92,7 @@ onMounted(async () => {
   // 第一轮设置映射
   menus.value.forEach(x => {
     const newMenuOption: MenuOption = {
-      label: x.title,
+      label: () => translateMenuTitle(x.code, x.title),
       key: x.routePath,
       icon: renderIcon(x.icon),
       show: x.metaData.isShow,

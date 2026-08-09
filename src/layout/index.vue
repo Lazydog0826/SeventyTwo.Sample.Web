@@ -1,5 +1,5 @@
 <template>
-  <n-layout class="app-layout">
+  <n-layout class="app-layout" :lang="locale">
     <n-layout-header class="app-header" bordered>
       <div class="header-main">
         <div class="brand">
@@ -8,6 +8,17 @@
       </div>
 
       <div class="header-actions">
+        <n-dropdown :options="languageOptions" @select="handleLanguageChange">
+          <n-button quaternary size="small">
+            <template #icon>
+              <n-icon>
+                <Languages></Languages>
+              </n-icon>
+            </template>
+            {{ locale === "zh-CN" ? "简体中文" : "English" }}
+          </n-button>
+        </n-dropdown>
+
         <n-button
           quaternary
           circle
@@ -41,7 +52,7 @@
 
 <script setup lang="ts">
 import { NAvatar, NButton, NDropdown, NIcon, NLayout, NLayoutHeader, type DropdownOption } from "naive-ui";
-import { Moon, Sun } from "@lucide/vue";
+import { Languages, Moon, Sun } from "@lucide/vue";
 import { computed, inject, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { logout as logoutApi } from "@/api/users.ts";
@@ -50,7 +61,7 @@ import LayoutContent from "./content.vue";
 import LayoutMenu from "@/layout/menu.vue";
 import { useUserStore } from "@/stores/users.ts";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const collapsed = ref(false);
 const isLoggingOut = ref(false);
 const userStore = useUserStore();
@@ -61,12 +72,21 @@ const userOptions = computed<Array<DropdownOption>>(() => [
     disabled: isLoggingOut.value,
   },
 ]);
+const languageOptions: Array<DropdownOption> = [
+  { label: "简体中文", key: "zh-CN" },
+  { label: "English", key: "en-US" },
+];
 const { isDark, toggleTheme } = inject<{
   isDark: Ref<boolean>;
   toggleTheme: () => void;
 }>("theme")!;
 
 void userStore.getInfo();
+
+function handleLanguageChange(key: string | number) {
+  locale.value = String(key);
+  localStorage.setItem("locale", locale.value);
+}
 
 async function handleUserAction(key: string | number) {
   if (key !== "logout" || isLoggingOut.value) {

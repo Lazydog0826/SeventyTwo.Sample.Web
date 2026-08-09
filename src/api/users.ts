@@ -1,3 +1,5 @@
+// noinspection JSUnusedGlobalSymbols
+
 import http from "@/utils/request";
 
 /** 用户登录请求。 */
