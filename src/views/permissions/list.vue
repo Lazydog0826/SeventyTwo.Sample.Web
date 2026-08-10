@@ -45,16 +45,25 @@
       </n-data-table>
     </n-card>
 
-    <n-modal v-model:show="showEditor" preset="card" :title="editorTitle" class="permission-editor">
+    <n-modal
+      v-model:show="showEditor"
+      preset="card"
+      :title="editorTitle"
+      style="width: 600px; max-width: calc(100vw - 32px)"
+    >
       <n-form ref="formRef" :model="formModel" :rules="formRules" label-placement="left" label-width="auto">
         <n-form-item :label="t('permissions.form.code')" path="code">
-          <n-input v-model:value="formModel.code" />
+          <n-input v-model:value="formModel.code" :placeholder="t('permissions.placeholders.code')" />
         </n-form-item>
         <n-form-item :label="t('permissions.form.title')" path="title">
-          <n-input v-model:value="formModel.title" />
+          <n-input v-model:value="formModel.title" :placeholder="t('permissions.placeholders.title')" />
         </n-form-item>
         <n-form-item :label="t('permissions.form.type')" path="type">
-          <n-select v-model:value="formModel.type" :options="typeOptions" />
+          <n-select
+            v-model:value="formModel.type"
+            :options="typeOptions"
+            :placeholder="t('permissions.placeholders.type')"
+          />
         </n-form-item>
         <n-form-item :label="t('permissions.form.parent')" path="parentId">
           <n-select
@@ -62,27 +71,34 @@
             clearable
             filterable
             :options="parentOptions"
-            :placeholder="t('permissions.form.root')"
+            :placeholder="t('permissions.placeholders.parent')"
           />
         </n-form-item>
         <n-form-item :label="t('permissions.form.sortOrder')" path="sortOrder">
-          <n-input-number v-model:value="formModel.sortOrder" :min="0" />
+          <n-input-number
+            v-model:value="formModel.sortOrder"
+            :min="0"
+            :placeholder="t('permissions.placeholders.sortOrder')"
+          />
         </n-form-item>
         <n-form-item :label="t('permissions.form.enable')" path="enable">
           <n-switch v-model:value="formModel.enable" />
         </n-form-item>
         <n-form-item v-if="formModel.type !== 'Button'" :label="t('permissions.form.icon')" path="icon">
-          <n-input v-model:value="formModel.icon" />
+          <n-input v-model:value="formModel.icon" :placeholder="t('permissions.placeholders.icon')" />
         </n-form-item>
         <template v-if="formModel.type !== 'Button'">
           <n-form-item :label="t('permissions.form.componentPath')" path="vueComponentPath">
-            <n-input v-model:value="formModel.vueComponentPath" />
+            <n-input
+              v-model:value="formModel.vueComponentPath"
+              :placeholder="t('permissions.placeholders.componentPath')"
+            />
           </n-form-item>
           <n-form-item :label="t('permissions.form.routePath')" path="routePath">
-            <n-input v-model:value="formModel.routePath" />
+            <n-input v-model:value="formModel.routePath" :placeholder="t('permissions.placeholders.routePath')" />
           </n-form-item>
           <n-form-item :label="t('permissions.form.routeName')" path="routeName">
-            <n-input v-model:value="formModel.routeName" />
+            <n-input v-model:value="formModel.routeName" :placeholder="t('permissions.placeholders.routeName')" />
           </n-form-item>
           <n-form-item :label="t('permissions.form.isShow')" path="isShow">
             <n-switch v-model:value="formModel.isShow" />
@@ -508,9 +524,6 @@ onMounted(() => Promise.all([loadPermissions(), loadActionPermissions()]));
 }
 .filter-select {
   width: 160px;
-}
-:deep(.permission-editor) {
-  width: min(680px, calc(100vw - 32px));
 }
 @media (max-width: 640px) {
   .toolbar {

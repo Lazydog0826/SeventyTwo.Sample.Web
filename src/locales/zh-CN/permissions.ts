@@ -52,6 +52,17 @@ export default {
     routeName: "路由名称",
     isShow: "菜单显示",
   },
+  placeholders: {
+    code: "请输入权限编码",
+    title: "请输入权限标题",
+    type: "请选择权限类型",
+    parent: "请选择上级权限",
+    sortOrder: "请输入排序值",
+    icon: "请输入图标",
+    componentPath: "请输入组件路径",
+    routePath: "请输入路由路径",
+    routeName: "请输入路由名称",
+  },
   validation: {
     code: "请输入权限编码",
     title: "请输入权限标题",

@@ -52,6 +52,17 @@ export default {
     routeName: "Route Name",
     isShow: "Show in Menu",
   },
+  placeholders: {
+    code: "Enter a permission code",
+    title: "Enter a permission title",
+    type: "Select a permission type",
+    parent: "Select a parent permission",
+    sortOrder: "Enter an order value",
+    icon: "Enter an icon",
+    componentPath: "Enter a component path",
+    routePath: "Enter a route path",
+    routeName: "Enter a route name",
+  },
   validation: {
     code: "Enter a permission code",
     title: "Enter a permission title",
