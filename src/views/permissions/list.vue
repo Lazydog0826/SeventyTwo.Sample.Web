@@ -489,7 +489,7 @@ async function loadPermissions() {
   loading.value = true;
   try {
     permissions.value = (await getPermissionList()) ?? [];
-    expandedRowKeys.value = collectExpandableKeys(permissionTree.value);
+    expandedRowKeys.value = [];
   } finally {
     loading.value = false;
   }
