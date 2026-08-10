@@ -89,6 +89,8 @@ export const kyInstance = ky.create({
   hooks: {
     beforeRequest: [
       ({ request }) => {
+        // 为每次实际发出的请求生成唯一编号，便于前后端关联请求日志。
+        request.headers.set("RequestNo", crypto.randomUUID());
         // 每次发送请求前读取最新访问 Token，避免在实例创建时固化旧 Token。
         const token = window.$accessToken;
         if (token) {
