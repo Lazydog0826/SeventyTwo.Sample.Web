@@ -1,6 +1,6 @@
 // noinspection JSUnusedGlobalSymbols,ExceptionCaughtLocallyJS
 
-import ky, { type Options } from "ky";
+import ky, { HTTPError, type Options } from "ky";
 import router from "@/router";
 import type { MessageReactive } from "naive-ui";
 
@@ -9,7 +9,7 @@ import type { MessageReactive } from "naive-ui";
  * `data` 在接口无返回值或业务数据为空时可能为 null/undefined。
  */
 interface WebApiResponse<T = any> {
-  code: number;
+  code: string;
   message: string;
   data: T | null | undefined;
 }
@@ -198,10 +198,12 @@ export const kyInstance = ky.create({
     ],
     beforeError: [
       async ({ error }) => {
-        // 所有最终向调用方抛出的错误统一在此提示；相同并发错误由 showErrorMessage 去重。
-        const message = `${error.name}：${error.message}`;
-        showErrorMessage(message);
-        // beforeError 必须返回 Error，供 ky 继续执行后续 beforeError hook 并最终抛出。
+        let content = error.message;
+        if (error instanceof HTTPError) {
+          const result = error.data as Partial<WebApiResponse> | undefined;
+          content = result?.message || error.message;
+        }
+        showErrorMessage(content);
         return error;
       },
     ],
@@ -216,13 +218,23 @@ class http {
     return kyInstance
       .get(url, options)
       .json<WebApiResponse<T>>()
-      .then(r => r.data);
+      .then(r => {
+        if (r.code === "OK" && options?.context && options?.context["showSuccessMessage"] === true) {
+          window.$message.success(r.message);
+        }
+        return r.data;
+      });
   }
   async post<T = any>(url: string, options?: Options): Promise<T | null | undefined> {
     return kyInstance
       .post(url, options)
       .json<WebApiResponse<T>>()
-      .then(r => r.data);
+      .then(r => {
+        if (r.code === "OK" && options?.context && options?.context["showSuccessMessage"] === true) {
+          window.$message.success(r.message);
+        }
+        return r.data;
+      });
   }
 }
 
