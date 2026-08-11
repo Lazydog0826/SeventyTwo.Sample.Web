@@ -197,13 +197,9 @@ export const kyInstance = ky.create({
       },
     ],
     beforeError: [
-      async ({ error, request }) => {
+      async ({ error }) => {
         // 所有最终向调用方抛出的错误统一在此提示；相同并发错误由 showErrorMessage 去重。
-        const requestNo = request.headers.get("RequestNo");
-        let message = `${error.name}：${error.message}`;
-        if (requestNo) {
-          message += ` - ${requestNo}`;
-        }
+        const message = `${error.name}：${error.message}`;
         showErrorMessage(message);
         // beforeError 必须返回 Error，供 ky 继续执行后续 beforeError hook 并最终抛出。
         return error;
@@ -216,15 +212,12 @@ export const kyInstance = ky.create({
  * 面向业务代码的请求封装，仅返回统一响应结构中的 data。
  */
 class http {
-  /** 发送 GET 请求并返回响应 data。 */
   async get<T = any>(url: string, options?: Options): Promise<T | null | undefined> {
     return kyInstance
       .get(url, options)
       .json<WebApiResponse<T>>()
       .then(r => r.data);
   }
-
-  /** 发送 POST 请求并返回响应 data。 */
   async post<T = any>(url: string, options?: Options): Promise<T | null | undefined> {
     return kyInstance
       .post(url, options)
