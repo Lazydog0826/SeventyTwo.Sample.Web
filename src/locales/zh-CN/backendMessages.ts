@@ -10,6 +10,12 @@ export default {
     itemSortMustNotBeNegative: "数据字典项排序号不能小于零",
     itemValueRequired: "数据字典项值不能为空",
     itemLabelRequired: "数据字典项显示文本不能为空",
+    codeExists: "数据字典编码已存在",
+    notFound: "数据字典不存在",
+    itemNotFound: "数据字典项不存在",
+    itemValueExists: "数据字典项值已存在",
+    dataChanged: "数据字典数据已变更，请刷新后重试",
+    modifiedAtRequired: "数据字典修改时间不能为空",
   },
   inventory: {
     idRequired: "库存 ID 不能为空",

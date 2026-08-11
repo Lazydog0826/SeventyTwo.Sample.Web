@@ -5,4 +5,7 @@ export const PermissionCode = {
   OrganizationsCreate: "organizationsCreate",
   OrganizationsUpdate: "organizationsUpdate",
   OrganizationsDelete: "organizationsDelete",
+  DataDictionariesCreate: "dataDictionariesCreate",
+  DataDictionariesUpdate: "dataDictionariesUpdate",
+  DataDictionariesDelete: "dataDictionariesDelete",
 } as const;

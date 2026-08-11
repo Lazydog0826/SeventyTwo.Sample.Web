@@ -10,6 +10,12 @@ export default {
     itemSortMustNotBeNegative: "Data dictionary item order cannot be negative",
     itemValueRequired: "Data dictionary item value is required",
     itemLabelRequired: "Data dictionary item label is required",
+    codeExists: "Data dictionary code already exists",
+    notFound: "Data dictionary not found",
+    itemNotFound: "Data dictionary item not found",
+    itemValueExists: "Data dictionary item value already exists",
+    dataChanged: "Data dictionary data has changed. Refresh and try again",
+    modifiedAtRequired: "Data dictionary modification time is required",
   },
   inventory: {
     idRequired: "Inventory ID is required",
