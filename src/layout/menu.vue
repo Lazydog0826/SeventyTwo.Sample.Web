@@ -93,7 +93,7 @@ onMounted(async () => {
   menus.value.forEach(x => {
     const newMenuOption: MenuOption = {
       label: () => translateMenuTitle(x.code, x.title),
-      key: x.routePath,
+      key: x.routePath || x.code,
       icon: renderIcon(x.icon),
       show: x.metaData.isShow,
       children: undefined,
@@ -104,7 +104,6 @@ onMounted(async () => {
   // 第二轮设置上下级关系
   menus.value.forEach(x => {
     const temMenuOption = menuOptionMap.get(x.id);
-
     if (x.parentId) {
       const parentMenuOption = menuOptionMap.get(x.parentId);
       if (parentMenuOption && temMenuOption) {
@@ -128,14 +127,14 @@ onMounted(async () => {
     while (loopCount < 10) {
       loopCount++;
       currParentId = currMenu?.parentId;
-      if (currParentId === null) break;
+      if (currParentId === null || currParentId === undefined) break;
       currMenu = menus.value.find(x => x.id === currParentId);
-      if (currMenu) defaultExpandedKeys.value.push(currMenu?.routePath);
+      if (currMenu?.routePath || currMenu?.code) defaultExpandedKeys.value.push(currMenu?.routePath || currMenu?.code);
     }
   }
 });
 
-function handleUpdateValue(key: string, _: MenuOption) {
+function handleUpdateValue(key: string, _menuOption: MenuOption) {
   if (route.path !== key) {
     router.push(key);
   }
