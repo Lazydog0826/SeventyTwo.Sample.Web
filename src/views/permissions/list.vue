@@ -495,9 +495,9 @@ async function loadPermissions() {
 
 async function loadActionPermissions() {
   const current = await permissionsStore.getPermissions();
-  canCreate.value = current.buttonCodes.includes("Permissions.Create");
-  canUpdate.value = current.buttonCodes.includes("Permissions.Update");
-  canDelete.value = current.buttonCodes.includes("Permissions.Delete");
+  canCreate.value = current.buttonCodes.includes("permissionsCreate");
+  canUpdate.value = current.buttonCodes.includes("permissionsUpdate");
+  canDelete.value = current.buttonCodes.includes("permissionsDelete");
 }
 
 watch([keyword, typeFilter, statusFilter], () => {
