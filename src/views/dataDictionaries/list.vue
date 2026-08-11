@@ -220,6 +220,8 @@ interface ItemFormModel {
 }
 type StatusFilter = "enabled" | "disabled";
 
+const dataChangedMessage = "dataDictionary.dataChanged";
+
 const { t } = useI18n();
 const permissionsStore = usePermissionsStore();
 const dictionaries = ref<DataDictionaryListOutput[]>([]);
@@ -241,6 +243,7 @@ const dictionaryFormRef = ref<FormInst | null>(null);
 const itemFormRef = ref<FormInst | null>(null);
 const dictionaryForm = reactive<DictionaryFormModel>(emptyDictionaryForm());
 const itemForm = reactive<ItemFormModel>(emptyItemForm());
+let itemLoadSequence = 0;
 
 const canCreate = computed(() => permissionsStore.hasPermission(PermissionCode.DataDictionariesCreate));
 const canUpdate = computed(() => permissionsStore.hasPermission(PermissionCode.DataDictionariesUpdate));
@@ -597,8 +600,10 @@ async function loadDictionaries() {
 }
 
 async function loadItems() {
+  const sequence = ++itemLoadSequence;
   if (!selectedDictionaryId.value) {
     items.value = [];
+    itemLoading.value = false;
     return;
   }
   const requestedId = selectedDictionaryId.value;
@@ -606,13 +611,13 @@ async function loadItems() {
   try {
     const result = await getDataDictionaryItems(requestedId);
     if (!result) throw new Error("Data dictionary items response is empty");
-    if (selectedDictionaryId.value !== requestedId) return;
+    if (sequence !== itemLoadSequence || selectedDictionaryId.value !== requestedId) return;
     items.value = result.items ?? [];
     applyDictionaryVersion(result.version);
     const dictionary = dictionaries.value.find(item => item.id === requestedId);
     if (dictionary) dictionary.itemCount = items.value.length;
   } finally {
-    itemLoading.value = false;
+    if (sequence === itemLoadSequence) itemLoading.value = false;
   }
 }
 
@@ -622,7 +627,15 @@ function applyDictionaryVersion(version: string) {
 }
 
 async function reloadOnConflict(error: unknown) {
-  if (!(error instanceof HTTPError) || error.response.status !== 409) return;
+  if (
+    !(error instanceof HTTPError) ||
+    error.response.status !== 409 ||
+    !error.data ||
+    typeof error.data !== "object" ||
+    !("message" in error.data) ||
+    error.data.message !== dataChangedMessage
+  )
+    return;
 
   const editingDictionaryId = dictionaryForm.id;
   const editingItemId = itemForm.id;
