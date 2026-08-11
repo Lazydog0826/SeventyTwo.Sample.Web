@@ -84,26 +84,24 @@
         <n-form-item :label="t('permissions.form.enable')" path="enable">
           <n-switch v-model:value="formModel.enable" />
         </n-form-item>
-        <n-form-item v-if="formModel.type !== 'Button'" :label="t('permissions.form.icon')" path="icon">
+        <n-form-item :label="t('permissions.form.icon')" path="icon">
           <n-input v-model:value="formModel.icon" :placeholder="t('permissions.placeholders.icon')" />
         </n-form-item>
-        <template v-if="formModel.type !== 'Button'">
-          <n-form-item :label="t('permissions.form.componentPath')" path="vueComponentPath">
-            <n-input
-              v-model:value="formModel.vueComponentPath"
-              :placeholder="t('permissions.placeholders.componentPath')"
-            />
-          </n-form-item>
-          <n-form-item :label="t('permissions.form.routePath')" path="routePath">
-            <n-input v-model:value="formModel.routePath" :placeholder="t('permissions.placeholders.routePath')" />
-          </n-form-item>
-          <n-form-item :label="t('permissions.form.routeName')" path="routeName">
-            <n-input v-model:value="formModel.routeName" :placeholder="t('permissions.placeholders.routeName')" />
-          </n-form-item>
-          <n-form-item :label="t('permissions.form.isShow')" path="isShow">
-            <n-switch v-model:value="formModel.isShow" />
-          </n-form-item>
-        </template>
+        <n-form-item :label="t('permissions.form.componentPath')" path="vueComponentPath">
+          <n-input
+            v-model:value="formModel.vueComponentPath"
+            :placeholder="t('permissions.placeholders.componentPath')"
+          />
+        </n-form-item>
+        <n-form-item :label="t('permissions.form.routePath')" path="routePath">
+          <n-input v-model:value="formModel.routePath" :placeholder="t('permissions.placeholders.routePath')" />
+        </n-form-item>
+        <n-form-item :label="t('permissions.form.routeName')" path="routeName">
+          <n-input v-model:value="formModel.routeName" :placeholder="t('permissions.placeholders.routeName')" />
+        </n-form-item>
+        <n-form-item :label="t('permissions.form.isShow')" path="isShow">
+          <n-switch v-model:value="formModel.isShow" />
+        </n-form-item>
       </n-form>
       <template #footer>
         <n-space justify="end">
@@ -450,12 +448,12 @@ async function submitEditor() {
       type: formModel.type,
       enable: formModel.enable,
       sortOrder: formModel.sortOrder,
-      icon: formModel.type === "Button" ? "" : formModel.icon,
-      vueComponentPath: formModel.type === "Button" ? "" : formModel.vueComponentPath,
-      routePath: formModel.type === "Button" ? "" : formModel.routePath,
-      routeName: formModel.type === "Button" ? "" : formModel.routeName,
+      icon: formModel.icon,
+      vueComponentPath: formModel.vueComponentPath,
+      routePath: formModel.routePath,
+      routeName: formModel.routeName,
       parentId: formModel.parentId,
-      metaData: { isShow: formModel.type === "Button" ? false : formModel.isShow },
+      metaData: { isShow: formModel.isShow },
     };
     if (formModel.id && formModel.version) {
       await updatePermission({ ...input, id: formModel.id, version: formModel.version });
