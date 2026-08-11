@@ -2,6 +2,8 @@ export const common = {
   login: "Login",
   logout: "Logout",
   username: "Username",
+  success: "Operation successful",
+  internalError: "Internal server error",
 };
 
 export const theme = {

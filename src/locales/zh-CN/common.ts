@@ -2,6 +2,8 @@ export const common = {
   login: "登录",
   logout: "退出登录",
   username: "用户名",
+  success: "操作成功",
+  internalError: "系统内部错误",
 };
 
 export const theme = {
