@@ -197,9 +197,13 @@ export const kyInstance = ky.create({
       },
     ],
     beforeError: [
-      async ({ error }) => {
+      async ({ error, request }) => {
         // 所有最终向调用方抛出的错误统一在此提示；相同并发错误由 showErrorMessage 去重。
-        const message = `${error.name}：${error.message}`;
+        const requestNo = request.headers.get("RequestNo");
+        let message = `${error.name}：${error.message}`;
+        if (requestNo) {
+          message += ` - ${requestNo}`;
+        }
         showErrorMessage(message);
         // beforeError 必须返回 Error，供 ky 继续执行后续 beforeError hook 并最终抛出。
         return error;
