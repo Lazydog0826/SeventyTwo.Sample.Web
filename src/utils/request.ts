@@ -2,6 +2,7 @@
 
 import ky, { HTTPError, type Options } from "ky";
 import router from "@/router";
+import i18n from "@/locales";
 import type { MessageReactive } from "naive-ui";
 
 /**
@@ -54,6 +55,10 @@ function showErrorMessage(content: string) {
     },
   });
   activeErrorMessages.set(content, messageReactive);
+}
+
+function translateBackendMessage(message: string) {
+  return i18n.global.te(message) ? i18n.global.t(message) : message;
 }
 
 /**
@@ -203,7 +208,7 @@ export const kyInstance = ky.create({
           const result = error.data as Partial<WebApiResponse> | undefined;
           content = result?.message || error.message;
         }
-        showErrorMessage(content);
+        showErrorMessage(translateBackendMessage(content));
         return error;
       },
     ],
@@ -220,7 +225,7 @@ class http {
       .json<WebApiResponse<T>>()
       .then(r => {
         if (r.code === "OK" && options?.context && options?.context["showSuccessMessage"] === true) {
-          window.$message.success(r.message);
+          window.$message.success(translateBackendMessage(r.message));
         }
         return r.data;
       });
@@ -231,7 +236,7 @@ class http {
       .json<WebApiResponse<T>>()
       .then(r => {
         if (r.code === "OK" && options?.context && options?.context["showSuccessMessage"] === true) {
-          window.$message.success(r.message);
+          window.$message.success(translateBackendMessage(r.message));
         }
         return r.data;
       });
