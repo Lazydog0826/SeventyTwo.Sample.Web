@@ -1,5 +1,5 @@
 <template>
-  <h1>{{ t("organizations.title") }}</h1>
+  <h1>{{ t("dataDictionaries.title") }}</h1>
 </template>
 
 <script setup lang="ts">
