@@ -160,6 +160,7 @@ import {
   type PermissionType,
 } from "@/api/permissions.ts";
 import { usePermissionsStore } from "@/stores/permissions.ts";
+import { PermissionCode } from "@/constants/permissions.ts";
 import { useI18n } from "vue-i18n";
 
 interface PermissionTreeNode extends PermissionListOutput {
@@ -184,9 +185,9 @@ const submitting = ref(false);
 const deleting = ref(false);
 const permissions = ref<PermissionListOutput[]>([]);
 const expandedRowKeys = ref<DataTableRowKey[]>([]);
-const canCreate = ref(false);
-const canUpdate = ref(false);
-const canDelete = ref(false);
+const canCreate = computed(() => permissionsStore.hasPermission(PermissionCode.PermissionsCreate));
+const canUpdate = computed(() => permissionsStore.hasPermission(PermissionCode.PermissionsUpdate));
+const canDelete = computed(() => permissionsStore.hasPermission(PermissionCode.PermissionsDelete));
 const showEditor = ref(false);
 const showDeleteConfirm = ref(false);
 const deletingPermission = ref<PermissionListOutput | null>(null);
@@ -493,18 +494,11 @@ async function loadPermissions() {
   }
 }
 
-async function loadActionPermissions() {
-  const current = await permissionsStore.getPermissions();
-  canCreate.value = current.buttonCodes.includes("permissionsCreate");
-  canUpdate.value = current.buttonCodes.includes("permissionsUpdate");
-  canDelete.value = current.buttonCodes.includes("permissionsDelete");
-}
-
 watch([keyword, typeFilter, statusFilter], () => {
   expandedRowKeys.value = collectExpandableKeys(filteredTree.value);
 });
 
-onMounted(() => Promise.all([loadPermissions(), loadActionPermissions()]));
+onMounted(() => Promise.all([loadPermissions(), permissionsStore.getPermissions()]));
 </script>
 
 <style scoped lang="scss">
