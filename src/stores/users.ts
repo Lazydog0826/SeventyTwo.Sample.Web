@@ -11,8 +11,8 @@ export const useUserStore = defineStore("users", () => {
     id: "",
     username: "",
     displayName: "",
-    phone: null,
-    email: null,
+    phone: "",
+    email: "",
   });
 
   const getInfo = async () => {

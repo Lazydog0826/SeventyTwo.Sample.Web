@@ -1,4 +1,7 @@
 export const PermissionCode = {
+  UsersCreate: "usersCreate",
+  UsersUpdate: "usersUpdate",
+  UsersDelete: "usersDelete",
   PermissionsCreate: "permissionsCreate",
   PermissionsUpdate: "permissionsUpdate",
   PermissionsDelete: "permissionsDelete",

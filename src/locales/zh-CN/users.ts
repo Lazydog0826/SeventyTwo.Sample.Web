@@ -1,3 +1,32 @@
 export default {
   title: "用户管理",
+  filters: { keyword: "搜索用户名、姓名、手机或邮箱", status: "用户状态" },
+  columns: { username: "用户名", displayName: "姓名", phone: "手机", email: "邮箱", status: "状态", actions: "操作" },
+  statuses: { enabled: "已启用", disabled: "已禁用" },
+  actions: { create: "新增用户", edit: "编辑", delete: "删除", cancel: "取消", save: "保存" },
+  editor: { createTitle: "新增用户", updateTitle: "编辑用户" },
+  form: { username: "用户名", password: "密码", displayName: "姓名", phone: "手机", email: "邮箱", enable: "启用" },
+  placeholders: {
+    username: "请输入 3 至 50 位用户名",
+    password: "请输入 6 至 100 位密码",
+    displayName: "请输入姓名",
+    phone: "请输入手机号码",
+    email: "请输入电子邮箱",
+  },
+  validation: {
+    username: "请输入 3 至 50 位用户名",
+    password: "请输入 6 至 100 位密码",
+    displayName: "请输入姓名",
+    phone: "请输入手机号码",
+    email: "请输入电子邮箱",
+  },
+  delete: { title: "删除用户", content: "确定永久删除用户“{name}”吗？此操作无法撤销。" },
+  messages: {
+    created: "用户创建成功",
+    updated: "用户修改成功",
+    deleted: "用户删除成功",
+    enabled: "用户已启用",
+    disabled: "用户已禁用",
+  },
+  empty: { data: "暂无用户", filtered: "没有符合筛选条件的用户" },
 };

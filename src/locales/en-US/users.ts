@@ -1,3 +1,14 @@
 export default {
-  title: "User Management",
+  title: "Users",
+  filters: { keyword: "Search username, name, phone or email", status: "User status" },
+  columns: { username: "Username", displayName: "Name", phone: "Phone", email: "Email", status: "Status", actions: "Actions" },
+  statuses: { enabled: "Enabled", disabled: "Disabled" },
+  actions: { create: "New user", edit: "Edit", delete: "Delete", cancel: "Cancel", save: "Save" },
+  editor: { createTitle: "New user", updateTitle: "Edit user" },
+  form: { username: "Username", password: "Password", displayName: "Name", phone: "Phone", email: "Email", enable: "Enabled" },
+  placeholders: { username: "Enter a 3-50 character username", password: "Enter a 6-100 character password", displayName: "Enter name", phone: "Enter phone", email: "Enter email" },
+  validation: { username: "Enter a 3-50 character username", password: "Enter a 6-100 character password", displayName: "Enter name", phone: "Enter phone", email: "Enter email" },
+  delete: { title: "Delete user", content: "Permanently delete “{name}”? This action cannot be undone." },
+  messages: { created: "User created", updated: "User updated", deleted: "User deleted", enabled: "User enabled", disabled: "User disabled" },
+  empty: { data: "No users", filtered: "No users match the filters" },
 };

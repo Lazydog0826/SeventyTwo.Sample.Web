@@ -103,6 +103,13 @@ export default {
     passwordHashRequired: "密码摘要不能为空",
     displayNameRequired: "用户显示名称不能为空",
     credentialsInvalid: "账号或密码错误",
+    phoneRequired: "手机号码不能为空",
+    emailRequired: "电子邮箱不能为空",
+    usernameExists: "用户名已存在",
+    dataChanged: "用户数据已变更，请刷新后重试",
+    modifiedAtRequired: "用户修改时间不能为空",
+    hasPermissions: "用户存在权限关联，不能删除",
+    superAdminProtected: "超级管理员不允许执行此操作",
   },
   validation: {
     failed: "请求参数校验失败",

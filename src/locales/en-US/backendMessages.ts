@@ -103,6 +103,13 @@ export default {
     passwordHashRequired: "Password hash is required",
     displayNameRequired: "User display name is required",
     credentialsInvalid: "Incorrect account or password",
+    phoneRequired: "Phone is required",
+    emailRequired: "Email is required",
+    usernameExists: "Username already exists",
+    dataChanged: "User data has changed; refresh and try again",
+    modifiedAtRequired: "User modification time is required",
+    hasPermissions: "User has permission associations and cannot be deleted",
+    superAdminProtected: "The super administrator cannot be modified",
   },
   validation: {
     failed: "Request validation failed",

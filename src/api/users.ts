@@ -15,9 +15,13 @@ export interface UserOutput {
   id: string;
   username: string;
   displayName: string;
-  phone: string | null;
-  email: string | null;
+  phone: string;
+  email: string;
 }
+
+export interface UserListOutput extends UserOutput { enable: boolean; version: string; }
+export interface CreateUserInput { username: string; password: string; displayName: string; phone: string; email: string; enable: boolean; }
+export interface UpdateUserInput { id: string; displayName: string; phone: string; email: string; version: string; }
 
 /** 获取当前登录用户信息。 */
 export function getInfo() {
@@ -38,3 +42,9 @@ export function refreshToken() {
 export function logout() {
   return http.post<void>("/api/users/Logout");
 }
+
+export function getUserList() { return http.get<UserListOutput[]>("/api/users/list"); }
+export function createUser(input: CreateUserInput) { return http.post<UserListOutput>("/api/users/create", { json: input }); }
+export function updateUser(input: UpdateUserInput) { return http.post<void>("/api/users/update", { json: input }); }
+export function setUserEnable(id: string, enable: boolean, version: string) { return http.post<void>("/api/users/set-enable", { json: { id, enable, version } }); }
+export function deleteUser(id: string, version: string) { return http.post<void>("/api/users/delete", { json: { id, version } }); }
