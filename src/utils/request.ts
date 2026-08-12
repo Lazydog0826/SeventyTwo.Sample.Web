@@ -115,7 +115,7 @@ export const kyInstance = ky.create({
           // 此时不能再次刷新，否则会形成刷新接口递归调用。
           if (new URL(request.url).pathname === RefreshTokenApiPath) {
             window.$accessToken = "";
-            await redirectToAuthPage();
+            redirectToAuthPage();
             return Promise.reject(new Error("登录已过期,请重新登录"));
           }
 
@@ -124,7 +124,7 @@ export const kyInstance = ky.create({
           // 否则该请求会在“刷新 → 重试 → 401”之间持续循环。
           if (retryCount > 0) {
             window.$accessToken = "";
-            await redirectToAuthPage();
+            redirectToAuthPage();
             return Promise.reject(new Error("刷新 Token 后请求仍返回 401"));
           }
 
