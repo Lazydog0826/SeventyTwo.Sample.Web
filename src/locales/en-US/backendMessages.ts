@@ -103,6 +103,7 @@ export default {
     passwordHashRequired: "Password hash is required",
     displayNameRequired: "User display name is required",
     credentialsInvalid: "Incorrect account or password",
+    disabled: "User is disabled",
     phoneRequired: "Phone is required",
     emailRequired: "Email is required",
     orgIdRequired: "User organization is required",

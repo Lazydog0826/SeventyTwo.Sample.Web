@@ -103,6 +103,7 @@ export default {
     passwordHashRequired: "密码摘要不能为空",
     displayNameRequired: "用户显示名称不能为空",
     credentialsInvalid: "账号或密码错误",
+    disabled: "用户已禁用",
     phoneRequired: "手机号码不能为空",
     emailRequired: "电子邮箱不能为空",
     orgIdRequired: "用户所属机构不能为空",
