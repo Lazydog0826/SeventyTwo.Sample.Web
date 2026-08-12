@@ -8,7 +8,11 @@
     :native-scrollbar="false"
   >
     <div class="sidebar-content">
+      <div v-if="loading" class="menu-loading" aria-live="polite" aria-label="菜单加载中">
+        <n-spin size="small"></n-spin>
+      </div>
       <n-menu
+        v-else
         :default-expanded-keys="defaultExpandedKeys"
         :watch-props="['defaultExpandedKeys']"
         :value="activeMenu"
@@ -35,7 +39,7 @@
 
 <!--suppress SpellCheckingInspection -->
 <script setup lang="ts">
-import { NButton, NLayoutSider, NMenu, type MenuOption, NIcon } from "naive-ui";
+import { NButton, NLayoutSider, NMenu, type MenuOption, NIcon, NSpin } from "naive-ui";
 import { PanelLeftClose, PanelLeftOpen } from "@lucide/vue";
 import { type Component, computed, h, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -58,6 +62,7 @@ const { rt, tm } = useI18n();
 const activeMenu = computed(() => route.path);
 const defaultExpandedKeys = ref<Array<string>>([]);
 const menuOptions = ref<MenuOption[]>([]);
+const loading = ref(true);
 const menuOptionMap = new Map<string, MenuOption>();
 const menus = ref<Array<PermissionMenuOutput>>([]);
 
@@ -85,52 +90,57 @@ function renderIcon(name?: string): MenuOption["icon"] {
 }
 
 onMounted(async () => {
-  const permissionsStore = usePermissionsStore();
-  const permissions = await permissionsStore.getPermissions();
-  menus.value = [...permissions.menus].sort((a, b) => a.sortOrder - b.sortOrder);
+  try {
+    const permissionsStore = usePermissionsStore();
+    const permissions = await permissionsStore.getPermissions();
+    menus.value = [...permissions.menus].sort((a, b) => a.sortOrder - b.sortOrder);
 
-  // 第一轮设置映射
-  menus.value.forEach(x => {
-    const newMenuOption: MenuOption = {
-      label: () => translateMenuTitle(x.code, x.title),
-      key: x.routePath || x.code,
-      icon: renderIcon(x.icon),
-      show: x.metaData.isShow,
-      children: undefined,
-    };
-    menuOptionMap.set(x.id, newMenuOption);
-  });
+    // 第一轮设置映射
+    menus.value.forEach(x => {
+      const newMenuOption: MenuOption = {
+        label: () => translateMenuTitle(x.code, x.title),
+        key: x.routePath || x.code,
+        icon: renderIcon(x.icon),
+        show: x.metaData.isShow,
+        children: undefined,
+      };
+      menuOptionMap.set(x.id, newMenuOption);
+    });
 
-  // 第二轮设置上下级关系
-  menus.value.forEach(x => {
-    const temMenuOption = menuOptionMap.get(x.id);
-    if (x.parentId) {
-      const parentMenuOption = menuOptionMap.get(x.parentId);
-      if (parentMenuOption && temMenuOption) {
-        parentMenuOption.children ??= [];
-        parentMenuOption.children.push(temMenuOption);
+    // 第二轮设置上下级关系
+    menus.value.forEach(x => {
+      const temMenuOption = menuOptionMap.get(x.id);
+      if (x.parentId) {
+        const parentMenuOption = menuOptionMap.get(x.parentId);
+        if (parentMenuOption && temMenuOption) {
+          parentMenuOption.children ??= [];
+          parentMenuOption.children.push(temMenuOption);
+        }
+      } else {
+        if (temMenuOption) {
+          menuOptions.value.push(temMenuOption);
+        }
       }
-    } else {
-      if (temMenuOption) {
-        menuOptions.value.push(temMenuOption);
+    });
+
+    // 处理默认展开
+    let loopCount = 0;
+    const currRoutePath = route.path;
+    let currMenu = menus.value.find(x => x.routePath === currRoutePath);
+    let currParentId: string | null | undefined = null;
+    if (currMenu) {
+      // 当前业务菜单层级不会超过 10 层，同时以此限制异常父级循环
+      while (loopCount < 10) {
+        loopCount++;
+        currParentId = currMenu?.parentId;
+        if (currParentId === null || currParentId === undefined) break;
+        currMenu = menus.value.find(x => x.id === currParentId);
+        if (currMenu?.routePath || currMenu?.code)
+          defaultExpandedKeys.value.push(currMenu?.routePath || currMenu?.code);
       }
     }
-  });
-
-  // 处理默认展开
-  let loopCount = 0;
-  const currRoutePath = route.path;
-  let currMenu = menus.value.find(x => x.routePath === currRoutePath);
-  let currParentId: string | null | undefined = null;
-  if (currMenu) {
-    // 当前业务菜单层级不会超过 10 层，同时以此限制异常父级循环
-    while (loopCount < 10) {
-      loopCount++;
-      currParentId = currMenu?.parentId;
-      if (currParentId === null || currParentId === undefined) break;
-      currMenu = menus.value.find(x => x.id === currParentId);
-      if (currMenu?.routePath || currMenu?.code) defaultExpandedKeys.value.push(currMenu?.routePath || currMenu?.code);
-    }
+  } finally {
+    loading.value = false;
   }
 });
 
@@ -151,6 +161,7 @@ function handleUpdateValue(key: string, _menuOption: MenuOption) {
   height: 100%;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .n-menu {
@@ -158,6 +169,14 @@ function handleUpdateValue(key: string, _menuOption: MenuOption) {
   min-height: 0;
   padding-bottom: 82px;
   overflow-y: auto;
+}
+
+.menu-loading {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 24px;
 }
 
 .sidebar-footer {
