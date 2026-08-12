@@ -35,8 +35,10 @@
 
       <n-dropdown trigger="click" :options="userOptions" @select="handleUserAction">
         <button class="user-summary" type="button" :aria-label="userStore.user.username">
-          <n-avatar round size="small">S</n-avatar>
-          <span>{{ userStore.user.username }}</span>
+          <n-skeleton v-if="userStore.isLoading" circle width="28px" height="28px" />
+          <n-avatar v-else round size="small">S</n-avatar>
+          <n-skeleton v-if="userStore.isLoading" text width="72px" />
+          <span v-else>{{ userStore.user.username }}</span>
         </button>
       </n-dropdown>
     </div>
@@ -44,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { NAvatar, NButton, NDropdown, NIcon, NLayoutHeader, type DropdownOption } from "naive-ui";
+import { NAvatar, NButton, NDropdown, NIcon, NLayoutHeader, NSkeleton, type DropdownOption } from "naive-ui";
 import { Languages, Moon, Sun } from "@lucide/vue";
 import { computed, inject, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
