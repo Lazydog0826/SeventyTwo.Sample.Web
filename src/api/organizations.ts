@@ -6,6 +6,7 @@ export interface OrganizationListOutput {
   name: string;
   enable: boolean;
   parentId: string | null;
+  sortOrder: number;
   version: string;
 }
 
@@ -14,6 +15,7 @@ export interface OrganizationMutationInput {
   name: string;
   enable: boolean;
   parentId: string | null;
+  sortOrder: number;
 }
 
 export interface UpdateOrganizationInput extends OrganizationMutationInput {

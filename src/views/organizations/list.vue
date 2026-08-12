@@ -28,7 +28,7 @@
         :data="filteredTree"
         :loading="loading"
         :row-key="row => row.id"
-        :scroll-x="hasActions ? 780 : 620"
+        :scroll-x="hasActions ? 870 : 710"
         :single-line="false"
         striped
       >
@@ -50,6 +50,15 @@
         </n-form-item>
         <n-form-item :label="t('organizations.form.name')" path="name">
           <n-input v-model:value="formModel.name" :placeholder="t('organizations.placeholders.name')" />
+        </n-form-item>
+        <n-form-item :label="t('organizations.form.sortOrder')" path="sortOrder">
+          <n-input-number
+            v-model:value="formModel.sortOrder"
+            :min="0"
+            :precision="0"
+            :placeholder="t('organizations.placeholders.sortOrder')"
+            style="width: 100%"
+          />
         </n-form-item>
         <n-form-item :label="t('organizations.form.parent')" path="parentId">
           <n-select
@@ -100,6 +109,7 @@ import {
   NForm,
   NFormItem,
   NInput,
+  NInputNumber,
   NModal,
   NSelect,
   NSpace,
@@ -194,12 +204,22 @@ const parentOptions = computed<SelectOption[]>(() => {
 const formRules = computed<FormRules>(() => ({
   code: { required: true, whitespace: true, message: t("organizations.validation.code"), trigger: ["input", "blur"] },
   name: { required: true, whitespace: true, message: t("organizations.validation.name"), trigger: ["input", "blur"] },
+  sortOrder: {
+    required: true,
+    type: "number",
+    validator: (_rule, value) =>
+      typeof value === "number" && Number.isInteger(value) && value >= 0
+        ? true
+        : new Error(t("organizations.validation.sortOrder")),
+    trigger: ["input", "blur"],
+  },
 }));
 
 const columns = computed<DataTableColumns<OrganizationTreeNode>>(() => {
   const result: DataTableColumns<OrganizationTreeNode> = [
     { title: t("organizations.columns.name"), key: "name", width: 260, fixed: "left", ellipsis: { tooltip: true } },
     { title: t("organizations.columns.code"), key: "code", width: 220, render: row => renderText(row.code, 200) },
+    { title: t("organizations.columns.sortOrder"), key: "sortOrder", width: 90 },
     {
       title: t("organizations.columns.status"),
       key: "enable",
@@ -243,7 +263,7 @@ const columns = computed<DataTableColumns<OrganizationTreeNode>>(() => {
 });
 
 function createEmptyForm(): OrganizationFormModel {
-  return { id: null, version: null, code: "", name: "", enable: true, parentId: null };
+  return { id: null, version: null, code: "", name: "", enable: true, parentId: null, sortOrder: 0 };
 }
 
 function renderText(value: string, maxWidth: number) {
@@ -265,7 +285,7 @@ function buildOrganizationTree(items: OrganizationListOutput[]): OrganizationTre
 }
 
 function sortTree(nodes: OrganizationTreeNode[]) {
-  nodes.sort((left, right) => left.name.localeCompare(right.name) || left.id.localeCompare(right.id));
+  nodes.sort((left, right) => left.sortOrder - right.sortOrder || left.id.localeCompare(right.id));
   nodes.forEach(node => node.children && sortTree(node.children));
 }
 
@@ -333,6 +353,7 @@ async function submitEditor() {
       name: formModel.name,
       enable: formModel.enable,
       parentId: formModel.parentId,
+      sortOrder: formModel.sortOrder,
     };
     if (formModel.id && formModel.version) {
       await updateOrganization({ ...input, id: formModel.id, version: formModel.version });

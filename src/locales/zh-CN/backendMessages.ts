@@ -47,6 +47,7 @@ export default {
     rootCannotBeChild: "根机构不能改为子机构",
     childCannotBeRoot: "子机构不能改为根机构",
     crossRootMoveNotAllowed: "机构不能跨根机构移动",
+    sortMustNotBeNegative: "机构排序号不能小于零",
     hasChildren: "机构存在下级机构，不能删除",
     hasMembers: "机构存在成员，不能删除",
     dataChanged: "机构数据已变更，请刷新后重试",

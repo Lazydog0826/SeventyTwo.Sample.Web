@@ -47,6 +47,7 @@ export default {
     rootCannotBeChild: "A root organization cannot become a child organization",
     childCannotBeRoot: "A child organization cannot become a root organization",
     crossRootMoveNotAllowed: "An organization cannot move across root organizations",
+    sortMustNotBeNegative: "Organization sort order cannot be negative",
     hasChildren: "The organization has child organizations and cannot be deleted",
     hasMembers: "The organization has members and cannot be deleted",
     dataChanged: "Organization data changed; refresh and try again",
