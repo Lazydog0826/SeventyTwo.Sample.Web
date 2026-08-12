@@ -7,8 +7,10 @@ const BRAND_TITLE = "SeventyTwo";
 export function documentTitleGuard(router: Router) {
   const updateDocumentTitle = (route: RouteLocationNormalizedLoaded) => {
     const titleKey = typeof route.meta.titleKey === "string" ? route.meta.titleKey : "";
-    const resolvedTitleKey = [titleKey, `menu.${titleKey}`].find(key => titleKey && i18n.global.te(key));
-    const pageTitle = resolvedTitleKey ? i18n.global.t(resolvedTitleKey) : "";
+    const pageTitle =
+      titleKey && i18n.global.te(titleKey) && typeof i18n.global.tm(titleKey) === "string"
+        ? i18n.global.t(titleKey)
+        : "";
     document.title = pageTitle ? `${pageTitle} - ${BRAND_TITLE}` : BRAND_TITLE;
   };
 

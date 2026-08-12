@@ -82,7 +82,7 @@ function registerRoute(menus: Array<PermissionMenuOutput>, router: Router) {
         name: x.routeName,
         meta: {
           ...x.metaData,
-          titleKey: x.code,
+          titleKey: `menu.${x.code}`,
         },
         component: viewModules[x.vueComponentPath],
       };
