@@ -21,11 +21,13 @@ export const usePermissionsStore = defineStore("permissions", () => {
     if (!loadingPromise) {
       loadingPromise = (async () => {
         const result = await getPermissionsApi();
-        if (result) {
-          permissions.menus = result.menus;
-          permissions.buttonCodes = result.buttonCodes;
-          isLoad.value = true;
+        if (!result) {
+          throw new Error("获取权限失败：接口未返回有效数据");
         }
+
+        permissions.menus = result.menus;
+        permissions.buttonCodes = result.buttonCodes;
+        isLoad.value = true;
         return permissions;
       })();
     }
