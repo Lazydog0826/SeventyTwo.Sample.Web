@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" fill="none" role="img"
+     aria-labelledby="icon-title icon-desc">
+    <title id="icon-title">SeventyTwo</title>
+    <desc id="icon-desc">由两条相连折带组成的 SeventyTwo 品牌图标</desc>
+
+    <g aria-hidden="true">
+        <path d="M14 31L39 16L76 37L61 46L39 33L29 39L51 52L37 61L14 48V31Z" fill="#165DFF"/>
+        <path d="M76 48V65L51 80L14 59L29 50L51 63L61 57L39 44L53 35L76 48Z" fill="#14C9C9"/>
+    </g>
+</svg>
