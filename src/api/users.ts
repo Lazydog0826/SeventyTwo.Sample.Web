@@ -1,6 +1,7 @@
 // noinspection JSUnusedGlobalSymbols
 
 import http from "@/utils/request";
+import type { PermissionListOutput } from "@/api/permissions.ts";
 
 /** 用户登录请求。 */
 export interface LoginRequest {
@@ -41,6 +42,10 @@ export interface UpdateUserInput {
   orgId: string;
   version: string;
 }
+export interface UserAuthorizationOutput {
+  permissions: PermissionListOutput[];
+  permissionIds: string[];
+}
 
 /** 获取当前登录用户信息。 */
 export function getInfo() {
@@ -76,4 +81,10 @@ export function setUserEnable(id: string, enable: boolean, version: string) {
 }
 export function deleteUser(id: string, version: string) {
   return http.post<void>("/api/users/delete", { json: { id, version } });
+}
+export function getUserAuthorization(userId: string) {
+  return http.get<UserAuthorizationOutput>("/api/users/authorization", { searchParams: { userId } });
+}
+export function authorizeUser(userId: string, permissionIds: string[]) {
+  return http.post<void>("/api/users/authorize", { json: { userId, permissionIds } });
 }

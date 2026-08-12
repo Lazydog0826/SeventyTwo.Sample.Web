@@ -3,7 +3,7 @@ export default {
   filters: { keyword: "搜索用户名、姓名、手机或邮箱", status: "用户状态" },
   columns: { username: "用户名", displayName: "姓名", phone: "手机", email: "邮箱", status: "状态", actions: "操作" },
   statuses: { enabled: "已启用", disabled: "已禁用" },
-  actions: { create: "新增用户", edit: "编辑", delete: "删除", cancel: "取消", save: "保存" },
+  actions: { create: "新增用户", edit: "编辑", authorize: "授权", delete: "删除", cancel: "取消", save: "保存" },
   editor: { createTitle: "新增用户", updateTitle: "编辑用户" },
   form: {
     username: "用户名",
@@ -31,12 +31,14 @@ export default {
     organization: "请选择所属机构",
   },
   delete: { title: "删除用户", content: "确定永久删除用户“{name}”吗？此操作无法撤销。" },
+  authorization: { title: "为“{name}”授权", empty: "暂无权限数据" },
   messages: {
     created: "用户创建成功",
     updated: "用户修改成功",
     deleted: "用户删除成功",
     enabled: "用户已启用",
     disabled: "用户已禁用",
+    authorized: "用户授权保存成功",
   },
   empty: { data: "暂无用户", filtered: "没有符合筛选条件的用户" },
 };

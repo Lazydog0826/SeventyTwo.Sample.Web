@@ -77,6 +77,38 @@
       >
     </n-modal>
 
+    <n-modal
+      v-model:show="showAuthorization"
+      preset="card"
+      :title="t('users.authorization.title', { name: authorizingUser?.displayName ?? '' })"
+      style="width: 640px; max-width: calc(100vw - 32px)"
+    >
+      <n-spin :show="authorizationLoading">
+        <n-tree
+          v-if="authorizationOptions.length"
+          v-model:checked-keys="authorizationCheckedKeys"
+          :data="authorizationOptions"
+          checkable
+          block-line
+          default-expand-all
+        />
+        <n-empty v-else :description="t('users.authorization.empty')" />
+      </n-spin>
+      <template #footer>
+        <n-space justify="end">
+          <n-button @click="showAuthorization = false">{{ t("users.actions.cancel") }}</n-button>
+          <n-button
+            type="primary"
+            :loading="authorizationSaving"
+            :disabled="authorizationLoading"
+            @click="saveAuthorization"
+          >
+            {{ t("users.actions.save") }}
+          </n-button>
+        </n-space>
+      </template>
+    </n-modal>
+
     <n-modal v-model:show="showDeleteConfirm" preset="dialog" type="warning" :title="t('users.delete.title')">
       {{ t("users.delete.content", { name: deletingUser?.displayName ?? "" }) }}
       <template #action
@@ -107,13 +139,26 @@ import {
   NSpace,
   NSwitch,
   NTag,
+  NTree,
   NTreeSelect,
+  NSpin,
   type DataTableColumns,
   type FormInst,
   type FormRules,
   type TreeSelectOption,
+  type TreeOption,
 } from "naive-ui";
-import { createUser, deleteUser, getUserList, setUserEnable, updateUser, type UserListOutput } from "@/api/users.ts";
+import {
+  authorizeUser,
+  createUser,
+  deleteUser,
+  getUserAuthorization,
+  getUserList,
+  setUserEnable,
+  updateUser,
+  type UserListOutput,
+} from "@/api/users.ts";
+import type { PermissionListOutput } from "@/api/permissions.ts";
 import { getUserOrganizationOptions, type OrganizationListOutput } from "@/api/organizations.ts";
 import { PermissionCode } from "@/constants/permissions.ts";
 import { SystemUsername } from "@/constants/users.ts";
@@ -145,13 +190,21 @@ const deleting = ref(false);
 const enablingIds = ref(new Set<string>());
 const showEditor = ref(false);
 const showDeleteConfirm = ref(false);
+const showAuthorization = ref(false);
+const authorizationLoading = ref(false);
+const authorizationSaving = ref(false);
+const authorizingUser = ref<UserListOutput | null>(null);
+const authorizationOptions = ref<TreeOption[]>([]);
+const authorizationCheckedKeys = ref<Array<string | number>>([]);
+const authorizationPermissions = ref<PermissionListOutput[]>([]);
 const deletingUser = ref<UserListOutput | null>(null);
 const formRef = ref<FormInst | null>(null);
 const formModel = reactive<UserFormModel>(emptyForm());
 const canCreate = computed(() => permissionsStore.hasPermission(PermissionCode.UsersCreate));
 const canUpdate = computed(() => permissionsStore.hasPermission(PermissionCode.UsersUpdate));
 const canDelete = computed(() => permissionsStore.hasPermission(PermissionCode.UsersDelete));
-const hasActions = computed(() => canUpdate.value || canDelete.value);
+const canAuthorize = computed(() => permissionsStore.hasPermission(PermissionCode.UsersAuthorize));
+const hasActions = computed(() => canUpdate.value || canAuthorize.value || canDelete.value);
 const hasFilter = computed(() => Boolean(keyword.value.trim()) || statusFilter.value !== null);
 const filteredUsers = computed(() => {
   const value = keyword.value.trim().toLocaleLowerCase();
@@ -252,7 +305,7 @@ const columns = computed<DataTableColumns<UserListOutput>>(() => {
     result.push({
       title: t("users.columns.actions"),
       key: "actions",
-      width: 160,
+      width: 230,
       fixed: "right",
       render: row =>
         h(NSpace, null, {
@@ -279,6 +332,19 @@ const columns = computed<DataTableColumns<UserListOutput>>(() => {
                     onClick: () => openDelete(row),
                   },
                   { default: () => t("users.actions.delete") }
+                )
+              : null,
+            canAuthorize.value
+              ? h(
+                  NButton,
+                  {
+                    text: true,
+                    type: "primary",
+                    loading: authorizationLoading.value && authorizingUser.value?.id === row.id,
+                    disabled: authorizationLoading.value,
+                    onClick: () => openAuthorization(row),
+                  },
+                  { default: () => t("users.actions.authorize") }
                 )
               : null,
           ],
@@ -313,6 +379,72 @@ function openEdit(user: UserListOutput) {
 function openDelete(user: UserListOutput) {
   deletingUser.value = user;
   showDeleteConfirm.value = true;
+}
+async function openAuthorization(user: UserListOutput) {
+  authorizingUser.value = user;
+  authorizationOptions.value = [];
+  authorizationCheckedKeys.value = [];
+  showAuthorization.value = true;
+  authorizationLoading.value = true;
+  try {
+    const data = await getUserAuthorization(user.id);
+    if (!data) {
+      showAuthorization.value = false;
+      authorizingUser.value = null;
+      return;
+    }
+    authorizationPermissions.value = data.permissions;
+    authorizationOptions.value = buildPermissionOptions(data.permissions);
+    authorizationCheckedKeys.value = data.permissionIds;
+  } catch {
+    showAuthorization.value = false;
+    authorizingUser.value = null;
+  } finally {
+    authorizationLoading.value = false;
+  }
+}
+function buildPermissionOptions(items: PermissionListOutput[]): TreeOption[] {
+  const byParent = new Map<string, PermissionListOutput[]>();
+  items.forEach(item => {
+    if (!item.parentId) return;
+    const children = byParent.get(item.parentId) ?? [];
+    children.push(item);
+    byParent.set(item.parentId, children);
+  });
+  const ids = new Set(items.map(item => item.id));
+  const roots = items.filter(item => !item.parentId || !ids.has(item.parentId));
+  const build = (nodes: PermissionListOutput[], ancestorDisabled = false): TreeOption[] =>
+    [...nodes]
+      .sort((a, b) => a.sortOrder - b.sortOrder || a.id.localeCompare(b.id))
+      .map(item => {
+        const disabled = ancestorDisabled || !item.enable;
+        const children = build(byParent.get(item.id) ?? [], disabled);
+        return {
+          key: item.id,
+          label: `${item.title} (${item.code})`,
+          disabled,
+          children: children.length ? children : undefined,
+        };
+      });
+  return build(roots);
+}
+async function saveAuthorization() {
+  if (!authorizingUser.value) return;
+  authorizationSaving.value = true;
+  try {
+    const selected = new Set(authorizationCheckedKeys.value.map(String));
+    const byId = new Map(authorizationPermissions.value.map(permission => [permission.id, permission]));
+    [...selected].forEach(id => {
+      for (let parentId = byId.get(id)?.parentId; parentId; parentId = byId.get(parentId)?.parentId ?? null)
+        selected.add(parentId);
+    });
+    await authorizeUser(authorizingUser.value.id, [...selected]);
+    window.$message.success(t("users.messages.authorized"));
+    showAuthorization.value = false;
+    authorizingUser.value = null;
+  } finally {
+    authorizationSaving.value = false;
+  }
 }
 async function submitEditor() {
   await formRef.value?.validate();

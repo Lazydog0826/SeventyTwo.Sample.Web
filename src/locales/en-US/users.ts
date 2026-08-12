@@ -11,7 +11,14 @@ export default {
     actions: "Actions",
   },
   statuses: { enabled: "Enabled", disabled: "Disabled" },
-  actions: { create: "New user", edit: "Edit", delete: "Delete", cancel: "Cancel", save: "Save" },
+  actions: {
+    create: "New user",
+    edit: "Edit",
+    authorize: "Authorize",
+    delete: "Delete",
+    cancel: "Cancel",
+    save: "Save",
+  },
   editor: { createTitle: "New user", updateTitle: "Edit user" },
   form: {
     username: "Username",
@@ -39,12 +46,14 @@ export default {
     organization: "Select an organization",
   },
   delete: { title: "Delete user", content: "Permanently delete “{name}”? This action cannot be undone." },
+  authorization: { title: "Authorize “{name}”", empty: "No permission data" },
   messages: {
     created: "User created",
     updated: "User updated",
     deleted: "User deleted",
     enabled: "User enabled",
     disabled: "User disabled",
+    authorized: "User authorization saved",
   },
   empty: { data: "No users", filtered: "No users match the filters" },
 };
