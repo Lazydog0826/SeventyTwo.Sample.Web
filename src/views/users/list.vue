@@ -86,11 +86,13 @@
       <n-spin :show="authorizationLoading">
         <n-tree
           v-if="authorizationOptions.length"
-          v-model:checked-keys="authorizationCheckedKeys"
+          :checked-keys="authorizationCheckedKeys"
+          :indeterminate-keys="authorizationIndeterminateKeys"
           :data="authorizationOptions"
           checkable
           block-line
           default-expand-all
+          @update:checked-keys="handleAuthorizationCheck"
         />
         <n-empty v-else :description="t('users.authorization.empty')" />
       </n-spin>
@@ -196,6 +198,8 @@ const authorizationSaving = ref(false);
 const authorizingUser = ref<UserListOutput | null>(null);
 const authorizationOptions = ref<TreeOption[]>([]);
 const authorizationCheckedKeys = ref<Array<string | number>>([]);
+const authorizationIndeterminateKeys = ref<Array<string | number>>([]);
+const authorizationSelectedIds = ref(new Set<string>());
 const authorizationPermissions = ref<PermissionListOutput[]>([]);
 const deletingUser = ref<UserListOutput | null>(null);
 const formRef = ref<FormInst | null>(null);
@@ -384,6 +388,8 @@ async function openAuthorization(user: UserListOutput) {
   authorizingUser.value = user;
   authorizationOptions.value = [];
   authorizationCheckedKeys.value = [];
+  authorizationIndeterminateKeys.value = [];
+  authorizationSelectedIds.value = new Set();
   showAuthorization.value = true;
   authorizationLoading.value = true;
   try {
@@ -395,7 +401,8 @@ async function openAuthorization(user: UserListOutput) {
     }
     authorizationPermissions.value = data.permissions;
     authorizationOptions.value = buildPermissionOptions(data.permissions);
-    authorizationCheckedKeys.value = data.permissionIds;
+    authorizationSelectedIds.value = new Set(data.permissionIds);
+    syncAuthorizationTreeState();
   } catch {
     showAuthorization.value = false;
     authorizingUser.value = null;
@@ -428,11 +435,72 @@ function buildPermissionOptions(items: PermissionListOutput[]): TreeOption[] {
       });
   return build(roots);
 }
+function handleAuthorizationCheck(
+  _keys: Array<string | number>,
+  _options: Array<TreeOption | null>,
+  meta: { node: TreeOption | null; action: "check" | "uncheck" }
+) {
+  if (meta.node?.key === undefined) return;
+  const selected = new Set(authorizationSelectedIds.value);
+  const byId = new Map(authorizationPermissions.value.map(permission => [permission.id, permission]));
+  const updateSubtree = (option: TreeOption, checked: boolean) => {
+    if (option.disabled || option.key === undefined) return;
+    const id = String(option.key);
+    checked ? selected.add(id) : selected.delete(id);
+    option.children?.forEach(child => updateSubtree(child, checked));
+  };
+  const nodeId = String(meta.node.key);
+  updateSubtree(meta.node, meta.action === "check");
+  if (meta.action === "uncheck") {
+    for (let parentId = byId.get(nodeId)?.parentId; parentId; parentId = byId.get(parentId)?.parentId ?? null) {
+      selected.delete(parentId);
+    }
+  }
+  [...selected].forEach(id => {
+    for (let parentId = byId.get(id)?.parentId; parentId; parentId = byId.get(parentId)?.parentId ?? null)
+      selected.add(parentId);
+  });
+  authorizationSelectedIds.value = selected;
+  syncAuthorizationTreeState();
+}
+function syncAuthorizationTreeState() {
+  const checkedKeys: Array<string | number> = [];
+  const indeterminateKeys: Array<string | number> = [];
+  const visit = (option: TreeOption): { editable: number; selected: number } => {
+    let editableDescendants = 0;
+    let selectedDescendants = 0;
+    option.children?.forEach(child => {
+      const status = visit(child);
+      editableDescendants += status.editable;
+      selectedDescendants += status.selected;
+    });
+    if (option.key === undefined) return { editable: editableDescendants, selected: selectedDescendants };
+    const selected = authorizationSelectedIds.value.has(String(option.key));
+    if (option.disabled) {
+      if (selected) checkedKeys.push(option.key);
+      return { editable: 0, selected: 0 };
+    }
+    if (
+      editableDescendants > 0 &&
+      (selected || selectedDescendants > 0) &&
+      (!selected || selectedDescendants < editableDescendants)
+    )
+      indeterminateKeys.push(option.key);
+    else if (selected) checkedKeys.push(option.key);
+    return {
+      editable: editableDescendants + 1,
+      selected: selectedDescendants + (selected ? 1 : 0),
+    };
+  };
+  authorizationOptions.value.forEach(visit);
+  authorizationCheckedKeys.value = checkedKeys;
+  authorizationIndeterminateKeys.value = indeterminateKeys;
+}
 async function saveAuthorization() {
   if (!authorizingUser.value) return;
   authorizationSaving.value = true;
   try {
-    const selected = new Set(authorizationCheckedKeys.value.map(String));
+    const selected = new Set(authorizationSelectedIds.value);
     const byId = new Map(authorizationPermissions.value.map(permission => [permission.id, permission]));
     [...selected].forEach(id => {
       for (let parentId = byId.get(id)?.parentId; parentId; parentId = byId.get(parentId)?.parentId ?? null)
