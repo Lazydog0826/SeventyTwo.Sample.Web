@@ -393,11 +393,13 @@ function buildParentOptions(nodes: PermissionTreeNode[]): TreeSelectOption[] {
   return nodes.flatMap(node => {
     if (excludedParentIds.value.has(node.id)) return [];
     const children = buildParentOptions(node.children ?? []);
-    return [{
-      label: `${node.title} (${node.code})`,
-      key: node.id,
-      children: children.length ? children : undefined,
-    }];
+    return [
+      {
+        label: `${node.title} (${node.code})`,
+        key: node.id,
+        children: children.length ? children : undefined,
+      },
+    ];
   });
 }
 

@@ -197,9 +197,7 @@ const excludedParentIds = computed(() =>
 );
 const parentOptions = computed<TreeSelectOption[]>(() => {
   const editingRootId = editingOrganization.value ? getRootId(editingOrganization.value.id) : null;
-  return buildParentOptions(
-    organizationTree.value.filter(node => editingRootId === null || node.id === editingRootId)
-  );
+  return buildParentOptions(organizationTree.value.filter(node => editingRootId === null || node.id === editingRootId));
 });
 const formRules = computed<FormRules>(() => ({
   code: { required: true, whitespace: true, message: t("organizations.validation.code"), trigger: ["input", "blur"] },
@@ -293,11 +291,13 @@ function buildParentOptions(nodes: OrganizationTreeNode[]): TreeSelectOption[] {
   return nodes.flatMap(node => {
     if (excludedParentIds.value.has(node.id)) return [];
     const children = buildParentOptions(node.children ?? []);
-    return [{
-      label: `${node.name} (${node.code})`,
-      key: node.id,
-      children: children.length ? children : undefined,
-    }];
+    return [
+      {
+        label: `${node.name} (${node.code})`,
+        key: node.id,
+        children: children.length ? children : undefined,
+      },
+    ];
   });
 }
 
