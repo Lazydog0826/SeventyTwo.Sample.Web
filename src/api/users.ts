@@ -21,6 +21,7 @@ export interface UserOutput {
 
 export interface UserListOutput extends UserOutput {
   enable: boolean;
+  orgId: string;
   version: string;
 }
 export interface CreateUserInput {
@@ -30,12 +31,14 @@ export interface CreateUserInput {
   phone: string;
   email: string;
   enable: boolean;
+  orgId: string;
 }
 export interface UpdateUserInput {
   id: string;
   displayName: string;
   phone: string;
   email: string;
+  orgId: string;
   version: string;
 }
 

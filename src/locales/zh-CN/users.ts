@@ -5,13 +5,22 @@ export default {
   statuses: { enabled: "已启用", disabled: "已禁用" },
   actions: { create: "新增用户", edit: "编辑", delete: "删除", cancel: "取消", save: "保存" },
   editor: { createTitle: "新增用户", updateTitle: "编辑用户" },
-  form: { username: "用户名", password: "密码", displayName: "姓名", phone: "手机", email: "邮箱", enable: "启用" },
+  form: {
+    username: "用户名",
+    password: "密码",
+    displayName: "姓名",
+    phone: "手机",
+    email: "邮箱",
+    organization: "所属机构",
+    enable: "启用",
+  },
   placeholders: {
     username: "请输入 3 至 50 位用户名",
     password: "请输入 6 至 100 位密码",
     displayName: "请输入姓名",
     phone: "请输入手机号码",
     email: "请输入电子邮箱",
+    organization: "请选择所属机构",
   },
   validation: {
     username: "请输入 3 至 50 位用户名",
@@ -19,6 +28,7 @@ export default {
     displayName: "请输入姓名",
     phone: "请输入手机号码",
     email: "请输入电子邮箱",
+    organization: "请选择所属机构",
   },
   delete: { title: "删除用户", content: "确定永久删除用户“{name}”吗？此操作无法撤销。" },
   messages: {

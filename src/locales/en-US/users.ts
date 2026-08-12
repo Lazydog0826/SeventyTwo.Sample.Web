@@ -6,6 +6,7 @@ export default {
     displayName: "Name",
     phone: "Phone",
     email: "Email",
+    organization: "Organization",
     status: "Status",
     actions: "Actions",
   },
@@ -18,6 +19,7 @@ export default {
     displayName: "Name",
     phone: "Phone",
     email: "Email",
+    organization: "Organization",
     enable: "Enabled",
   },
   placeholders: {
@@ -26,6 +28,7 @@ export default {
     displayName: "Enter name",
     phone: "Enter phone",
     email: "Enter email",
+    organization: "Select an organization",
   },
   validation: {
     username: "Enter a 3-50 character username",
@@ -33,6 +36,7 @@ export default {
     displayName: "Enter name",
     phone: "Enter phone",
     email: "Enter email",
+    organization: "Select an organization",
   },
   delete: { title: "Delete user", content: "Permanently delete “{name}”? This action cannot be undone." },
   messages: {

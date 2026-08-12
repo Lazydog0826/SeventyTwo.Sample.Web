@@ -55,6 +55,14 @@
         <n-form-item :label="t('users.form.email')" path="email"
           ><n-input v-model:value="formModel.email" :placeholder="t('users.placeholders.email')"
         /></n-form-item>
+        <n-form-item :label="t('users.form.organization')" path="orgId"
+          ><n-select
+            v-model:value="formModel.orgId"
+            :options="organizationOptions"
+            :loading="organizationsLoading"
+            :placeholder="t('users.placeholders.organization')"
+            filterable
+        /></n-form-item>
         <n-form-item v-if="!formModel.id" :label="t('users.form.enable')"
           ><n-switch v-model:value="formModel.enable"
         /></n-form-item>
@@ -104,6 +112,7 @@ import {
   type FormRules,
 } from "naive-ui";
 import { createUser, deleteUser, getUserList, setUserEnable, updateUser, type UserListOutput } from "@/api/users.ts";
+import { getUserOrganizationOptions, type OrganizationListOutput } from "@/api/organizations.ts";
 import { PermissionCode } from "@/constants/permissions.ts";
 import { SystemUsername } from "@/constants/users.ts";
 import { usePermissionsStore } from "@/stores/permissions.ts";
@@ -118,14 +127,17 @@ interface UserFormModel {
   displayName: string;
   phone: string;
   email: string;
+  orgId: string | null;
   enable: boolean;
 }
 const { t } = useI18n();
 const permissionsStore = usePermissionsStore();
 const users = ref<UserListOutput[]>([]);
+const organizations = ref<OrganizationListOutput[]>([]);
 const keyword = ref("");
 const statusFilter = ref<StatusFilter | null>(null);
 const loading = ref(false);
+const organizationsLoading = ref(false);
 const submitting = ref(false);
 const deleting = ref(false);
 const enablingIds = ref(new Set<string>());
@@ -156,6 +168,11 @@ const statusOptions = computed(() => [
   { label: t("users.statuses.enabled"), value: "enabled" },
   { label: t("users.statuses.disabled"), value: "disabled" },
 ]);
+const organizationOptions = computed(() =>
+  organizations.value
+    .filter(item => item.enable)
+    .map(item => ({ label: `${item.name} (${item.code})`, value: item.id }))
+);
 const formRules = computed<FormRules>(() => ({
   username: {
     required: true,
@@ -176,6 +193,7 @@ const formRules = computed<FormRules>(() => ({
   displayName: requiredRule("displayName"),
   phone: requiredRule("phone"),
   email: requiredRule("email"),
+  orgId: { required: true, message: t("users.validation.organization"), trigger: ["change", "blur"] },
 }));
 const columns = computed<DataTableColumns<UserListOutput>>(() => {
   const result: DataTableColumns<UserListOutput> = [
@@ -249,7 +267,17 @@ function requiredRule(field: "displayName" | "phone" | "email") {
   return { required: true, whitespace: true, message: t(`users.validation.${field}`), trigger: ["input", "blur"] };
 }
 function emptyForm(): UserFormModel {
-  return { id: null, version: null, username: "", password: "", displayName: "", phone: "", email: "", enable: true };
+  return {
+    id: null,
+    version: null,
+    username: "",
+    password: "",
+    displayName: "",
+    phone: "",
+    email: "",
+    orgId: null,
+    enable: true,
+  };
 }
 function openCreate() {
   Object.assign(formModel, emptyForm());
@@ -267,6 +295,7 @@ async function submitEditor() {
   await formRef.value?.validate();
   submitting.value = true;
   try {
+    if (!formModel.orgId) return;
     if (formModel.id && formModel.version) {
       await updateUser({
         id: formModel.id,
@@ -274,6 +303,7 @@ async function submitEditor() {
         displayName: formModel.displayName,
         phone: formModel.phone,
         email: formModel.email,
+        orgId: formModel.orgId,
       });
       window.$message.success(t("users.messages.updated"));
     } else {
@@ -284,6 +314,7 @@ async function submitEditor() {
         phone: formModel.phone,
         email: formModel.email,
         enable: formModel.enable,
+        orgId: formModel.orgId,
       });
       window.$message.success(t("users.messages.created"));
     }
@@ -326,7 +357,15 @@ async function loadUsers() {
     loading.value = false;
   }
 }
-onMounted(() => Promise.all([loadUsers(), permissionsStore.getPermissions()]));
+async function loadOrganizations() {
+  organizationsLoading.value = true;
+  try {
+    organizations.value = (await getUserOrganizationOptions()) ?? [];
+  } finally {
+    organizationsLoading.value = false;
+  }
+}
+onMounted(() => Promise.all([loadUsers(), loadOrganizations(), permissionsStore.getPermissions()]));
 </script>
 
 <style scoped lang="scss">

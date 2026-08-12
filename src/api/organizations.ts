@@ -27,6 +27,10 @@ export function getOrganizationList() {
   return http.get<OrganizationListOutput[]>("/api/organizations/list");
 }
 
+export function getUserOrganizationOptions() {
+  return http.get<OrganizationListOutput[]>("/api/users/organization-options");
+}
+
 export function createOrganization(input: OrganizationMutationInput) {
   return http.post<OrganizationListOutput>("/api/organizations/create", { json: input });
 }
