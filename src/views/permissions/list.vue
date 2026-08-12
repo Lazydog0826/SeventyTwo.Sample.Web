@@ -154,6 +154,7 @@ import {
 import {
   createPermission,
   deletePermission,
+  getPermissionDetail,
   getPermissionList,
   updatePermission,
   type PermissionListOutput,
@@ -184,6 +185,8 @@ const statusFilter = ref<StatusFilter | null>(null);
 const loading = ref(false);
 const submitting = ref(false);
 const deleting = ref(false);
+const editingLoadingId = ref<string | null>(null);
+let editRequestSequence = 0;
 const permissions = ref<PermissionListOutput[]>([]);
 const expandedRowKeys = ref<DataTableRowKey[]>([]);
 const canCreate = computed(() => permissionsStore.hasPermission(PermissionCode.PermissionsCreate));
@@ -320,7 +323,13 @@ const columns = computed<DataTableColumns<PermissionTreeNode>>(() => {
             canUpdate.value
               ? h(
                   NButton,
-                  { text: true, type: "primary", onClick: () => openEdit(row) },
+                  {
+                    text: true,
+                    type: "primary",
+                    loading: editingLoadingId.value === row.id,
+                    disabled: editingLoadingId.value === row.id,
+                    onClick: () => openEdit(row),
+                  },
                   { default: () => t("permissions.actions.edit") }
                 )
               : null,
@@ -429,16 +438,30 @@ function collectExpandableKeys(nodes: PermissionTreeNode[]): DataTableRowKey[] {
 }
 
 function openCreate() {
+  editRequestSequence++;
+  editingLoadingId.value = null;
   Object.assign(formModel, createEmptyForm());
   showEditor.value = true;
 }
 
-function openEdit(permission: PermissionListOutput) {
-  Object.assign(formModel, {
-    ...permission,
-    isShow: permission.metaData.isShow,
-  });
-  showEditor.value = true;
+async function openEdit(permission: PermissionListOutput) {
+  if (editingLoadingId.value === permission.id) return;
+  const requestSequence = ++editRequestSequence;
+  showEditor.value = false;
+  editingLoadingId.value = permission.id;
+  try {
+    const detail = await getPermissionDetail(permission.id);
+    if (!detail || requestSequence !== editRequestSequence) return;
+    Object.assign(formModel, {
+      ...detail,
+      isShow: detail.metaData.isShow,
+    });
+    showEditor.value = true;
+  } catch {
+    // 错误由统一请求处理展示，详情失败时保持编辑弹窗关闭。
+  } finally {
+    if (requestSequence === editRequestSequence) editingLoadingId.value = null;
+  }
 }
 
 function openDelete(permission: PermissionListOutput) {

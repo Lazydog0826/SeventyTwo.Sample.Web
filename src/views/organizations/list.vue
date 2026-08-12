@@ -125,6 +125,7 @@ import {
 import {
   createOrganization,
   deleteOrganization,
+  getOrganizationDetail,
   getOrganizationList,
   updateOrganization,
   type OrganizationListOutput,
@@ -153,6 +154,8 @@ const statusFilter = ref<StatusFilter | null>(null);
 const loading = ref(false);
 const submitting = ref(false);
 const deleting = ref(false);
+const editingLoadingId = ref<string | null>(null);
+let editRequestSequence = 0;
 const showEditor = ref(false);
 const showDeleteConfirm = ref(false);
 const deletingOrganization = ref<OrganizationListOutput | null>(null);
@@ -242,7 +245,13 @@ const columns = computed<DataTableColumns<OrganizationTreeNode>>(() => {
             canUpdate.value
               ? h(
                   NButton,
-                  { text: true, type: "primary", onClick: () => openEdit(row) },
+                  {
+                    text: true,
+                    type: "primary",
+                    loading: editingLoadingId.value === row.id,
+                    disabled: editingLoadingId.value === row.id,
+                    onClick: () => openEdit(row),
+                  },
                   { default: () => t("organizations.actions.edit") }
                 )
               : null,
@@ -336,15 +345,29 @@ function collectExpandableKeys(nodes: OrganizationTreeNode[]): DataTableRowKey[]
 }
 
 function openCreate() {
+  editRequestSequence++;
+  editingLoadingId.value = null;
   editingOrganization.value = null;
   Object.assign(formModel, createEmptyForm());
   showEditor.value = true;
 }
 
-function openEdit(organization: OrganizationListOutput) {
-  editingOrganization.value = organization;
-  Object.assign(formModel, organization);
-  showEditor.value = true;
+async function openEdit(organization: OrganizationListOutput) {
+  if (editingLoadingId.value === organization.id) return;
+  const requestSequence = ++editRequestSequence;
+  showEditor.value = false;
+  editingLoadingId.value = organization.id;
+  try {
+    const detail = await getOrganizationDetail(organization.id);
+    if (!detail || requestSequence !== editRequestSequence) return;
+    editingOrganization.value = detail;
+    Object.assign(formModel, detail);
+    showEditor.value = true;
+  } catch {
+    // 错误由统一请求处理展示，详情失败时保持编辑弹窗关闭。
+  } finally {
+    if (requestSequence === editRequestSequence) editingLoadingId.value = null;
+  }
 }
 
 function openDelete(organization: OrganizationListOutput) {

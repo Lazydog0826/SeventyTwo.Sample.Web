@@ -27,6 +27,10 @@ export function getOrganizationList() {
   return http.get<OrganizationListOutput[]>("/api/organizations/list");
 }
 
+export function getOrganizationDetail(id: string) {
+  return http.get<OrganizationListOutput>("/api/organizations/detail", { searchParams: { id } });
+}
+
 export function getUserOrganizationOptions() {
   return http.get<OrganizationListOutput[]>("/api/users/organization-options");
 }

@@ -75,6 +75,10 @@ export function getPermissionList() {
   return http.get<PermissionListOutput[]>("/api/permissions/list");
 }
 
+export function getPermissionDetail(id: string) {
+  return http.get<PermissionListOutput>("/api/permissions/detail", { searchParams: { id } });
+}
+
 export function createPermission(input: PermissionMutationInput) {
   return http.post<PermissionListOutput>("/api/permissions/create", { json: input });
 }

@@ -70,6 +70,9 @@ export function logout() {
 export function getUserList() {
   return http.get<UserListOutput[]>("/api/users/list");
 }
+export function getUserDetail(id: string) {
+  return http.get<UserListOutput>("/api/users/detail", { searchParams: { id } });
+}
 export function createUser(input: CreateUserInput) {
   return http.post<UserListOutput>("/api/users/create", { json: input });
 }

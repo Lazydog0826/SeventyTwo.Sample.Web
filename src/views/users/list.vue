@@ -155,6 +155,7 @@ import {
   createUser,
   deleteUser,
   getUserAuthorization,
+  getUserDetail,
   getUserList,
   setUserEnable,
   updateUser,
@@ -189,6 +190,8 @@ const loading = ref(false);
 const organizationsLoading = ref(false);
 const submitting = ref(false);
 const deleting = ref(false);
+const editingLoadingId = ref<string | null>(null);
+let editRequestSequence = 0;
 const enablingIds = ref(new Set<string>());
 const showEditor = ref(false);
 const showDeleteConfirm = ref(false);
@@ -320,7 +323,8 @@ const columns = computed<DataTableColumns<UserListOutput>>(() => {
                   {
                     text: true,
                     type: "primary",
-                    disabled: row.username === SystemUsername.SuperAdmin,
+                    loading: editingLoadingId.value === row.id,
+                    disabled: row.username === SystemUsername.SuperAdmin || editingLoadingId.value === row.id,
                     onClick: () => openEdit(row),
                   },
                   { default: () => t("users.actions.edit") }
@@ -373,12 +377,26 @@ function emptyForm(): UserFormModel {
   };
 }
 function openCreate() {
+  editRequestSequence++;
+  editingLoadingId.value = null;
   Object.assign(formModel, emptyForm());
   showEditor.value = true;
 }
-function openEdit(user: UserListOutput) {
-  Object.assign(formModel, { ...user, password: "" });
-  showEditor.value = true;
+async function openEdit(user: UserListOutput) {
+  if (editingLoadingId.value === user.id) return;
+  const requestSequence = ++editRequestSequence;
+  showEditor.value = false;
+  editingLoadingId.value = user.id;
+  try {
+    const detail = await getUserDetail(user.id);
+    if (!detail || requestSequence !== editRequestSequence) return;
+    Object.assign(formModel, { ...detail, password: "" });
+    showEditor.value = true;
+  } catch {
+    // 错误由统一请求处理展示，详情失败时保持编辑弹窗关闭。
+  } finally {
+    if (requestSequence === editRequestSequence) editingLoadingId.value = null;
+  }
 }
 function openDelete(user: UserListOutput) {
   deletingUser.value = user;
