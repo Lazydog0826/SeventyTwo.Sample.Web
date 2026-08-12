@@ -1,5 +1,33 @@
 <template>
-  <main class="error-page">
+  <main class="error-page" :lang="locale">
+    <div class="error-toolbar">
+      <n-button
+        quaternary
+        circle
+        :title="t(isDark ? 'theme.switchToLight' : 'theme.switchToDark')"
+        :aria-label="t(isDark ? 'theme.switchToLight' : 'theme.switchToDark')"
+        @click="toggleTheme"
+      >
+        <template #icon>
+          <n-icon>
+            <Sun v-if="isDark"></Sun>
+            <Moon v-else></Moon>
+          </n-icon>
+        </template>
+      </n-button>
+
+      <n-dropdown :options="languageOptions" @select="handleLanguageChange">
+        <n-button quaternary size="small">
+          <template #icon>
+            <n-icon>
+              <Languages></Languages>
+            </n-icon>
+          </template>
+          {{ locale === "zh-CN" ? "简体中文" : "English" }}
+        </n-button>
+      </n-dropdown>
+    </div>
+
     <n-card class="error-card" :bordered="false">
       <div class="error-content">
         <div class="error-icon error-icon--primary" aria-hidden="true">
@@ -21,13 +49,28 @@
 </template>
 
 <script setup lang="ts">
-import { FileQuestion } from "@lucide/vue";
-import { NButton, NCard, NText } from "naive-ui";
+import { FileQuestion, Languages, Moon, Sun } from "@lucide/vue";
+import { NButton, NCard, NDropdown, NIcon, NText } from "naive-ui";
+import { inject, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const router = useRouter();
+const { isDark, toggleTheme } = inject<{
+  isDark: Ref<boolean>;
+  toggleTheme: () => void;
+}>("theme")!;
+
+const languageOptions = [
+  { label: "简体中文", key: "zh-CN" },
+  { label: "English", key: "en-US" },
+];
+
+const handleLanguageChange = (key: string | number) => {
+  locale.value = String(key);
+  localStorage.setItem("locale", locale.value);
+};
 </script>
 
 <style scoped lang="scss">
@@ -44,6 +87,16 @@ const router = useRouter();
   width: min(100%, 480px);
   border-radius: 16px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+.error-toolbar {
+  position: fixed;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  top: 24px;
+  right: 24px;
 }
 
 .error-content {
@@ -106,6 +159,11 @@ h1 {
 
   .error-content {
     padding: 16px 4px;
+  }
+
+  .error-toolbar {
+    top: 16px;
+    right: 16px;
   }
 }
 </style>
