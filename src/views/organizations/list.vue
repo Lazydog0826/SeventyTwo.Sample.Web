@@ -61,7 +61,7 @@
           />
         </n-form-item>
         <n-form-item :label="t('organizations.form.parent')" path="parentId">
-          <n-select
+          <n-tree-select
             v-model:value="formModel.parentId"
             :clearable="editingOrganization === null"
             filterable
@@ -115,11 +115,12 @@ import {
   NSpace,
   NSwitch,
   NTag,
+  NTreeSelect,
   type DataTableColumns,
   type DataTableRowKey,
   type FormInst,
   type FormRules,
-  type SelectOption,
+  type TreeSelectOption,
 } from "naive-ui";
 import {
   createOrganization,
@@ -194,12 +195,11 @@ const statusOptions = computed(() => [
 const excludedParentIds = computed(() =>
   formModel.id ? new Set([formModel.id, ...collectDescendantIds(formModel.id)]) : new Set<string>()
 );
-const parentOptions = computed<SelectOption[]>(() => {
+const parentOptions = computed<TreeSelectOption[]>(() => {
   const editingRootId = editingOrganization.value ? getRootId(editingOrganization.value.id) : null;
-  return flattenTree(organizationTree.value)
-    .filter(item => !excludedParentIds.value.has(item.node.id))
-    .filter(item => editingRootId === null || getRootId(item.node.id) === editingRootId)
-    .map(item => ({ label: `${"　".repeat(item.depth)}${item.node.name} (${item.node.code})`, value: item.node.id }));
+  return buildParentOptions(
+    organizationTree.value.filter(node => editingRootId === null || node.id === editingRootId)
+  );
 });
 const formRules = computed<FormRules>(() => ({
   code: { required: true, whitespace: true, message: t("organizations.validation.code"), trigger: ["input", "blur"] },
@@ -289,8 +289,16 @@ function sortTree(nodes: OrganizationTreeNode[]) {
   nodes.forEach(node => node.children && sortTree(node.children));
 }
 
-function flattenTree(nodes: OrganizationTreeNode[], depth = 0): Array<{ node: OrganizationTreeNode; depth: number }> {
-  return nodes.flatMap(node => [{ node, depth }, ...flattenTree(node.children ?? [], depth + 1)]);
+function buildParentOptions(nodes: OrganizationTreeNode[]): TreeSelectOption[] {
+  return nodes.flatMap(node => {
+    if (excludedParentIds.value.has(node.id)) return [];
+    const children = buildParentOptions(node.children ?? []);
+    return [{
+      label: `${node.name} (${node.code})`,
+      key: node.id,
+      children: children.length ? children : undefined,
+    }];
+  });
 }
 
 function collectDescendantIds(id: string): string[] {

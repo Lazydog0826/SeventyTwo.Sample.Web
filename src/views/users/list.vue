@@ -56,7 +56,7 @@
           ><n-input v-model:value="formModel.email" :placeholder="t('users.placeholders.email')"
         /></n-form-item>
         <n-form-item :label="t('users.form.organization')" path="orgId"
-          ><n-select
+          ><n-tree-select
             v-model:value="formModel.orgId"
             :options="organizationOptions"
             :loading="organizationsLoading"
@@ -107,9 +107,11 @@ import {
   NSpace,
   NSwitch,
   NTag,
+  NTreeSelect,
   type DataTableColumns,
   type FormInst,
   type FormRules,
+  type TreeSelectOption,
 } from "naive-ui";
 import { createUser, deleteUser, getUserList, setUserEnable, updateUser, type UserListOutput } from "@/api/users.ts";
 import { getUserOrganizationOptions, type OrganizationListOutput } from "@/api/organizations.ts";
@@ -168,11 +170,7 @@ const statusOptions = computed(() => [
   { label: t("users.statuses.enabled"), value: "enabled" },
   { label: t("users.statuses.disabled"), value: "disabled" },
 ]);
-const organizationOptions = computed(() =>
-  organizations.value
-    .filter(item => item.enable)
-    .map(item => ({ label: `${item.name} (${item.code})`, value: item.id }))
-);
+const organizationOptions = computed<TreeSelectOption[]>(() => buildOrganizationOptions(organizations.value));
 const formRules = computed<FormRules>(() => ({
   username: {
     required: true,
@@ -195,6 +193,31 @@ const formRules = computed<FormRules>(() => ({
   email: requiredRule("email"),
   orgId: { required: true, message: t("users.validation.organization"), trigger: ["change", "blur"] },
 }));
+
+function buildOrganizationOptions(items: OrganizationListOutput[]): TreeSelectOption[] {
+  const enabledItems = items.filter(item => item.enable);
+  const childrenByParent = new Map<string, OrganizationListOutput[]>();
+  enabledItems.forEach(item => {
+    if (!item.parentId) return;
+    const children = childrenByParent.get(item.parentId) ?? [];
+    children.push(item);
+    childrenByParent.set(item.parentId, children);
+  });
+  const enabledIds = new Set(enabledItems.map(item => item.id));
+  const roots = enabledItems.filter(item => !item.parentId || !enabledIds.has(item.parentId));
+  const buildOptions = (nodes: OrganizationListOutput[]): TreeSelectOption[] =>
+    [...nodes]
+      .sort((left, right) => left.sortOrder - right.sortOrder || left.id.localeCompare(right.id))
+      .map(node => {
+        const children = buildOptions(childrenByParent.get(node.id) ?? []);
+        return {
+          label: `${node.name} (${node.code})`,
+          key: node.id,
+          children: children.length ? children : undefined,
+        };
+      });
+  return buildOptions(roots);
+}
 const columns = computed<DataTableColumns<UserListOutput>>(() => {
   const result: DataTableColumns<UserListOutput> = [
     { title: t("users.columns.username"), key: "username", width: 160, fixed: "left" },

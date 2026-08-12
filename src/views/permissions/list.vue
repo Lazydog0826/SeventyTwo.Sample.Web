@@ -66,7 +66,7 @@
           />
         </n-form-item>
         <n-form-item :label="t('permissions.form.parent')" path="parentId">
-          <n-select
+          <n-tree-select
             v-model:value="formModel.parentId"
             clearable
             filterable
@@ -144,11 +144,12 @@ import {
   NSpace,
   NSwitch,
   NTag,
+  NTreeSelect,
   type DataTableColumns,
   type DataTableRowKey,
   type FormInst,
   type FormRules,
-  type SelectOption,
+  type TreeSelectOption,
 } from "naive-ui";
 import {
   createPermission,
@@ -228,11 +229,7 @@ const excludedParentIds = computed(() => {
   if (!formModel.id) return new Set<string>();
   return new Set([formModel.id, ...collectDescendantIds(formModel.id)]);
 });
-const parentOptions = computed<SelectOption[]>(() =>
-  flattenTree(permissionTree.value)
-    .filter(item => !excludedParentIds.value.has(item.node.id))
-    .map(item => ({ label: `${"　".repeat(item.depth)}${item.node.title} (${item.node.code})`, value: item.node.id }))
-);
+const parentOptions = computed<TreeSelectOption[]>(() => buildParentOptions(permissionTree.value));
 const formRules = computed<FormRules>(() => ({
   code: { required: true, message: t("permissions.validation.code"), trigger: ["input", "blur"] },
   title: { required: true, message: t("permissions.validation.title"), trigger: ["input", "blur"] },
@@ -392,8 +389,16 @@ function sortTree(nodes: PermissionTreeNode[]) {
   nodes.forEach(node => node.children && sortTree(node.children));
 }
 
-function flattenTree(nodes: PermissionTreeNode[], depth = 0): Array<{ node: PermissionTreeNode; depth: number }> {
-  return nodes.flatMap(node => [{ node, depth }, ...flattenTree(node.children ?? [], depth + 1)]);
+function buildParentOptions(nodes: PermissionTreeNode[]): TreeSelectOption[] {
+  return nodes.flatMap(node => {
+    if (excludedParentIds.value.has(node.id)) return [];
+    const children = buildParentOptions(node.children ?? []);
+    return [{
+      label: `${node.title} (${node.code})`,
+      key: node.id,
+      children: children.length ? children : undefined,
+    }];
+  });
 }
 
 function collectDescendantIds(id: string): string[] {
