@@ -17,3 +17,8 @@ export const notFound = {
   goBack: "返回上一页",
   goHome: "返回首页",
 };
+
+export const noPermission = {
+  title: "暂无访问权限",
+  description: "当前账号尚未配置菜单权限，请联系相关人员配置权限。",
+};

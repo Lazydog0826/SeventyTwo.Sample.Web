@@ -2,32 +2,23 @@
   <main class="error-page">
     <n-card class="error-card" :bordered="false">
       <div class="error-content">
-        <div class="error-icon error-icon--primary" aria-hidden="true">
-          <FileQuestion :size="38" :stroke-width="1.8"></FileQuestion>
+        <div class="error-icon error-icon--warning" aria-hidden="true">
+          <ShieldAlert :size="38" :stroke-width="1.8"></ShieldAlert>
         </div>
-        <div class="status-code status-code--primary">404</div>
-        <h1>{{ t("notFound.title") }}</h1>
-        <n-text depth="3">{{ t("notFound.description") }}</n-text>
-
-        <div class="error-actions">
-          <n-button size="large" @click="router.back()">{{ t("notFound.goBack") }}</n-button>
-          <n-button type="primary" size="large" @click="router.push('/home')">
-            {{ t("notFound.goHome") }}
-          </n-button>
-        </div>
+        <div class="status-code status-code--warning">403</div>
+        <h1>{{ t("noPermission.title") }}</h1>
+        <n-text depth="3">{{ t("noPermission.description") }}</n-text>
       </div>
     </n-card>
   </main>
 </template>
 
 <script setup lang="ts">
-import { FileQuestion } from "@lucide/vue";
-import { NButton, NCard, NText } from "naive-ui";
+import { ShieldAlert } from "@lucide/vue";
+import { NCard, NText } from "naive-ui";
 import { useI18n } from "vue-i18n";
-import { useRouter } from "vue-router";
 
 const { t } = useI18n();
-const router = useRouter();
 </script>
 
 <style scoped lang="scss">
@@ -62,9 +53,9 @@ const router = useRouter();
   border-radius: 16px;
 }
 
-.error-icon--primary {
-  color: var(--color-primary-6);
-  background: var(--color-primary-1);
+.error-icon--warning {
+  color: var(--color-warning-6);
+  background: var(--color-warning-1);
 }
 
 .status-code {
@@ -74,8 +65,8 @@ const router = useRouter();
   line-height: 1;
 }
 
-.status-code--primary {
-  color: var(--color-primary-6);
+.status-code--warning {
+  color: var(--color-warning-6);
 }
 
 h1 {
@@ -89,14 +80,6 @@ h1 {
   max-width: 360px;
   font-size: 15px;
   line-height: 1.7;
-}
-
-.error-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 28px;
 }
 
 @media (max-width: 640px) {

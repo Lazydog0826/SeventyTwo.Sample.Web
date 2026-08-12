@@ -1,4 +1,4 @@
-import { common, notFound, theme } from "./common";
+import { common, noPermission, notFound, theme } from "./common";
 import backendMessages from "./backendMessages";
 import dataDictionaries from "./dataDictionaries";
 import home from "./home";
@@ -20,4 +20,5 @@ export default {
   permissions,
   home,
   notFound,
+  noPermission,
 };

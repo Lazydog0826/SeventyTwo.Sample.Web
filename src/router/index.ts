@@ -20,6 +20,12 @@ const defaultRouter: RouteRecordRaw[] = [
     meta: {},
     component: () => import("@/views/404.vue"),
   },
+  {
+    path: "/403",
+    name: "403",
+    meta: {},
+    component: () => import("@/views/403.vue"),
+  },
 ];
 
 const router = createRouter({

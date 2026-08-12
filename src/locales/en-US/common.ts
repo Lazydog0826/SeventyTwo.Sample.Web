@@ -17,3 +17,8 @@ export const notFound = {
   goBack: "Go back",
   goHome: "Back to home",
 };
+
+export const noPermission = {
+  title: "Access unavailable",
+  description: "No menu permissions are configured for this account. Please contact the appropriate administrator.",
+};
