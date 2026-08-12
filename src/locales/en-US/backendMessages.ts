@@ -38,7 +38,6 @@ export default {
     selfCannotBeParent: "An organization cannot be its own parent",
     codeRequired: "Organization code is required",
     nameRequired: "Organization name is required",
-    memberIdRequired: "Organization member ID is required",
     codeExists: "Organization code already exists",
     notFound: "Organization not found",
     parentNotFound: "Parent organization not found",
@@ -52,6 +51,9 @@ export default {
     hasMembers: "The organization has members and cannot be deleted",
     dataChanged: "Organization data changed; refresh and try again",
     modifiedAtRequired: "Organization modification time is required",
+  },
+  order: {
+    randomCountMustBePositive: "Random order generation count must be greater than zero",
   },
   paging: {
     pageNumberMustBePositive: "Page number must be greater than zero",
@@ -70,6 +72,7 @@ export default {
     parentNotFound: "Parent permission not found",
     hierarchyCycle: "The permission hierarchy contains a circular reference",
     descendantCannotBeParent: "A permission cannot use itself or a descendant as its parent",
+    hasChildren: "The permission has child permissions and cannot be deleted",
     selfCannotBeParent: "A permission cannot be its own parent",
     parentIdRequired: "Parent permission ID is required",
     buttonParentRequired: "A parent permission is required for a button",
@@ -83,6 +86,9 @@ export default {
     routePathRequired: "Route path is required for a page",
     routeNameRequired: "Route name is required for a page",
     routeMetadataRequired: "Route metadata is required",
+    authorizationInvalid: "User authorization contains duplicate or nonexistent permissions",
+    authorizationHierarchyInvalid: "User authorization does not include the complete parent permission chain",
+    superAdminAuthorizationForbidden: "The super administrator's authorization cannot be modified",
   },
   product: {
     idRequired: "Product ID is required",

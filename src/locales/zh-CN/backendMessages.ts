@@ -38,7 +38,6 @@ export default {
     selfCannotBeParent: "机构不能以自身作为上级机构",
     codeRequired: "机构编码不能为空",
     nameRequired: "机构名称不能为空",
-    memberIdRequired: "机构成员 ID 不能为空",
     codeExists: "机构编码已存在",
     notFound: "机构不存在",
     parentNotFound: "上级机构不存在",
@@ -52,6 +51,9 @@ export default {
     hasMembers: "机构存在成员，不能删除",
     dataChanged: "机构数据已变更，请刷新后重试",
     modifiedAtRequired: "机构修改时间不能为空",
+  },
+  order: {
+    randomCountMustBePositive: "随机订单生成数量必须大于零",
   },
   paging: {
     pageNumberMustBePositive: "页码必须大于零",
@@ -70,6 +72,7 @@ export default {
     parentNotFound: "上级权限不存在",
     hierarchyCycle: "权限层级存在循环引用",
     descendantCannotBeParent: "权限不能将自身或下级权限设为上级权限",
+    hasChildren: "权限存在下级权限，不能删除",
     selfCannotBeParent: "权限不能以自身作为上级权限",
     parentIdRequired: "上级权限 ID 不能为空",
     buttonParentRequired: "按钮的上级权限不能为空",
@@ -83,6 +86,9 @@ export default {
     routePathRequired: "页面路由路径不能为空",
     routeNameRequired: "页面路由名称不能为空",
     routeMetadataRequired: "路由元数据不能为空",
+    authorizationInvalid: "用户授权包含重复或不存在的权限",
+    authorizationHierarchyInvalid: "用户授权未包含所选权限的完整上级权限链",
+    superAdminAuthorizationForbidden: "禁止修改超级管理员授权",
   },
   product: {
     idRequired: "商品 ID 不能为空",
