@@ -106,6 +106,7 @@ export default {
     phoneRequired: "手机号码不能为空",
     emailRequired: "电子邮箱不能为空",
     usernameExists: "用户名已存在",
+    usernameReserved: "该账号为系统保留账号",
     dataChanged: "用户数据已变更，请刷新后重试",
     modifiedAtRequired: "用户修改时间不能为空",
     hasPermissions: "用户存在权限关联，不能删除",

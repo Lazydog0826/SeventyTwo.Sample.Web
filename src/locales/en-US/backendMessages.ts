@@ -106,6 +106,7 @@ export default {
     phoneRequired: "Phone is required",
     emailRequired: "Email is required",
     usernameExists: "Username already exists",
+    usernameReserved: "This username is reserved by the system",
     dataChanged: "User data has changed; refresh and try again",
     modifiedAtRequired: "User modification time is required",
     hasPermissions: "User has permission associations and cannot be deleted",

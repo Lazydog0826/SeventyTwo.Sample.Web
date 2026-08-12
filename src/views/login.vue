@@ -96,6 +96,7 @@ import { computed, inject, reactive, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import { login } from "@/api/users";
+import { SystemUsername } from "@/constants/users";
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -103,7 +104,7 @@ const router = useRouter();
 const formRef = ref<FormInst | null>(null);
 const loading = ref(false);
 const formValue = reactive({
-  account: "superadmin",
+  account: SystemUsername.SuperAdmin,
   password: "123456",
 });
 const rules = computed<FormRules>(() => ({

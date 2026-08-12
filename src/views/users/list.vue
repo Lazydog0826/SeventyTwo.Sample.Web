@@ -105,6 +105,7 @@ import {
 } from "naive-ui";
 import { createUser, deleteUser, getUserList, setUserEnable, updateUser, type UserListOutput } from "@/api/users.ts";
 import { PermissionCode } from "@/constants/permissions.ts";
+import { SystemUsername } from "@/constants/users.ts";
 import { usePermissionsStore } from "@/stores/permissions.ts";
 import { useI18n } from "vue-i18n";
 
@@ -195,7 +196,7 @@ const columns = computed<DataTableColumns<UserListOutput>>(() => {
         canUpdate.value
           ? h(NSwitch, {
               value: row.enable,
-              disabled: row.username === "superadmin",
+              disabled: row.username === SystemUsername.SuperAdmin,
               loading: enablingIds.value.has(row.id),
               "onUpdate:value": value => changeEnable(row, value),
             })
@@ -221,7 +222,7 @@ const columns = computed<DataTableColumns<UserListOutput>>(() => {
                   {
                     text: true,
                     type: "primary",
-                    disabled: row.username === "superadmin",
+                    disabled: row.username === SystemUsername.SuperAdmin,
                     onClick: () => openEdit(row),
                   },
                   { default: () => t("users.actions.edit") }
@@ -233,7 +234,7 @@ const columns = computed<DataTableColumns<UserListOutput>>(() => {
                   {
                     text: true,
                     type: "error",
-                    disabled: row.username === "superadmin",
+                    disabled: row.username === SystemUsername.SuperAdmin,
                     onClick: () => openDelete(row),
                   },
                   { default: () => t("users.actions.delete") }
