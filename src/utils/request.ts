@@ -63,18 +63,21 @@ function translateBackendMessage(message: string) {
 
 /**
  * 跳转到登录页，并通过 redirect 参数保存当前完整路由。
- * 如果已经位于登录页则不再跳转，避免并发 401 覆盖首次保存的 redirect，
- * 或形成 `/login?redirect=/login...` 形式的嵌套重定向。
+ * 使用整页导航重建 Router、Pinia 等运行时状态，避免重新登录其他账号后
+ * 沿用旧账号的动态路由、权限和用户信息。
+ * 如果已经位于登录页则不再跳转，避免形成嵌套重定向。
  */
-async function redirectToAuthPage() {
+function redirectToAuthPage() {
   const currentRoute = router.resolve(router.options.history.location);
   if (currentRoute.path === AuthPagePath) {
     return;
   }
-  await router.push({
+
+  const authRoute = router.resolve({
     path: AuthPagePath,
     query: { redirect: currentRoute.fullPath },
   });
+  window.location.replace(authRoute.href);
 }
 
 export const kyInstance = ky.create({
