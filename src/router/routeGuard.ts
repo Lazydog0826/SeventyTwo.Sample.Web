@@ -73,19 +73,27 @@ export function routeGuard(router: Router) {
 }
 
 function registerRoute(menus: Array<PermissionMenuOutput>, router: Router) {
-  // 2 为页面类型，注册路由只考虑页面类型
+  // 注册路由只考虑页面类型
   menus
     .filter(x => x.type === "Page")
     .forEach(x => {
-      const newRoute: RouteRecordRaw = {
+      const component = viewModules[x.vueComponentPath];
+      if (!component) {
+        console.error(
+          `动态路由组件不存在，已跳过：routeName=${x.routeName}, routePath=${x.routePath}, vueComponentPath=${x.vueComponentPath}`
+        );
+        return;
+      }
+
+      const route: RouteRecordRaw = {
         path: x.routePath,
         name: x.routeName,
         meta: {
           ...x.metaData,
           titleKey: `menu.${x.code}`,
         },
-        component: viewModules[x.vueComponentPath],
+        component,
       };
-      router.addRoute("layout", newRoute);
+      router.addRoute("layout", route);
     });
 }
