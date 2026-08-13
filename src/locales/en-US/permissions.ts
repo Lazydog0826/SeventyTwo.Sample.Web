@@ -58,7 +58,7 @@ export default {
     type: "Select a permission type",
     parent: "Select a parent permission",
     sortOrder: "Enter an order value",
-    icon: "Enter an icon",
+    icon: "Select an icon",
     componentPath: "Enter a component path",
     routePath: "Enter a route path",
     routeName: "Enter a route name",

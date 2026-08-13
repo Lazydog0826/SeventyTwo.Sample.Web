@@ -58,7 +58,7 @@ export default {
     type: "请选择权限类型",
     parent: "请选择上级权限",
     sortOrder: "请输入排序值",
-    icon: "请输入图标",
+    icon: "请选择图标",
     componentPath: "请输入组件路径",
     routePath: "请输入路由路径",
     routeName: "请输入路由名称",

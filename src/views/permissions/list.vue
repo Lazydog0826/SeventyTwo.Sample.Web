@@ -85,7 +85,14 @@
           <n-switch v-model:value="formModel.enable" />
         </n-form-item>
         <n-form-item :label="t('permissions.form.icon')" path="icon">
-          <n-input v-model:value="formModel.icon" :placeholder="t('permissions.placeholders.icon')" />
+          <n-select
+            v-model:value="formModel.icon"
+            clearable
+            filterable
+            :options="iconOptions"
+            :placeholder="t('permissions.placeholders.icon')"
+            :render-label="renderIconOption"
+          />
         </n-form-item>
         <n-form-item :label="t('permissions.form.componentPath')" path="vueComponentPath">
           <n-input
@@ -128,7 +135,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, h, onMounted, reactive, ref, watch } from "vue";
+import { computed, h, onMounted, reactive, ref, watch, type Component } from "vue";
+import * as LucideIcons from "@lucide/vue";
 import {
   NButton,
   NCard,
@@ -137,6 +145,7 @@ import {
   NEmpty,
   NForm,
   NFormItem,
+  NIcon,
   NInput,
   NInputNumber,
   NModal,
@@ -149,6 +158,7 @@ import {
   type DataTableRowKey,
   type FormInst,
   type FormRules,
+  type SelectOption,
   type TreeSelectOption,
 } from "naive-ui";
 import {
@@ -169,9 +179,10 @@ interface PermissionTreeNode extends PermissionListOutput {
   children?: PermissionTreeNode[];
 }
 
-interface PermissionFormModel extends PermissionMutationInput {
+interface PermissionFormModel extends Omit<PermissionMutationInput, "icon"> {
   id: string | null;
   version: string | null;
+  icon: string | null;
   isShow: boolean;
 }
 
@@ -209,6 +220,19 @@ const statusOptions = computed(() => [
   { label: t("permissions.statuses.disabled"), value: "disabled" },
 ]);
 
+const lucideIconComponents = LucideIcons as unknown as Record<string, Component>;
+// 仅保留可直接作为图标名称保存的导出，排除工具函数及重复的 Lucide/Icon 命名导出。
+const iconOptions: SelectOption[] = Object.keys(lucideIconComponents)
+  .filter(
+    name =>
+      typeof lucideIconComponents[name] === "function" &&
+      /^[A-Z]/.test(name) &&
+      name !== "Icon" &&
+      !name.startsWith("Lucide") &&
+      !name.endsWith("Icon")
+  )
+  .sort((left, right) => left.localeCompare(right))
+  .map(name => ({ label: name, value: name }));
 const typeTagTypes: Record<PermissionType, "default" | "info" | "warning"> = {
   Directory: "warning",
   Page: "info",
@@ -356,7 +380,7 @@ function createEmptyForm(): PermissionFormModel {
     type: "Page",
     enable: true,
     sortOrder: 0,
-    icon: "",
+    icon: null,
     vueComponentPath: "",
     routePath: "",
     routeName: "",
@@ -464,6 +488,15 @@ async function openEdit(permission: PermissionListOutput) {
   }
 }
 
+function renderIconOption(option: SelectOption) {
+  const name = String(option.value ?? "");
+  const icon = lucideIconComponents[name];
+  return h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } }, [
+    icon ? h(NIcon, { size: 18 }, { default: () => h(icon) }) : null,
+    h("span", name),
+  ]);
+}
+
 function openDelete(permission: PermissionListOutput) {
   deletingPermission.value = permission;
   showDeleteConfirm.value = true;
@@ -479,7 +512,7 @@ async function submitEditor() {
       type: formModel.type,
       enable: formModel.enable,
       sortOrder: formModel.sortOrder,
-      icon: formModel.icon,
+      icon: formModel.icon ?? "",
       vueComponentPath: formModel.vueComponentPath,
       routePath: formModel.routePath,
       routeName: formModel.routeName,
