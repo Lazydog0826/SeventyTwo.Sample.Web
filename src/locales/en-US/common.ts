@@ -22,3 +22,8 @@ export const noPermission = {
   title: "Access unavailable",
   description: "No menu permissions are configured for this account. Please contact the appropriate administrator.",
 };
+
+export const defaultPageUnconfigured = {
+  title: "Default page not configured",
+  description: "No default page is configured for this account. Please contact an administrator.",
+};

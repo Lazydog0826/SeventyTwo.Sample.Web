@@ -115,6 +115,7 @@ export default {
     orgIdRequired: "User organization is required",
     organizationNotFound: "User organization not found",
     organizationDisabled: "User organization is disabled",
+    defaultPageInvalid: "The user's default page is invalid",
     usernameExists: "Username already exists",
     usernameReserved: "This username is reserved by the system",
     dataChanged: "User data has changed; refresh and try again",

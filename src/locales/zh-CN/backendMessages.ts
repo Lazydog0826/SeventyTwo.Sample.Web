@@ -115,6 +115,7 @@ export default {
     orgIdRequired: "用户所属机构不能为空",
     organizationNotFound: "用户所属机构不存在",
     organizationDisabled: "用户所属机构已禁用",
+    defaultPageInvalid: "用户默认页面无效",
     usernameExists: "用户名已存在",
     usernameReserved: "该账号为系统保留账号",
     dataChanged: "用户数据已变更，请刷新后重试",

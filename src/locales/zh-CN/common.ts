@@ -22,3 +22,8 @@ export const noPermission = {
   title: "暂无访问权限",
   description: "当前账号尚未配置菜单权限，请联系相关人员配置权限。",
 };
+
+export const defaultPageUnconfigured = {
+  title: "未配置默认页面",
+  description: "当前账号尚未配置默认页面，请联系管理员配置。",
+};
