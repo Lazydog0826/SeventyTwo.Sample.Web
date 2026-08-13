@@ -8,7 +8,6 @@ export default {
   passwordPlaceholder: "Enter your password",
   passwordRequired: "Please enter your password",
   invalidToken: "Login failed: no access token was returned",
-  rememberMe: "Remember me",
   forgotPassword: "Forgot password?",
   noAccount: "Don't have an account?",
   createAccount: "Create account",

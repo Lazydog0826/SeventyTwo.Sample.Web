@@ -3,6 +3,7 @@ export const PermissionCode = {
   UsersUpdate: "usersUpdate",
   UsersDelete: "usersDelete",
   UsersAuthorize: "usersAuthorize",
+  UsersResetPassword: "usersResetPassword",
   PermissionsCreate: "permissionsCreate",
   PermissionsUpdate: "permissionsUpdate",
   PermissionsDelete: "permissionsDelete",

@@ -284,12 +284,12 @@ const formRules = computed<FormRules>(() => ({
 
 const columns = computed<DataTableColumns<PermissionTreeNode>>(() => {
   const result: DataTableColumns<PermissionTreeNode> = [
-    { title: t("permissions.columns.title"), key: "title", width: 190, fixed: "left", ellipsis: { tooltip: true } },
-    { title: t("permissions.columns.code"), key: "code", width: 180, render: row => renderText(row.code, 160) },
+    { title: t("permissions.columns.title"), key: "title", minWidth: 190, fixed: "left", ellipsis: { tooltip: true } },
+    { title: t("permissions.columns.code"), key: "code", minWidth: 180, render: row => renderText(row.code, 160) },
     {
       title: t("permissions.columns.type"),
       key: "type",
-      width: 90,
+      minWidth: 90,
       render: row =>
         h(
           NTag,
@@ -300,7 +300,7 @@ const columns = computed<DataTableColumns<PermissionTreeNode>>(() => {
     {
       title: t("permissions.columns.status"),
       key: "enable",
-      width: 90,
+      minWidth: 90,
       render: row =>
         h(
           NTag,
@@ -308,30 +308,30 @@ const columns = computed<DataTableColumns<PermissionTreeNode>>(() => {
           { default: () => t(row.enable ? "permissions.statuses.enabled" : "permissions.statuses.disabled") }
         ),
     },
-    { title: t("permissions.columns.sortOrder"), key: "sortOrder", width: 80 },
-    { title: t("permissions.columns.icon"), key: "icon", width: 120, render: row => renderText(row.icon, 100) },
+    { title: t("permissions.columns.sortOrder"), key: "sortOrder", minWidth: 80 },
+    { title: t("permissions.columns.icon"), key: "icon", minWidth: 120, render: row => renderText(row.icon, 100) },
     {
       title: t("permissions.columns.routePath"),
       key: "routePath",
-      width: 190,
+      minWidth: 190,
       render: row => renderText(row.routePath, 170),
     },
     {
       title: t("permissions.columns.routeName"),
       key: "routeName",
-      width: 170,
+      minWidth: 170,
       render: row => renderText(row.routeName, 150),
     },
     {
       title: t("permissions.columns.componentPath"),
       key: "vueComponentPath",
-      width: 260,
+      minWidth: 260,
       render: row => renderText(row.vueComponentPath, 240),
     },
     {
       title: t("permissions.columns.metaData"),
       key: "metaData",
-      width: 170,
+      minWidth: 170,
       render: row => t(row.metaData.isShow ? "permissions.metaData.show" : "permissions.metaData.hide"),
     },
   ];
@@ -339,7 +339,7 @@ const columns = computed<DataTableColumns<PermissionTreeNode>>(() => {
     result.push({
       title: t("permissions.columns.actions"),
       key: "actions",
-      width: 180,
+      minWidth: 180,
       fixed: "right",
       render: row =>
         h(NSpace, null, {

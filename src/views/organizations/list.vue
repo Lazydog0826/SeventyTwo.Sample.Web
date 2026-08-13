@@ -28,7 +28,7 @@
         :data="filteredTree"
         :loading="loading"
         :row-key="row => row.id"
-        :scroll-x="hasActions ? 870 : 710"
+        :scroll-x="hasActions ? 830 : 670"
         :single-line="false"
         striped
       >
@@ -218,13 +218,13 @@ const formRules = computed<FormRules>(() => ({
 
 const columns = computed<DataTableColumns<OrganizationTreeNode>>(() => {
   const result: DataTableColumns<OrganizationTreeNode> = [
-    { title: t("organizations.columns.name"), key: "name", width: 260, fixed: "left", ellipsis: { tooltip: true } },
-    { title: t("organizations.columns.code"), key: "code", width: 220, render: row => renderText(row.code, 200) },
-    { title: t("organizations.columns.sortOrder"), key: "sortOrder", width: 90 },
+    { title: t("organizations.columns.name"), key: "name", minWidth: 260, fixed: "left", ellipsis: { tooltip: true } },
+    { title: t("organizations.columns.code"), key: "code", minWidth: 220, render: row => renderText(row.code, 200) },
+    { title: t("organizations.columns.sortOrder"), key: "sortOrder", minWidth: 90 },
     {
       title: t("organizations.columns.status"),
       key: "enable",
-      width: 100,
+      minWidth: 100,
       render: row =>
         h(
           NTag,
@@ -237,7 +237,7 @@ const columns = computed<DataTableColumns<OrganizationTreeNode>>(() => {
     result.push({
       title: t("organizations.columns.actions"),
       key: "actions",
-      width: 160,
+      minWidth: 160,
       fixed: "right",
       render: row =>
         h(NSpace, null, {

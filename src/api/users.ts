@@ -60,6 +60,9 @@ export interface UserAuthorizationOutput {
   permissions: PermissionListOutput[];
   permissionIds: string[];
 }
+export interface ResetPasswordOutput {
+  password: string;
+}
 
 /** 获取当前登录用户信息。 */
 export function getInfo() {
@@ -101,6 +104,9 @@ export function setUserEnable(id: string, enable: boolean, version: string) {
 }
 export function deleteUser(id: string, version: string) {
   return http.post<void>("/api/users/delete", { json: { id, version } });
+}
+export function resetUserPassword(id: string, version: string) {
+  return http.post<ResetPasswordOutput>("/api/users/reset-password", { json: { id, version } });
 }
 export function getUserAuthorization(userId: string) {
   return http.get<UserAuthorizationOutput>("/api/users/authorization", { searchParams: { userId } });

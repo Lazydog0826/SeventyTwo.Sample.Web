@@ -16,6 +16,9 @@ export default {
     create: "New user",
     edit: "Edit",
     authorize: "Authorize",
+    resetPassword: "Reset password",
+    copy: "Copy password",
+    close: "Close",
     delete: "Delete",
     cancel: "Cancel",
     save: "Save",
@@ -50,6 +53,12 @@ export default {
   },
   delete: { title: "Delete user", content: "Permanently delete “{name}”? This action cannot be undone." },
   authorization: { title: "Authorize “{name}”", empty: "No permission data" },
+  resetPassword: {
+    confirmTitle: "Reset user password",
+    confirmContent: "Reset the password for “{name}”? All existing sessions for this user will be invalidated immediately.",
+    resultTitle: "Password reset successful",
+    resultHint: "This password is shown only once. Copy it now and deliver it securely; it cannot be viewed again after closing.",
+  },
   messages: {
     created: "User created",
     updated: "User updated",
@@ -57,6 +66,9 @@ export default {
     enabled: "User enabled",
     disabled: "User disabled",
     authorized: "User authorization saved",
+    passwordReset: "User password reset",
+    passwordCopied: "Password copied",
+    passwordCopyFailed: "Could not copy the password; copy it manually",
   },
   empty: { data: "No users", filtered: "No users match the filters" },
 };

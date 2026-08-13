@@ -30,7 +30,7 @@
             :loading="dictionaryLoading"
             :row-key="(row: DataDictionaryListOutput) => row.id"
             :row-props="dictionaryRowProps"
-            :scroll-x="900"
+            :scroll-x="canUpdate || canDelete ? 878 : 748"
             :single-line="false"
             striped
           >
@@ -52,7 +52,7 @@
             :data="items"
             :loading="itemLoading"
             :row-key="(row: DataDictionaryItemOutput) => row.id"
-            :scroll-x="600"
+            :scroll-x="canUpdate ? 600 : 470"
             :single-line="false"
             striped
           >
@@ -332,7 +332,7 @@ const dictionaryColumns = computed<DataTableColumns<DataDictionaryListOutput>>((
   const columns: DataTableColumns<DataDictionaryListOutput> = [
     {
       key: "selection",
-      width: 48,
+      minWidth: 48,
       fixed: "left",
       render: row =>
         h(NRadio, {
@@ -344,19 +344,19 @@ const dictionaryColumns = computed<DataTableColumns<DataDictionaryListOutput>>((
           },
         }),
     },
-    { title: t("dataDictionaries.columns.code"), key: "code", width: 160, render: row => textCell(row.code, 140) },
-    { title: t("dataDictionaries.columns.name"), key: "name", width: 160, render: row => textCell(row.name, 140) },
+    { title: t("dataDictionaries.columns.code"), key: "code", minWidth: 160, render: row => textCell(row.code, 140) },
+    { title: t("dataDictionaries.columns.name"), key: "name", minWidth: 160, render: row => textCell(row.name, 140) },
     {
       title: t("dataDictionaries.columns.description"),
       key: "description",
-      width: 200,
+      minWidth: 200,
       render: row => textCell(row.description ?? "-", 180),
     },
-    { title: t("dataDictionaries.columns.itemCount"), key: "itemCount", width: 90 },
+    { title: t("dataDictionaries.columns.itemCount"), key: "itemCount", minWidth: 90 },
     {
       title: t("dataDictionaries.columns.status"),
       key: "enable",
-      width: 90,
+      minWidth: 90,
       render: row =>
         h(
           NTag,
@@ -369,7 +369,7 @@ const dictionaryColumns = computed<DataTableColumns<DataDictionaryListOutput>>((
     columns.push({
       title: t("dataDictionaries.columns.actions"),
       key: "actions",
-      width: 130,
+      minWidth: 130,
       fixed: "right",
       render: row =>
         h(NSpace, null, {
@@ -410,15 +410,15 @@ const dictionaryColumns = computed<DataTableColumns<DataDictionaryListOutput>>((
 
 const itemColumns = computed<DataTableColumns<DataDictionaryItemOutput>>(() => {
   const columns: DataTableColumns<DataDictionaryItemOutput> = [
-    { title: t("dataDictionaries.columns.value"), key: "value", width: 180, render: row => textCell(row.value, 160) },
-    { title: t("dataDictionaries.columns.label"), key: "label", width: 200, render: row => textCell(row.label, 180) },
-    { title: t("dataDictionaries.columns.sortOrder"), key: "sortOrder", width: 90 },
+    { title: t("dataDictionaries.columns.value"), key: "value", minWidth: 180, render: row => textCell(row.value, 160) },
+    { title: t("dataDictionaries.columns.label"), key: "label", minWidth: 200, render: row => textCell(row.label, 180) },
+    { title: t("dataDictionaries.columns.sortOrder"), key: "sortOrder", minWidth: 90 },
   ];
   if (canUpdate.value)
     columns.push({
       title: t("dataDictionaries.columns.actions"),
       key: "actions",
-      width: 130,
+      minWidth: 130,
       render: row =>
         h(NSpace, null, {
           default: () => [

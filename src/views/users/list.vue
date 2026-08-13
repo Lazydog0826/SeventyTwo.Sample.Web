@@ -19,7 +19,7 @@
         :data="filteredUsers"
         :loading="loading"
         :row-key="row => row.id"
-        :scroll-x="hasActions ? 1040 : 880"
+        :scroll-x="hasActions ? 1160 : 830"
         striped
       >
         <template #empty><n-empty :description="emptyDescription" /></template>
@@ -131,6 +131,40 @@
         ></template
       >
     </n-modal>
+
+    <n-modal
+      v-model:show="showResetPasswordConfirm"
+      preset="dialog"
+      type="warning"
+      :title="t('users.resetPassword.confirmTitle')"
+    >
+      {{ t("users.resetPassword.confirmContent", { name: resettingUser?.displayName ?? "" }) }}
+      <template #action>
+        <n-space justify="end">
+          <n-button @click="showResetPasswordConfirm = false">{{ t("users.actions.cancel") }}</n-button>
+          <n-button type="warning" :loading="resettingPassword" @click="confirmResetPassword">
+            {{ t("users.actions.resetPassword") }}
+          </n-button>
+        </n-space>
+      </template>
+    </n-modal>
+
+    <n-modal
+      v-model:show="showResetPasswordResult"
+      preset="card"
+      :title="t('users.resetPassword.resultTitle')"
+      style="width: 520px; max-width: calc(100vw - 32px)"
+      @after-leave="resetPasswordResult = ''"
+    >
+      <n-alert type="warning" :bordered="false">{{ t("users.resetPassword.resultHint") }}</n-alert>
+      <n-input :value="resetPasswordResult" readonly class="reset-password-value" />
+      <template #footer>
+        <n-space justify="end">
+          <n-button @click="showResetPasswordResult = false">{{ t("users.actions.close") }}</n-button>
+          <n-button type="primary" @click="copyResetPassword">{{ t("users.actions.copy") }}</n-button>
+        </n-space>
+      </template>
+    </n-modal>
   </div>
 </template>
 
@@ -138,6 +172,7 @@
 import { computed, h, onMounted, reactive, ref } from "vue";
 import {
   NButton,
+  NAlert,
   NCard,
   NDataTable,
   NEllipsis,
@@ -167,6 +202,7 @@ import {
   getUserDetail,
   getUserList,
   getDefaultPageOptions,
+  resetUserPassword,
   setUserEnable,
   updateUser,
   type UserListOutput,
@@ -204,11 +240,14 @@ const organizationsLoading = ref(false);
 const defaultPagesLoading = ref(false);
 const submitting = ref(false);
 const deleting = ref(false);
+const resettingPassword = ref(false);
 const editingLoadingId = ref<string | null>(null);
 let editRequestSequence = 0;
 const enablingIds = ref(new Set<string>());
 const showEditor = ref(false);
 const showDeleteConfirm = ref(false);
+const showResetPasswordConfirm = ref(false);
+const showResetPasswordResult = ref(false);
 const showAuthorization = ref(false);
 const authorizationLoading = ref(false);
 const authorizationSaving = ref(false);
@@ -219,13 +258,18 @@ const authorizationIndeterminateKeys = ref<Array<string | number>>([]);
 const authorizationSelectedIds = ref(new Set<string>());
 const authorizationPermissions = ref<PermissionListOutput[]>([]);
 const deletingUser = ref<UserListOutput | null>(null);
+const resettingUser = ref<UserListOutput | null>(null);
+const resetPasswordResult = ref("");
 const formRef = ref<FormInst | null>(null);
 const formModel = reactive<UserFormModel>(emptyForm());
 const canCreate = computed(() => permissionsStore.hasPermission(PermissionCode.UsersCreate));
 const canUpdate = computed(() => permissionsStore.hasPermission(PermissionCode.UsersUpdate));
 const canDelete = computed(() => permissionsStore.hasPermission(PermissionCode.UsersDelete));
 const canAuthorize = computed(() => permissionsStore.hasPermission(PermissionCode.UsersAuthorize));
-const hasActions = computed(() => canUpdate.value || canAuthorize.value || canDelete.value);
+const canResetPassword = computed(() => permissionsStore.hasPermission(PermissionCode.UsersResetPassword));
+const hasActions = computed(
+  () => canUpdate.value || canAuthorize.value || canResetPassword.value || canDelete.value
+);
 const hasFilter = computed(() => Boolean(keyword.value.trim()) || statusFilter.value !== null);
 const filteredUsers = computed(() => {
   const value = keyword.value.trim().toLocaleLowerCase();
@@ -300,19 +344,19 @@ function buildDefaultPageOptions(items: DefaultPageOptionOutput[]): TreeSelectOp
 }
 const columns = computed<DataTableColumns<UserListOutput>>(() => {
   const result: DataTableColumns<UserListOutput> = [
-    { title: t("users.columns.username"), key: "username", width: 160, fixed: "left" },
-    { title: t("users.columns.displayName"), key: "displayName", width: 160 },
-    { title: t("users.columns.phone"), key: "phone", width: 170 },
+    { title: t("users.columns.username"), key: "username", minWidth: 160, fixed: "left" },
+    { title: t("users.columns.displayName"), key: "displayName", minWidth: 160 },
+    { title: t("users.columns.phone"), key: "phone", minWidth: 170 },
     {
       title: t("users.columns.email"),
       key: "email",
-      width: 230,
+      minWidth: 230,
       render: row => h(NEllipsis, { tooltip: true }, { default: () => row.email }),
     },
     {
       title: t("users.columns.status"),
       key: "enable",
-      width: 110,
+      minWidth: 110,
       render: row =>
         canUpdate.value
           ? h(NSwitch, {
@@ -332,7 +376,7 @@ const columns = computed<DataTableColumns<UserListOutput>>(() => {
     result.push({
       title: t("users.columns.actions"),
       key: "actions",
-      width: 230,
+      minWidth: 330,
       fixed: "right",
       render: row =>
         h(NSpace, null, {
@@ -373,6 +417,18 @@ const columns = computed<DataTableColumns<UserListOutput>>(() => {
                     onClick: () => openAuthorization(row),
                   },
                   { default: () => t("users.actions.authorize") }
+                )
+              : null,
+            canResetPassword.value
+              ? h(
+                  NButton,
+                  {
+                    text: true,
+                    type: "warning",
+                    disabled: row.username === SystemUsername.SuperAdmin || resettingPassword.value,
+                    onClick: () => openResetPassword(row),
+                  },
+                  { default: () => t("users.actions.resetPassword") }
                 )
               : null,
           ],
@@ -422,6 +478,33 @@ async function openEdit(user: UserListOutput) {
 function openDelete(user: UserListOutput) {
   deletingUser.value = user;
   showDeleteConfirm.value = true;
+}
+function openResetPassword(user: UserListOutput) {
+  resettingUser.value = user;
+  showResetPasswordConfirm.value = true;
+}
+async function confirmResetPassword() {
+  if (!resettingUser.value) return;
+  resettingPassword.value = true;
+  try {
+    const result = await resetUserPassword(resettingUser.value.id, resettingUser.value.version);
+    if (!result) return;
+    resetPasswordResult.value = result.password;
+    showResetPasswordConfirm.value = false;
+    resettingUser.value = null;
+    showResetPasswordResult.value = true;
+    window.$message.success(t("users.messages.passwordReset"));
+  } finally {
+    resettingPassword.value = false;
+  }
+}
+async function copyResetPassword() {
+  try {
+    await navigator.clipboard.writeText(resetPasswordResult.value);
+    window.$message.success(t("users.messages.passwordCopied"));
+  } catch {
+    window.$message.error(t("users.messages.passwordCopyFailed"));
+  }
 }
 async function openAuthorization(user: UserListOutput) {
   authorizingUser.value = user;
@@ -662,6 +745,9 @@ onMounted(async () => {
 }
 .status-select {
   width: 160px;
+}
+.reset-password-value {
+  margin-top: 16px;
 }
 @media (max-width: 640px) {
   .toolbar {

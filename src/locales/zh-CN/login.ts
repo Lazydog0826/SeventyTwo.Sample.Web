@@ -8,7 +8,6 @@ export default {
   passwordPlaceholder: "请输入密码",
   passwordRequired: "请输入密码",
   invalidToken: "登录失败：服务器未返回访问令牌",
-  rememberMe: "记住我",
   forgotPassword: "忘记密码？",
   noAccount: "还没有账号？",
   createAccount: "创建账号",

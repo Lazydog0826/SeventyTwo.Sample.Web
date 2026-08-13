@@ -3,7 +3,10 @@ export default {
   filters: { keyword: "搜索用户名、姓名、手机或邮箱", status: "用户状态" },
   columns: { username: "用户名", displayName: "姓名", phone: "手机", email: "邮箱", status: "状态", actions: "操作" },
   statuses: { enabled: "已启用", disabled: "已禁用" },
-  actions: { create: "新增用户", edit: "编辑", authorize: "授权", delete: "删除", cancel: "取消", save: "保存" },
+  actions: {
+    create: "新增用户", edit: "编辑", authorize: "授权", resetPassword: "重置密码", delete: "删除",
+    cancel: "取消", save: "保存", copy: "复制密码", close: "关闭",
+  },
   editor: { createTitle: "新增用户", updateTitle: "编辑用户" },
   form: {
     username: "用户名",
@@ -34,6 +37,12 @@ export default {
   },
   delete: { title: "删除用户", content: "确定永久删除用户“{name}”吗？此操作无法撤销。" },
   authorization: { title: "为“{name}”授权", empty: "暂无权限数据" },
+  resetPassword: {
+    confirmTitle: "重置用户密码",
+    confirmContent: "确定重置用户“{name}”的密码吗？重置后该用户的现有登录会话将立即失效。",
+    resultTitle: "密码重置成功",
+    resultHint: "新密码仅展示一次，请立即复制并安全地交给用户。关闭后无法再次查看。",
+  },
   messages: {
     created: "用户创建成功",
     updated: "用户修改成功",
@@ -41,6 +50,9 @@ export default {
     enabled: "用户已启用",
     disabled: "用户已禁用",
     authorized: "用户授权保存成功",
+    passwordReset: "用户密码重置成功",
+    passwordCopied: "密码已复制",
+    passwordCopyFailed: "密码复制失败，请手动复制",
   },
   empty: { data: "暂无用户", filtered: "没有符合筛选条件的用户" },
 };
