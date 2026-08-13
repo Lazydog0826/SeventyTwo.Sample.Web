@@ -12,6 +12,7 @@ export default {
     phone: "手机",
     email: "邮箱",
     organization: "所属机构",
+    defaultPage: "默认页面",
     enable: "启用",
   },
   placeholders: {
@@ -21,6 +22,7 @@ export default {
     phone: "请输入手机号码",
     email: "请输入电子邮箱",
     organization: "请选择所属机构",
+    defaultPage: "请选择登录后的默认页面（可选）",
   },
   validation: {
     username: "请输入 3 至 50 位用户名",

@@ -7,6 +7,7 @@ export default {
     phone: "Phone",
     email: "Email",
     organization: "Organization",
+    defaultPage: "Default page",
     status: "Status",
     actions: "Actions",
   },
@@ -27,6 +28,7 @@ export default {
     phone: "Phone",
     email: "Email",
     organization: "Organization",
+    defaultPage: "Default page",
     enable: "Enabled",
   },
   placeholders: {
@@ -36,6 +38,7 @@ export default {
     phone: "Enter phone",
     email: "Enter email",
     organization: "Select an organization",
+    defaultPage: "Select the default page after login (optional)",
   },
   validation: {
     username: "Enter a 3-50 character username",
