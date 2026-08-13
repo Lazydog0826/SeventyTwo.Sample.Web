@@ -640,7 +640,9 @@ async function loadDefaultPages() {
 onMounted(async () => {
   await permissionsStore.getPermissions();
   const editorOptionsTask =
-    canCreate.value || canUpdate.value ? Promise.all([loadOrganizations(), loadDefaultPages()]) : Promise.resolve();
+    canCreate.value || canUpdate.value
+      ? await Promise.all([loadOrganizations(), loadDefaultPages()])
+      : await Promise.resolve();
   await Promise.all([loadUsers(), editorOptionsTask]);
 });
 </script>
