@@ -1,29 +1,28 @@
 # SeventyTwo Sample Web
 
-基于 Vue 3、TypeScript 和 Vite 构建的后台管理示例前端。
+基于 Vue 3、TypeScript 和 Vite 构建的后台管理示例前端，配套 SeventyTwo Sample 后端使用。
 
 ## 功能
 
-- 用户登录及登录后重定向
-- 访问令牌自动携带与刷新令牌续期
-- 基于后端权限数据的动态菜单和动态路由
-- 页面权限与按钮权限数据管理
+- 用户登录、退出及登录后重定向
+- 访问令牌自动携带、刷新令牌续期和失效跳转
+- 基于后端权限数据生成动态菜单和动态路由
+- 目录、页面和按钮权限管理
+- 机构、数据字典及字典项管理
+- 用户增删改、启停、授权及默认页面配置
+- 根据按钮权限控制业务操作入口
 - 中英文切换
 - 明暗主题切换
-- 数据仪表盘
+- 示例数据仪表盘
 - 全局请求错误提示和路由加载进度条
 
 ## 技术栈
 
-- Vue 3 与 TypeScript
-- Vite
-- Vue Router
-- Pinia
-- Vue I18n
-- Naive UI
-- ECharts 与 Vue ECharts
-- Ky
-- BProgress
+- Vue 3、TypeScript、Vite
+- Vue Router、Pinia、Vue I18n
+- Naive UI、Lucide Icons
+- ECharts、Vue ECharts
+- Ky、BProgress
 
 ## 环境要求
 
@@ -45,7 +44,9 @@ npm ci
 VITE_API_BASE_URL=http://localhost:5272
 ```
 
-后端需要提供用户登录、用户信息、令牌刷新、退出登录和权限查询接口。前端请求会携带 Cookie，并在访问令牌失效时尝试自动刷新。
+前端请求会携带 Cookie。登录接口返回的访问令牌仅保存在页面内存中；接口返回 `401` 时，前端会通过刷新令牌 Cookie 尝试续期并重放原请求，续期失败后跳转到登录页。
+
+业务菜单、页面路由和按钮操作均由后端权限数据决定。用户访问根路径 `/` 时会进入其配置的默认页面；未配置默认页面、没有菜单权限或访问不存在的动态路由时，会分别进入对应提示页。
 
 ## 开发
 
@@ -73,6 +74,8 @@ npm run preview
 src/
 ├─ api/          后端接口定义
 ├─ assets/       图片和图标资源
+├─ components/   通用组件
+├─ constants/    权限码等常量
 ├─ layout/       后台布局组件
 ├─ locales/      中英文语言资源
 ├─ router/       路由、路由守卫与动态视图

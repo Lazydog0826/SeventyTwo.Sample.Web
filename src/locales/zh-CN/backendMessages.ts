@@ -59,6 +59,7 @@ export default {
     pageNumberMustBePositive: "页码必须大于零",
     pageSizeOutOfRange100: "每页数量必须在一到一百之间",
     pageSizeOutOfRange1000: "每页数量必须在一到一千之间",
+    pageOffsetOutOfRange: "分页偏移超出支持范围",
     cursorFieldsMustBeProvidedTogether: "游标时间和游标 ID 必须同时提供",
     cursorDirectionInvalid: "游标翻页方向无效",
     previousPageCursorRequired: "查询上一页时必须提供游标",

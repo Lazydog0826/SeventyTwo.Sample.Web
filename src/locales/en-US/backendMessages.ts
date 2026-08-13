@@ -59,6 +59,7 @@ export default {
     pageNumberMustBePositive: "Page number must be greater than zero",
     pageSizeOutOfRange100: "Page size must be between 1 and 100",
     pageSizeOutOfRange1000: "Page size must be between 1 and 1,000",
+    pageOffsetOutOfRange: "Page offset is out of the supported range",
     cursorFieldsMustBeProvidedTogether: "Cursor time and cursor ID must be provided together",
     cursorDirectionInvalid: "Cursor paging direction is invalid",
     previousPageCursorRequired: "A cursor is required when querying the previous page",
