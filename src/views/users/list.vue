@@ -33,7 +33,7 @@
         :loading="loading"
         :pagination="pagination"
         :row-key="row => row.id"
-        :scroll-x="hasActions ? 1160 : 830"
+        :scroll-x="hasActions ? 1350 : 1020"
         remote
         striped
       >
@@ -78,6 +78,13 @@
             :placeholder="t('users.placeholders.organization')"
             filterable
         /></n-form-item>
+        <n-form-item :label="t('users.form.dataPermissionType')" path="dataPermissionType"
+          ><n-select
+            v-model:value="formModel.dataPermissionType"
+            :loading="dataPermissionTypesLoading"
+            :options="dataPermissionTypeOptions"
+            :placeholder="t('users.placeholders.dataPermissionType')"
+        /></n-form-item>
         <n-form-item :label="t('users.form.defaultPage')" path="defaultPageId"
           ><n-tree-select
             v-model:value="formModel.defaultPageId"
@@ -94,7 +101,12 @@
       <template #footer
         ><n-space justify="end"
           ><n-button @click="showEditor = false">{{ t("users.actions.cancel") }}</n-button
-          ><n-button :loading="submitting" type="primary" @click="submitEditor">{{
+          ><n-button
+            :disabled="!dataPermissionTypesAvailable"
+            :loading="submitting"
+            type="primary"
+            @click="submitEditor"
+          >{{
             t("users.actions.save")
           }}</n-button></n-space
         ></template
@@ -238,6 +250,8 @@ import {
   updateUser,
   type UserListOutput,
 } from "@/api/users.ts";
+import { getDataDictionaryOptions, type DataDictionaryOptionOutput } from "@/api/dataDictionaries.ts";
+import type { DataPermissionType } from "@/api/users.ts";
 import type { PermissionListOutput } from "@/api/permissions.ts";
 import { getUserOrganizationOptions, type OrganizationListOutput } from "@/api/organizations.ts";
 import { PermissionCode } from "@/constants/permissions.ts";
@@ -255,6 +269,7 @@ interface UserFormModel {
   phone: string;
   email: string;
   orgId: string | null;
+  dataPermissionType: DataPermissionType;
   defaultPageId: string | null;
   enable: boolean;
 }
@@ -263,6 +278,7 @@ const permissionsStore = usePermissionsStore();
 const users = ref<UserListOutput[]>([]);
 const organizations = ref<OrganizationListOutput[]>([]);
 const defaultPages = ref<DefaultPageOptionOutput[]>([]);
+const dataPermissionTypes = ref<DataDictionaryOptionOutput[]>([]);
 const keyword = ref("");
 const statusFilter = ref<StatusFilter | null>(null);
 const appliedKeyword = ref("");
@@ -288,6 +304,7 @@ const pagination = reactive<PaginationProps>({
 const loading = ref(false);
 const organizationsLoading = ref(false);
 const defaultPagesLoading = ref(false);
+const dataPermissionTypesLoading = ref(false);
 const submitting = ref(false);
 const deleting = ref(false);
 const resettingPassword = ref(false);
@@ -339,6 +356,14 @@ const statusOptions = computed(() => [
 ]);
 const organizationOptions = computed<TreeSelectOption[]>(() => buildOrganizationOptions(organizations.value));
 const defaultPageOptions = computed<TreeSelectOption[]>(() => buildDefaultPageOptions(defaultPages.value));
+const dataPermissionTypeOptions = computed(() =>
+  dataPermissionTypes.value
+    .filter((item): item is DataDictionaryOptionOutput & { value: DataPermissionType } =>
+      isDataPermissionType(item.value)
+    )
+    .map(item => ({ label: item.label, value: item.value }))
+);
+const dataPermissionTypesAvailable = computed(() => dataPermissionTypeOptions.value.length > 0);
 const formRules = computed<FormRules>(() => ({
   username: {
     required: true,
@@ -360,6 +385,12 @@ const formRules = computed<FormRules>(() => ({
   phone: requiredRule("phone"),
   email: requiredRule("email"),
   orgId: { required: true, message: t("users.validation.organization"), trigger: ["change", "blur"] },
+  dataPermissionType: {
+    required: true,
+    type: "string",
+    message: t("users.validation.dataPermissionType"),
+    trigger: ["change", "blur"],
+  },
 }));
 
 function buildOrganizationOptions(items: OrganizationListOutput[]): TreeSelectOption[] {
@@ -391,6 +422,9 @@ function buildDefaultPageOptions(items: DefaultPageOptionOutput[]): TreeSelectOp
     .sort((left, right) => left.sortOrder - right.sortOrder || left.id.localeCompare(right.id))
     .map(item => ({ label: item.title, key: item.id }));
 }
+function isDataPermissionType(value: string): value is DataPermissionType {
+  return ["All", "Organization", "OrganizationAndDescendants", "Self"].includes(value);
+}
 const columns = computed<DataTableColumns<UserListOutput>>(() => {
   const result: DataTableColumns<UserListOutput> = [
     { title: t("users.columns.username"), key: "username", minWidth: 160, fixed: "left" },
@@ -401,6 +435,14 @@ const columns = computed<DataTableColumns<UserListOutput>>(() => {
       key: "email",
       minWidth: 230,
       render: row => h(NEllipsis, { tooltip: true }, { default: () => row.email }),
+    },
+    {
+      title: t("users.columns.dataPermissionType"),
+      key: "dataPermissionType",
+      minWidth: 190,
+      render: row =>
+        dataPermissionTypes.value.find(item => item.value === row.dataPermissionType)?.label ??
+        String(row.dataPermissionType),
     },
     {
       title: t("users.columns.status"),
@@ -497,6 +539,7 @@ function emptyForm(): UserFormModel {
     phone: "",
     email: "",
     orgId: null,
+    dataPermissionType: "Self",
     defaultPageId: null,
     enable: true,
   };
@@ -706,6 +749,7 @@ async function submitEditor() {
         email: formModel.email,
         orgId: formModel.orgId,
         defaultPageId: formModel.defaultPageId,
+        dataPermissionType: formModel.dataPermissionType,
       });
       window.$message.success(t("users.messages.updated"));
     } else {
@@ -718,6 +762,7 @@ async function submitEditor() {
         enable: formModel.enable,
         orgId: formModel.orgId,
         defaultPageId: formModel.defaultPageId,
+        dataPermissionType: formModel.dataPermissionType,
       });
       window.$message.success(t("users.messages.created"));
     }
@@ -807,13 +852,24 @@ async function loadDefaultPages() {
     defaultPagesLoading.value = false;
   }
 }
+async function loadDataPermissionTypes() {
+  dataPermissionTypesLoading.value = true;
+  try {
+    dataPermissionTypes.value = (await getDataDictionaryOptions("DATA_PERMISSION_TYPE")) ?? [];
+  } catch {
+    // 字典加载失败由统一请求层提示；保留空选项，避免辅助数据请求中断用户列表初始化。
+    dataPermissionTypes.value = [];
+  } finally {
+    dataPermissionTypesLoading.value = false;
+  }
+}
 onMounted(async () => {
   await permissionsStore.getPermissions();
   const editorOptionsTask =
     canCreate.value || canUpdate.value
       ? await Promise.all([loadOrganizations(), loadDefaultPages()])
       : await Promise.resolve();
-  await Promise.all([loadUsers(), editorOptionsTask]);
+  await Promise.all([loadUsers(), loadDataPermissionTypes(), editorOptionsTask]);
 });
 </script>
 

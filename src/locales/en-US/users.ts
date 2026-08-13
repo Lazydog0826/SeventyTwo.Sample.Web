@@ -6,6 +6,7 @@ export default {
     displayName: "Name",
     phone: "Phone",
     email: "Email",
+    dataPermissionType: "Data permission",
     organization: "Organization",
     defaultPage: "Default page",
     status: "Status",
@@ -43,6 +44,7 @@ export default {
     phone: "Enter phone",
     email: "Enter email",
     organization: "Select an organization",
+    dataPermissionType: "Select a data permission",
     defaultPage: "Select the default page after login (optional)",
   },
   validation: {
@@ -52,6 +54,7 @@ export default {
     phone: "Enter phone",
     email: "Enter email",
     organization: "Select an organization",
+    dataPermissionType: "Select a data permission",
   },
   delete: { title: "Delete user", content: "Permanently delete “{name}”? This action cannot be undone." },
   authorization: { title: "Authorize “{name}”", empty: "No permission data" },

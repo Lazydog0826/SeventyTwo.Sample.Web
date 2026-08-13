@@ -14,6 +14,7 @@ export const useUserStore = defineStore("users", () => {
     phone: "",
     email: "",
     defaultPagePath: "",
+    dataPermissionType: "Self",
   });
 
   const getInfo = async () => {
@@ -31,6 +32,7 @@ export const useUserStore = defineStore("users", () => {
         user.phone = r.phone;
         user.email = r.email;
         user.defaultPagePath = r.defaultPagePath;
+        user.dataPermissionType = r.dataPermissionType;
         isLoad.value = true;
       }
       return user;

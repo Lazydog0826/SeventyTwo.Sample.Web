@@ -1,7 +1,7 @@
 export default {
   title: "用户管理",
   filters: { keyword: "搜索用户名、姓名、手机或邮箱", status: "用户状态" },
-  columns: { username: "用户名", displayName: "姓名", phone: "手机", email: "邮箱", status: "状态", actions: "操作" },
+  columns: { username: "用户名", displayName: "姓名", phone: "手机", email: "邮箱", dataPermissionType: "数据权限", status: "状态", actions: "操作" },
   statuses: { enabled: "已启用", disabled: "已禁用" },
   actions: {
     create: "新增用户",
@@ -24,6 +24,7 @@ export default {
     phone: "手机",
     email: "邮箱",
     organization: "所属机构",
+    dataPermissionType: "数据权限",
     defaultPage: "默认页面",
     enable: "启用",
   },
@@ -34,6 +35,7 @@ export default {
     phone: "请输入手机号码",
     email: "请输入电子邮箱",
     organization: "请选择所属机构",
+    dataPermissionType: "请选择数据权限",
     defaultPage: "请选择登录后的默认页面（可选）",
   },
   validation: {
@@ -43,6 +45,7 @@ export default {
     phone: "请输入手机号码",
     email: "请输入电子邮箱",
     organization: "请选择所属机构",
+    dataPermissionType: "请选择数据权限",
   },
   delete: { title: "删除用户", content: "确定永久删除用户“{name}”吗？此操作无法撤销。" },
   authorization: { title: "为“{name}”授权", empty: "暂无权限数据" },

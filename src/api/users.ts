@@ -4,6 +4,9 @@ import http from "@/utils/request";
 import type { PermissionListOutput } from "@/api/permissions.ts";
 import type { PageRequest, PageResponse } from "@/api/paging.ts";
 
+/** 数据权限类型，与后端 DataPermissionType 的 JSON 字符串枚举值保持一致。 */
+export type DataPermissionType = "All" | "Organization" | "OrganizationAndDescendants" | "Self";
+
 /** 用户登录请求。 */
 export interface LoginRequest {
   /** 账号。 */
@@ -20,6 +23,7 @@ export interface UserOutput {
   phone: string;
   email: string;
   defaultPagePath: string;
+  dataPermissionType: DataPermissionType;
 }
 
 export interface UserListOutput {
@@ -30,6 +34,7 @@ export interface UserListOutput {
   email: string;
   enable: boolean;
   orgId: string;
+  dataPermissionType: DataPermissionType;
   version: string;
   defaultPageId: string | null;
 }
@@ -42,6 +47,7 @@ export interface CreateUserInput {
   enable: boolean;
   orgId: string;
   defaultPageId: string | null;
+  dataPermissionType: DataPermissionType;
 }
 export interface UpdateUserInput {
   id: string;
@@ -50,6 +56,7 @@ export interface UpdateUserInput {
   email: string;
   orgId: string;
   defaultPageId: string | null;
+  dataPermissionType: DataPermissionType;
   version: string;
 }
 export interface DefaultPageOptionOutput {
