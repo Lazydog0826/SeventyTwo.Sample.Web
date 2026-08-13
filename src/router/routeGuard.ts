@@ -3,6 +3,7 @@ import type { Router, RouteRecordRaw } from "vue-router";
 import { usePermissionsStore } from "@/stores/permissions.ts";
 import type { PermissionMenuOutput } from "@/api/permissions.ts";
 import { BProgress } from "@bprogress/core";
+import { useUserStore } from "@/stores/users.ts";
 
 BProgress.configure({
   showSpinner: false,
@@ -11,6 +12,7 @@ BProgress.configure({
 export function routeGuard(router: Router) {
   let routesRegistered = false;
   let hasMenus = false;
+  let defaultPagePath: string | undefined;
   let registeringPromise: Promise<void> | null = null;
 
   // 规范：新增或修改守卫应直接返回导航结果，不再使用 Vue Router 5 已弃用的 next 回调；
@@ -20,7 +22,7 @@ export function routeGuard(router: Router) {
     BProgress.start();
 
     // 静态页面不依赖菜单权限，避免无权限用户无法访问登录页和错误页。
-    if (["login", "403", "404"].includes(String(to.name))) {
+    if (["login", "403", "404", "defaultPageUnconfigured"].includes(String(to.name))) {
       return next();
     }
 
@@ -29,8 +31,10 @@ export function routeGuard(router: Router) {
       if (!registeringPromise) {
         registeringPromise = (async () => {
           const permissionsStore = usePermissionsStore();
-          const permissions = await permissionsStore.getPermissions();
+          const userStore = useUserStore();
+          const [permissions, user] = await Promise.all([permissionsStore.getPermissions(), userStore.getInfo()]);
           registerRoute(permissions.menus, router);
+          defaultPagePath = user.defaultPagePath || undefined;
           hasMenus = permissions.menus.length > 0;
           routesRegistered = true;
         })().finally(() => {
@@ -58,6 +62,14 @@ export function routeGuard(router: Router) {
       return next("/403");
     }
 
+    if (to.path === "/") {
+      const defaultRoute = defaultPagePath ? router.resolve(defaultPagePath) : null;
+      if (defaultPagePath && defaultRoute?.matched.length) {
+        return next(defaultPagePath);
+      }
+      return next("/default-page-unconfigured");
+    }
+
     // 动态路由已注册但仍匹配不到，直接跳转到 404 页面。
     if (to.matched.length === 0) {
       return next("/404");
@@ -80,7 +92,7 @@ function registerRoute(menus: Array<PermissionMenuOutput>, router: Router) {
   // 规范：页面权限的 vueComponentPath 必须精确对应 viewModules 的键；routeName 和 routePath
   // 必须在全部页面权限中分别唯一。后端写入时应校验这些约束，前端注册仅做防御性诊断。
   // 注册路由只考虑页面类型
-  const pages = menus.filter(x => x.type === "Page");
+  const pages = menus.filter(x => x.type === "Page").sort((a, b) => a.sortOrder - b.sortOrder);
   const registeredRoutes = router.getRoutes();
   const registeredRouteNames = registeredRoutes
     .map(x => x.name)

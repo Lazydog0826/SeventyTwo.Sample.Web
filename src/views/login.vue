@@ -146,7 +146,7 @@ const handleLogin = async () => {
 
     window.$accessToken = accessToken;
     const redirect = route.query.redirect;
-    await router.push(typeof redirect === "string" ? redirect : "/home");
+    await router.push(typeof redirect === "string" ? redirect : "/");
   } catch {
     // 请求层已统一展示接口错误。
   } finally {

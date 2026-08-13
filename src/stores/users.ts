@@ -13,6 +13,7 @@ export const useUserStore = defineStore("users", () => {
     displayName: "",
     phone: "",
     email: "",
+    defaultPagePath: "",
   });
 
   const getInfo = async () => {
@@ -29,6 +30,7 @@ export const useUserStore = defineStore("users", () => {
         user.displayName = r.displayName;
         user.phone = r.phone;
         user.email = r.email;
+        user.defaultPagePath = r.defaultPagePath;
         isLoad.value = true;
       }
       return user;

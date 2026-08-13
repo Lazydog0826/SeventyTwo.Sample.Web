@@ -18,12 +18,19 @@ export interface UserOutput {
   displayName: string;
   phone: string;
   email: string;
+  defaultPagePath: string;
 }
 
-export interface UserListOutput extends UserOutput {
+export interface UserListOutput {
+  id: string;
+  username: string;
+  displayName: string;
+  phone: string;
+  email: string;
   enable: boolean;
   orgId: string;
   version: string;
+  defaultPageId: string | null;
 }
 export interface CreateUserInput {
   username: string;
@@ -33,6 +40,7 @@ export interface CreateUserInput {
   email: string;
   enable: boolean;
   orgId: string;
+  defaultPageId: string | null;
 }
 export interface UpdateUserInput {
   id: string;
@@ -40,7 +48,13 @@ export interface UpdateUserInput {
   phone: string;
   email: string;
   orgId: string;
+  defaultPageId: string | null;
   version: string;
+}
+export interface DefaultPageOptionOutput {
+  id: string;
+  title: string;
+  sortOrder: number;
 }
 export interface UserAuthorizationOutput {
   permissions: PermissionListOutput[];
@@ -69,6 +83,9 @@ export function logout() {
 
 export function getUserList() {
   return http.get<UserListOutput[]>("/api/users/list");
+}
+export function getDefaultPageOptions() {
+  return http.get<DefaultPageOptionOutput[]>("/api/users/default-page-options");
 }
 export function getUserDetail(id: string) {
   return http.get<UserListOutput>("/api/users/detail", { searchParams: { id } });

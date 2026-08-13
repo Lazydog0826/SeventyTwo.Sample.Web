@@ -27,6 +27,12 @@ const defaultRouter: RouteRecordRaw[] = [
     meta: { titleKey: "noPermission.title" },
     component: () => import("@/views/403.vue"),
   },
+  {
+    path: "/default-page-unconfigured",
+    name: "defaultPageUnconfigured",
+    meta: { titleKey: "defaultPageUnconfigured.title" },
+    component: () => import("@/views/default-page-unconfigured.vue"),
+  },
 ];
 
 const router = createRouter({

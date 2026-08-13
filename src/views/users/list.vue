@@ -63,6 +63,15 @@
             :placeholder="t('users.placeholders.organization')"
             filterable
         /></n-form-item>
+        <n-form-item :label="t('users.form.defaultPage')" path="defaultPageId"
+          ><n-tree-select
+            v-model:value="formModel.defaultPageId"
+            :options="defaultPageOptions"
+            :loading="defaultPagesLoading"
+            :placeholder="t('users.placeholders.defaultPage')"
+            clearable
+            filterable
+        /></n-form-item>
         <n-form-item v-if="!formModel.id" :label="t('users.form.enable')"
           ><n-switch v-model:value="formModel.enable"
         /></n-form-item>
@@ -157,9 +166,11 @@ import {
   getUserAuthorization,
   getUserDetail,
   getUserList,
+  getDefaultPageOptions,
   setUserEnable,
   updateUser,
   type UserListOutput,
+  type DefaultPageOptionOutput,
 } from "@/api/users.ts";
 import type { PermissionListOutput } from "@/api/permissions.ts";
 import { getUserOrganizationOptions, type OrganizationListOutput } from "@/api/organizations.ts";
@@ -178,16 +189,19 @@ interface UserFormModel {
   phone: string;
   email: string;
   orgId: string | null;
+  defaultPageId: string | null;
   enable: boolean;
 }
 const { t } = useI18n();
 const permissionsStore = usePermissionsStore();
 const users = ref<UserListOutput[]>([]);
 const organizations = ref<OrganizationListOutput[]>([]);
+const defaultPages = ref<DefaultPageOptionOutput[]>([]);
 const keyword = ref("");
 const statusFilter = ref<StatusFilter | null>(null);
 const loading = ref(false);
 const organizationsLoading = ref(false);
+const defaultPagesLoading = ref(false);
 const submitting = ref(false);
 const deleting = ref(false);
 const editingLoadingId = ref<string | null>(null);
@@ -231,6 +245,7 @@ const statusOptions = computed(() => [
   { label: t("users.statuses.disabled"), value: "disabled" },
 ]);
 const organizationOptions = computed<TreeSelectOption[]>(() => buildOrganizationOptions(organizations.value));
+const defaultPageOptions = computed<TreeSelectOption[]>(() => buildDefaultPageOptions(defaultPages.value));
 const formRules = computed<FormRules>(() => ({
   username: {
     required: true,
@@ -277,6 +292,11 @@ function buildOrganizationOptions(items: OrganizationListOutput[]): TreeSelectOp
         };
       });
   return buildOptions(roots);
+}
+function buildDefaultPageOptions(items: DefaultPageOptionOutput[]): TreeSelectOption[] {
+  return [...items]
+    .sort((left, right) => left.sortOrder - right.sortOrder || left.id.localeCompare(right.id))
+    .map(item => ({ label: item.title, key: item.id }));
 }
 const columns = computed<DataTableColumns<UserListOutput>>(() => {
   const result: DataTableColumns<UserListOutput> = [
@@ -373,6 +393,7 @@ function emptyForm(): UserFormModel {
     phone: "",
     email: "",
     orgId: null,
+    defaultPageId: null,
     enable: true,
   };
 }
@@ -545,6 +566,7 @@ async function submitEditor() {
         phone: formModel.phone,
         email: formModel.email,
         orgId: formModel.orgId,
+        defaultPageId: formModel.defaultPageId,
       });
       window.$message.success(t("users.messages.updated"));
     } else {
@@ -556,6 +578,7 @@ async function submitEditor() {
         email: formModel.email,
         enable: formModel.enable,
         orgId: formModel.orgId,
+        defaultPageId: formModel.defaultPageId,
       });
       window.$message.success(t("users.messages.created"));
     }
@@ -606,7 +629,20 @@ async function loadOrganizations() {
     organizationsLoading.value = false;
   }
 }
-onMounted(() => Promise.all([loadUsers(), loadOrganizations(), permissionsStore.getPermissions()]));
+async function loadDefaultPages() {
+  defaultPagesLoading.value = true;
+  try {
+    defaultPages.value = (await getDefaultPageOptions()) ?? [];
+  } finally {
+    defaultPagesLoading.value = false;
+  }
+}
+onMounted(async () => {
+  await permissionsStore.getPermissions();
+  const editorOptionsTask =
+    canCreate.value || canUpdate.value ? Promise.all([loadOrganizations(), loadDefaultPages()]) : Promise.resolve();
+  await Promise.all([loadUsers(), editorOptionsTask]);
+});
 </script>
 
 <style scoped lang="scss">

@@ -1,0 +1,137 @@
+<template>
+  <main class="notice-page" :lang="locale">
+    <div class="notice-toolbar">
+      <n-button
+        quaternary
+        circle
+        :title="t(isDark ? 'theme.switchToLight' : 'theme.switchToDark')"
+        :aria-label="t(isDark ? 'theme.switchToLight' : 'theme.switchToDark')"
+        @click="toggleTheme"
+      >
+        <template #icon>
+          <n-icon>
+            <Sun v-if="isDark"></Sun>
+            <Moon v-else></Moon>
+          </n-icon>
+        </template>
+      </n-button>
+
+      <n-dropdown :options="languageOptions" @select="handleLanguageChange">
+        <n-button quaternary size="small">
+          <template #icon>
+            <n-icon>
+              <Languages></Languages>
+            </n-icon>
+          </template>
+          {{ locale === "zh-CN" ? "简体中文" : "English" }}
+        </n-button>
+      </n-dropdown>
+    </div>
+
+    <n-card class="notice-card" :bordered="false">
+      <div class="notice-content">
+        <div class="notice-icon" aria-hidden="true">
+          <PanelTopDashed :size="38" :stroke-width="1.8"></PanelTopDashed>
+        </div>
+        <h1>{{ t("defaultPageUnconfigured.title") }}</h1>
+        <n-text depth="3">{{ t("defaultPageUnconfigured.description") }}</n-text>
+      </div>
+    </n-card>
+  </main>
+</template>
+
+<script setup lang="ts">
+import { Languages, Moon, PanelTopDashed, Sun } from "@lucide/vue";
+import { NButton, NCard, NDropdown, NIcon, NText } from "naive-ui";
+import { inject, type Ref } from "vue";
+import { useI18n } from "vue-i18n";
+
+const { t, locale } = useI18n();
+const { isDark, toggleTheme } = inject<{
+  isDark: Ref<boolean>;
+  toggleTheme: () => void;
+}>("theme")!;
+
+const languageOptions = [
+  { label: "简体中文", key: "zh-CN" },
+  { label: "English", key: "en-US" },
+];
+
+const handleLanguageChange = (key: string | number) => {
+  locale.value = String(key);
+  localStorage.setItem("locale", locale.value);
+};
+</script>
+
+<style scoped lang="scss">
+.notice-page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--color-bg-page);
+}
+
+.notice-card {
+  width: min(100%, 480px);
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+.notice-toolbar {
+  position: fixed;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  top: 24px;
+  right: 24px;
+}
+
+.notice-content {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 24px 12px;
+  text-align: center;
+}
+
+.notice-icon {
+  display: grid;
+  width: 72px;
+  height: 72px;
+  place-items: center;
+  border-radius: 16px;
+  color: var(--color-warning-6);
+  background: var(--color-warning-1);
+}
+
+h1 {
+  margin: 24px 0 8px;
+  color: var(--color-gray-10);
+  font-size: 28px;
+  line-height: 1.3;
+}
+
+.n-text {
+  max-width: 360px;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+@media (max-width: 640px) {
+  .notice-page {
+    padding: 16px;
+  }
+
+  .notice-content {
+    padding: 16px 4px;
+  }
+
+  .notice-toolbar {
+    top: 16px;
+    right: 16px;
+  }
+}
+</style>
