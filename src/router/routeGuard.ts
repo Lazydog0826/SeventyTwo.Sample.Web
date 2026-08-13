@@ -13,6 +13,8 @@ export function routeGuard(router: Router) {
   let hasMenus = false;
   let registeringPromise: Promise<void> | null = null;
 
+  // 规范：新增或修改守卫应直接返回导航结果，不再使用 Vue Router 5 已弃用的 next 回调；
+  // 现有守卫迁移时需保持异步动态路由注册、replace 语义和完整 URL 不变。
   router.beforeEach(async (to, _from, next) => {
     // 进度条组件
     BProgress.start();
@@ -44,7 +46,9 @@ export function routeGuard(router: Router) {
 
       // 重新进入守卫，使用注册后的路由表匹配目标地址。
       return next({
-        path: to.fullPath,
+        path: to.path,
+        query: to.query,
+        hash: to.hash,
         replace: true,
       });
     }
@@ -73,27 +77,49 @@ export function routeGuard(router: Router) {
 }
 
 function registerRoute(menus: Array<PermissionMenuOutput>, router: Router) {
+  // 规范：页面权限的 vueComponentPath 必须精确对应 viewModules 的键；routeName 和 routePath
+  // 必须在全部页面权限中分别唯一。后端写入时应校验这些约束，前端注册仅做防御性诊断。
   // 注册路由只考虑页面类型
-  menus
-    .filter(x => x.type === "Page")
-    .forEach(x => {
-      const component = viewModules[x.vueComponentPath];
-      if (!component) {
-        console.error(
-          `动态路由组件不存在，已跳过：routeName=${x.routeName}, routePath=${x.routePath}, vueComponentPath=${x.vueComponentPath}`
-        );
-        return;
-      }
+  const pages = menus.filter(x => x.type === "Page");
+  const registeredRoutes = router.getRoutes();
+  const registeredRouteNames = registeredRoutes
+    .map(x => x.name)
+    .filter((name): name is string => typeof name === "string");
+  const duplicateRouteName = findDuplicate([...registeredRouteNames, ...pages.map(x => x.routeName)]);
+  const duplicateRoutePath = findDuplicate([...registeredRoutes.map(x => x.path), ...pages.map(x => x.routePath)]);
+  if (duplicateRouteName || duplicateRoutePath) {
+    throw new Error(
+      `动态路由配置冲突，已拒绝整组注册：routeName=${duplicateRouteName ?? "无"}, routePath=${duplicateRoutePath ?? "无"}`
+    );
+  }
 
-      const route: RouteRecordRaw = {
-        path: x.routePath,
-        name: x.routeName,
-        meta: {
-          ...x.metaData,
-          titleKey: `menu.${x.code}`,
-        },
-        component,
-      };
-      router.addRoute("layout", route);
-    });
+  pages.forEach(x => {
+    const component = viewModules[x.vueComponentPath];
+    if (!component) {
+      console.error(
+        `动态路由组件不存在，已跳过：routeName=${x.routeName}, routePath=${x.routePath}, vueComponentPath=${x.vueComponentPath}`
+      );
+      return;
+    }
+
+    const route: RouteRecordRaw = {
+      path: x.routePath,
+      name: x.routeName,
+      meta: {
+        ...x.metaData,
+        titleKey: `menu.${x.code}`,
+      },
+      component,
+    };
+    router.addRoute("layout", route);
+  });
+}
+
+function findDuplicate(values: Array<string>) {
+  const seen = new Set<string>();
+  return values.find(value => {
+    if (seen.has(value)) return true;
+    seen.add(value);
+    return false;
+  });
 }
