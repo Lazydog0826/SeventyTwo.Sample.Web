@@ -8,7 +8,7 @@
     :native-scrollbar="false"
   >
     <div class="sidebar-content">
-      <div v-if="loading" class="menu-loading" aria-live="polite" aria-label="菜单加载中">
+      <div v-if="loading" class="menu-loading" aria-live="polite" :aria-label="t('common.menuLoading')">
         <n-spin size="small"></n-spin>
       </div>
       <n-menu
@@ -24,7 +24,12 @@
       ></n-menu>
 
       <div class="sidebar-footer" :class="{ 'sidebar-footer--collapsed': collapsed }">
-        <n-button quaternary circle aria-label="切换侧边栏" @click="emit('toggle')">
+        <n-button
+          quaternary
+          circle
+          :aria-label="t(collapsed ? 'common.expandSidebar' : 'common.collapseSidebar')"
+          @click="emit('toggle')"
+        >
           <template #icon>
             <n-icon>
               <PanelLeftOpen v-if="collapsed"></PanelLeftOpen>
@@ -58,7 +63,7 @@ const emit = defineEmits<{
 
 const route = useRoute();
 const router = useRouter();
-const { rt, tm } = useI18n();
+const { rt, t, tm } = useI18n();
 const activeMenu = computed(() => route.path);
 const defaultExpandedKeys = ref<Array<string>>([]);
 const menuOptions = ref<MenuOption[]>([]);

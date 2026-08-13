@@ -64,7 +64,6 @@
           </n-form-item>
 
           <div class="form-options">
-            <n-checkbox>{{ t("login.rememberMe") }}</n-checkbox>
             <n-button text type="primary">
               {{ t("login.forgotPassword") }}
             </n-button>
@@ -89,7 +88,7 @@
 </template>
 
 <script setup lang="ts">
-import { NButton, NCard, NCheckbox, NDropdown, NForm, NFormItem, NIcon, NInput, NText } from "naive-ui";
+import { NButton, NCard, NDropdown, NForm, NFormItem, NIcon, NInput, NText } from "naive-ui";
 import type { FormInst, FormRules } from "naive-ui";
 import { Languages, Moon, Sun } from "@lucide/vue";
 import { computed, inject, reactive, ref, type Ref } from "vue";
@@ -208,7 +207,7 @@ const handleLogin = async () => {
 .form-options {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin: 0 0 24px;
 }
 

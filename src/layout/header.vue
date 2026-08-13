@@ -36,7 +36,7 @@
       <n-dropdown trigger="click" :options="userOptions" @select="handleUserAction">
         <button class="user-summary" type="button" :aria-label="userStore.user.username">
           <n-skeleton v-if="userStore.isLoading" circle width="28px" height="28px" />
-          <n-avatar v-else round size="small">S</n-avatar>
+          <n-avatar v-else round size="small">{{ avatarInitial }}</n-avatar>
           <n-skeleton v-if="userStore.isLoading" text width="72px" />
           <span v-else>{{ userStore.user.username }}</span>
         </button>
@@ -57,6 +57,7 @@ import { useUserStore } from "@/stores/users.ts";
 const { t, locale } = useI18n();
 const isLoggingOut = ref(false);
 const userStore = useUserStore();
+const avatarInitial = computed(() => Array.from(userStore.user.username.trim())[0]?.toUpperCase() ?? "");
 const userOptions = computed<Array<DropdownOption>>(() => [
   {
     label: t("common.logout"),

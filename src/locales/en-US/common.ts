@@ -4,6 +4,9 @@ export const common = {
   username: "Username",
   success: "Operation successful",
   internalError: "Internal server error",
+  menuLoading: "Loading menu",
+  expandSidebar: "Expand sidebar",
+  collapseSidebar: "Collapse sidebar",
 };
 
 export const theme = {
