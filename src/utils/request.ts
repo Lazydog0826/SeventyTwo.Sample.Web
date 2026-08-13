@@ -83,8 +83,8 @@ function redirectToAuthPage() {
 export const kyInstance = ky.create({
   // 所有相对请求地址均基于该环境变量解析。
   baseUrl: import.meta.env.VITE_API_BASE_URL,
-  // 单次网络请求最多等待 5 秒。
-  timeout: 5000,
+  // 单次网络请求最多等待 10 秒。
+  timeout: 10000,
   // 跨域请求携带 Cookie，刷新 Token 可由 HttpOnly Cookie 保存。
   credentials: "include",
   retry: {
