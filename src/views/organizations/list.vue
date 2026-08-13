@@ -17,7 +17,7 @@
             clearable
           />
         </n-space>
-        <n-button v-if="canCreate" type="primary" @click="openCreate">
+        <n-button v-if="canCreate" :disabled="actionLoading" type="primary" @click="openCreate">
           {{ t("organizations.actions.create") }}
         </n-button>
       </div>
@@ -84,11 +84,21 @@
       </template>
     </n-modal>
 
-    <n-modal v-model:show="showDeleteConfirm" :title="t('organizations.delete.title')" preset="dialog" type="warning">
+    <n-modal
+      v-model:show="showDeleteConfirm"
+      :close-on-esc="!deleting"
+      :closable="!deleting"
+      :mask-closable="!deleting"
+      :title="t('organizations.delete.title')"
+      preset="dialog"
+      type="warning"
+    >
       {{ t("organizations.delete.content", { name: deletingOrganization?.name ?? "" }) }}
       <template #action>
         <n-space justify="end">
-          <n-button @click="showDeleteConfirm = false">{{ t("organizations.actions.cancel") }}</n-button>
+          <n-button :disabled="deleting" @click="showDeleteConfirm = false">
+            {{ t("organizations.actions.cancel") }}
+          </n-button>
           <n-button :loading="deleting" type="error" @click="confirmDelete">
             {{ t("organizations.actions.delete") }}
           </n-button>
@@ -155,6 +165,8 @@ const loading = ref(false);
 const submitting = ref(false);
 const deleting = ref(false);
 const editingLoadingId = ref<string | null>(null);
+// 表格操作互斥：详情加载期间禁用全部操作按钮。
+const actionLoading = computed(() => editingLoadingId.value !== null);
 let editRequestSequence = 0;
 const showEditor = ref(false);
 const showDeleteConfirm = ref(false);
@@ -248,8 +260,7 @@ const columns = computed<DataTableColumns<OrganizationTreeNode>>(() => {
                   {
                     text: true,
                     type: "primary",
-                    loading: editingLoadingId.value === row.id,
-                    disabled: editingLoadingId.value === row.id,
+                    disabled: actionLoading.value,
                     onClick: () => openEdit(row),
                   },
                   { default: () => t("organizations.actions.edit") }
@@ -258,7 +269,7 @@ const columns = computed<DataTableColumns<OrganizationTreeNode>>(() => {
             canDelete.value
               ? h(
                   NButton,
-                  { text: true, type: "error", onClick: () => openDelete(row) },
+                  { text: true, type: "error", disabled: actionLoading.value, onClick: () => openDelete(row) },
                   { default: () => t("organizations.actions.delete") }
                 )
               : null,
@@ -345,6 +356,7 @@ function collectExpandableKeys(nodes: OrganizationTreeNode[]): DataTableRowKey[]
 }
 
 function openCreate() {
+  if (actionLoading.value) return;
   editRequestSequence++;
   editingLoadingId.value = null;
   editingOrganization.value = null;
@@ -353,10 +365,11 @@ function openCreate() {
 }
 
 async function openEdit(organization: OrganizationListOutput) {
-  if (editingLoadingId.value === organization.id) return;
+  if (actionLoading.value) return;
   const requestSequence = ++editRequestSequence;
   showEditor.value = false;
   editingLoadingId.value = organization.id;
+  const loadingMessage = window.$message.loading(t("common.loading"), { duration: 0 });
   try {
     const detail = await getOrganizationDetail(organization.id);
     if (!detail || requestSequence !== editRequestSequence) return;
@@ -366,11 +379,13 @@ async function openEdit(organization: OrganizationListOutput) {
   } catch {
     // 错误由统一请求处理展示，详情失败时保持编辑弹窗关闭。
   } finally {
+    loadingMessage.destroy();
     if (requestSequence === editRequestSequence) editingLoadingId.value = null;
   }
 }
 
 function openDelete(organization: OrganizationListOutput) {
+  if (actionLoading.value) return;
   deletingOrganization.value = organization;
   showDeleteConfirm.value = true;
 }
@@ -401,7 +416,7 @@ async function submitEditor() {
 }
 
 async function confirmDelete() {
-  if (!deletingOrganization.value) return;
+  if (!deletingOrganization.value || deleting.value) return;
   deleting.value = true;
   try {
     await deleteOrganization(deletingOrganization.value.id);

@@ -24,7 +24,7 @@
             clearable
           />
         </n-space>
-        <n-button v-if="canCreate" type="primary" @click="openCreate">
+        <n-button v-if="canCreate" :disabled="actionLoading" type="primary" @click="openCreate">
           {{ t("permissions.actions.create") }}
         </n-button>
       </div>
@@ -120,11 +120,21 @@
       </template>
     </n-modal>
 
-    <n-modal v-model:show="showDeleteConfirm" :title="t('permissions.delete.title')" preset="dialog" type="warning">
+    <n-modal
+      v-model:show="showDeleteConfirm"
+      :close-on-esc="!deleting"
+      :closable="!deleting"
+      :mask-closable="!deleting"
+      :title="t('permissions.delete.title')"
+      preset="dialog"
+      type="warning"
+    >
       {{ t("permissions.delete.content", { title: deletingPermission?.title ?? "" }) }}
       <template #action>
         <n-space justify="end">
-          <n-button @click="showDeleteConfirm = false">{{ t("permissions.actions.cancel") }}</n-button>
+          <n-button :disabled="deleting" @click="showDeleteConfirm = false">
+            {{ t("permissions.actions.cancel") }}
+          </n-button>
           <n-button :loading="deleting" type="error" @click="confirmDelete">
             {{ t("permissions.actions.delete") }}
           </n-button>
@@ -197,6 +207,8 @@ const loading = ref(false);
 const submitting = ref(false);
 const deleting = ref(false);
 const editingLoadingId = ref<string | null>(null);
+// 表格操作互斥：详情加载期间禁用全部操作按钮。
+const actionLoading = computed(() => editingLoadingId.value !== null);
 let editRequestSequence = 0;
 const permissions = ref<PermissionListOutput[]>([]);
 const expandedRowKeys = ref<DataTableRowKey[]>([]);
@@ -350,8 +362,7 @@ const columns = computed<DataTableColumns<PermissionTreeNode>>(() => {
                   {
                     text: true,
                     type: "primary",
-                    loading: editingLoadingId.value === row.id,
-                    disabled: editingLoadingId.value === row.id,
+                    disabled: actionLoading.value,
                     onClick: () => openEdit(row),
                   },
                   { default: () => t("permissions.actions.edit") }
@@ -360,7 +371,7 @@ const columns = computed<DataTableColumns<PermissionTreeNode>>(() => {
             canDelete.value
               ? h(
                   NButton,
-                  { text: true, type: "error", onClick: () => openDelete(row) },
+                  { text: true, type: "error", disabled: actionLoading.value, onClick: () => openDelete(row) },
                   { default: () => t("permissions.actions.delete") }
                 )
               : null,
@@ -462,6 +473,7 @@ function collectExpandableKeys(nodes: PermissionTreeNode[]): DataTableRowKey[] {
 }
 
 function openCreate() {
+  if (actionLoading.value) return;
   editRequestSequence++;
   editingLoadingId.value = null;
   Object.assign(formModel, createEmptyForm());
@@ -469,10 +481,11 @@ function openCreate() {
 }
 
 async function openEdit(permission: PermissionListOutput) {
-  if (editingLoadingId.value === permission.id) return;
+  if (actionLoading.value) return;
   const requestSequence = ++editRequestSequence;
   showEditor.value = false;
   editingLoadingId.value = permission.id;
+  const loadingMessage = window.$message.loading(t("common.loading"), { duration: 0 });
   try {
     const detail = await getPermissionDetail(permission.id);
     if (!detail || requestSequence !== editRequestSequence) return;
@@ -484,6 +497,7 @@ async function openEdit(permission: PermissionListOutput) {
   } catch {
     // 错误由统一请求处理展示，详情失败时保持编辑弹窗关闭。
   } finally {
+    loadingMessage.destroy();
     if (requestSequence === editRequestSequence) editingLoadingId.value = null;
   }
 }
@@ -498,6 +512,7 @@ function renderIconOption(option: SelectOption) {
 }
 
 function openDelete(permission: PermissionListOutput) {
+  if (actionLoading.value) return;
   deletingPermission.value = permission;
   showDeleteConfirm.value = true;
 }
@@ -534,7 +549,7 @@ async function submitEditor() {
 }
 
 async function confirmDelete() {
-  if (!deletingPermission.value) return;
+  if (!deletingPermission.value || deleting.value) return;
   deleting.value = true;
   try {
     await deletePermission(deletingPermission.value.id);

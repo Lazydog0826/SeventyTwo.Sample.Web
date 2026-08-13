@@ -132,6 +132,9 @@
 
     <n-modal
       v-model:show="showDictionaryDelete"
+      :close-on-esc="!deleting"
+      :closable="!deleting"
+      :mask-closable="!deleting"
       :title="t('dataDictionaries.delete.dictionaryTitle')"
       preset="dialog"
       type="warning"
@@ -139,7 +142,9 @@
       {{ t("dataDictionaries.delete.dictionaryContent", { name: deletingDictionary?.name ?? "" }) }}
       <template #action>
         <n-space justify="end">
-          <n-button @click="showDictionaryDelete = false">{{ t("dataDictionaries.actions.cancel") }}</n-button>
+          <n-button :disabled="deleting" @click="showDictionaryDelete = false">
+            {{ t("dataDictionaries.actions.cancel") }}
+          </n-button>
           <n-button :loading="deleting" type="error" @click="confirmDeleteDictionary">{{
             t("dataDictionaries.actions.delete")
           }}</n-button>
@@ -149,6 +154,9 @@
 
     <n-modal
       v-model:show="showItemDelete"
+      :close-on-esc="!deleting"
+      :closable="!deleting"
+      :mask-closable="!deleting"
       :title="t('dataDictionaries.delete.itemTitle')"
       preset="dialog"
       type="warning"
@@ -156,7 +164,9 @@
       {{ t("dataDictionaries.delete.itemContent", { label: deletingItem?.label ?? "" }) }}
       <template #action>
         <n-space justify="end">
-          <n-button @click="showItemDelete = false">{{ t("dataDictionaries.actions.cancel") }}</n-button>
+          <n-button :disabled="deleting" @click="showItemDelete = false">
+            {{ t("dataDictionaries.actions.cancel") }}
+          </n-button>
           <n-button :loading="deleting" type="error" @click="confirmDeleteItem">{{
             t("dataDictionaries.actions.delete")
           }}</n-button>
@@ -556,7 +566,7 @@ async function submitItem() {
 }
 
 async function confirmDeleteDictionary() {
-  if (!deletingDictionary.value) return;
+  if (!deletingDictionary.value || deleting.value) return;
   deleting.value = true;
   try {
     await deleteDataDictionary(deletingDictionary.value.id);
@@ -574,7 +584,7 @@ async function confirmDeleteDictionary() {
 }
 
 async function confirmDeleteItem() {
-  if (!selectedDictionary.value || !deletingItem.value) return;
+  if (!selectedDictionary.value || !deletingItem.value || deleting.value) return;
   deleting.value = true;
   try {
     const result = await deleteDataDictionaryItem({

@@ -12,7 +12,9 @@
             clearable
           />
         </n-space>
-        <n-button v-if="canCreate" type="primary" @click="openCreate">{{ t("users.actions.create") }}</n-button>
+        <n-button v-if="canCreate" :disabled="actionLoading" type="primary" @click="openCreate">
+          {{ t("users.actions.create") }}
+        </n-button>
       </div>
       <n-data-table
         :columns="columns"
@@ -120,11 +122,20 @@
       </template>
     </n-modal>
 
-    <n-modal v-model:show="showDeleteConfirm" :title="t('users.delete.title')" preset="dialog" type="warning">
+    <n-modal
+      v-model:show="showDeleteConfirm"
+      :close-on-esc="!deleting"
+      :closable="!deleting"
+      :mask-closable="!deleting"
+      :show-icon="true"
+      :title="t('users.delete.title')"
+      preset="dialog"
+      type="warning"
+    >
       {{ t("users.delete.content", { name: deletingUser?.displayName ?? "" }) }}
       <template #action
         ><n-space justify="end"
-          ><n-button @click="showDeleteConfirm = false">{{ t("users.actions.cancel") }}</n-button
+          ><n-button :disabled="deleting" @click="showDeleteConfirm = false">{{ t("users.actions.cancel") }}</n-button
           ><n-button :loading="deleting" type="error" @click="confirmDelete">{{
             t("users.actions.delete")
           }}</n-button></n-space
@@ -134,6 +145,9 @@
 
     <n-modal
       v-model:show="showResetPasswordConfirm"
+      :close-on-esc="!resettingPassword"
+      :closable="!resettingPassword"
+      :mask-closable="!resettingPassword"
       :title="t('users.resetPassword.confirmTitle')"
       preset="dialog"
       type="warning"
@@ -141,7 +155,9 @@
       {{ t("users.resetPassword.confirmContent", { name: resettingUser?.displayName ?? "" }) }}
       <template #action>
         <n-space justify="end">
-          <n-button @click="showResetPasswordConfirm = false">{{ t("users.actions.cancel") }}</n-button>
+          <n-button :disabled="resettingPassword" @click="showResetPasswordConfirm = false">
+            {{ t("users.actions.cancel") }}
+          </n-button>
           <n-button :loading="resettingPassword" type="warning" @click="confirmResetPassword">
             {{ t("users.actions.resetPassword") }}
           </n-button>
@@ -250,6 +266,10 @@ const showResetPasswordConfirm = ref(false);
 const showResetPasswordResult = ref(false);
 const showAuthorization = ref(false);
 const authorizationLoading = ref(false);
+// 表格操作互斥：任一异步操作执行期间禁用全部操作控件。
+const actionLoading = computed(
+  () => editingLoadingId.value !== null || authorizationLoading.value || enablingIds.value.size > 0
+);
 const authorizationSaving = ref(false);
 const authorizingUser = ref<UserListOutput | null>(null);
 const authorizationOptions = ref<TreeOption[]>([]);
@@ -359,7 +379,7 @@ const columns = computed<DataTableColumns<UserListOutput>>(() => {
         canUpdate.value
           ? h(NSwitch, {
               value: row.enable,
-              disabled: row.username === SystemUsername.SuperAdmin,
+              disabled: row.username === SystemUsername.SuperAdmin || actionLoading.value,
               loading: enablingIds.value.has(row.id),
               "onUpdate:value": value => changeEnable(row, value),
             })
@@ -385,8 +405,7 @@ const columns = computed<DataTableColumns<UserListOutput>>(() => {
                   {
                     text: true,
                     type: "primary",
-                    loading: editingLoadingId.value === row.id,
-                    disabled: row.username === SystemUsername.SuperAdmin || editingLoadingId.value === row.id,
+                    disabled: row.username === SystemUsername.SuperAdmin || actionLoading.value,
                     onClick: () => openEdit(row),
                   },
                   { default: () => t("users.actions.edit") }
@@ -398,7 +417,7 @@ const columns = computed<DataTableColumns<UserListOutput>>(() => {
                   {
                     text: true,
                     type: "error",
-                    disabled: row.username === SystemUsername.SuperAdmin,
+                    disabled: row.username === SystemUsername.SuperAdmin || actionLoading.value,
                     onClick: () => openDelete(row),
                   },
                   { default: () => t("users.actions.delete") }
@@ -410,8 +429,7 @@ const columns = computed<DataTableColumns<UserListOutput>>(() => {
                   {
                     text: true,
                     type: "primary",
-                    loading: authorizationLoading.value && authorizingUser.value?.id === row.id,
-                    disabled: authorizationLoading.value,
+                    disabled: actionLoading.value,
                     onClick: () => openAuthorization(row),
                   },
                   { default: () => t("users.actions.authorize") }
@@ -423,7 +441,7 @@ const columns = computed<DataTableColumns<UserListOutput>>(() => {
                   {
                     text: true,
                     type: "warning",
-                    disabled: row.username === SystemUsername.SuperAdmin || resettingPassword.value,
+                    disabled: row.username === SystemUsername.SuperAdmin || resettingPassword.value || actionLoading.value,
                     onClick: () => openResetPassword(row),
                   },
                   { default: () => t("users.actions.resetPassword") }
@@ -452,16 +470,18 @@ function emptyForm(): UserFormModel {
   };
 }
 function openCreate() {
+  if (actionLoading.value) return;
   editRequestSequence++;
   editingLoadingId.value = null;
   Object.assign(formModel, emptyForm());
   showEditor.value = true;
 }
 async function openEdit(user: UserListOutput) {
-  if (editingLoadingId.value === user.id) return;
+  if (actionLoading.value) return;
   const requestSequence = ++editRequestSequence;
   showEditor.value = false;
   editingLoadingId.value = user.id;
+  const loadingMessage = window.$message.loading(t("common.loading"), { duration: 0 });
   try {
     const detail = await getUserDetail(user.id);
     if (!detail || requestSequence !== editRequestSequence) return;
@@ -470,19 +490,22 @@ async function openEdit(user: UserListOutput) {
   } catch {
     // 错误由统一请求处理展示，详情失败时保持编辑弹窗关闭。
   } finally {
+    loadingMessage.destroy();
     if (requestSequence === editRequestSequence) editingLoadingId.value = null;
   }
 }
 function openDelete(user: UserListOutput) {
+  if (actionLoading.value) return;
   deletingUser.value = user;
   showDeleteConfirm.value = true;
 }
 function openResetPassword(user: UserListOutput) {
+  if (actionLoading.value) return;
   resettingUser.value = user;
   showResetPasswordConfirm.value = true;
 }
 async function confirmResetPassword() {
-  if (!resettingUser.value) return;
+  if (!resettingUser.value || resettingPassword.value) return;
   resettingPassword.value = true;
   try {
     const result = await resetUserPassword(resettingUser.value.id, resettingUser.value.version);
@@ -505,13 +528,14 @@ async function copyResetPassword() {
   }
 }
 async function openAuthorization(user: UserListOutput) {
+  if (actionLoading.value) return;
   authorizingUser.value = user;
   authorizationOptions.value = [];
   authorizationCheckedKeys.value = [];
   authorizationIndeterminateKeys.value = [];
   authorizationSelectedIds.value = new Set();
-  showAuthorization.value = true;
   authorizationLoading.value = true;
+  const loadingMessage = window.$message.loading(t("common.loading"), { duration: 0 });
   try {
     const data = await getUserAuthorization(user.id);
     if (!data) {
@@ -523,10 +547,12 @@ async function openAuthorization(user: UserListOutput) {
     authorizationOptions.value = buildPermissionOptions(data.permissions);
     authorizationSelectedIds.value = new Set(data.permissionIds);
     syncAuthorizationTreeState();
+    showAuthorization.value = true;
   } catch {
     showAuthorization.value = false;
     authorizingUser.value = null;
   } finally {
+    loadingMessage.destroy();
     authorizationLoading.value = false;
   }
 }
@@ -670,6 +696,7 @@ async function submitEditor() {
   }
 }
 async function changeEnable(user: UserListOutput, enable: boolean) {
+  if (actionLoading.value) return;
   enablingIds.value = new Set(enablingIds.value).add(user.id);
   try {
     await setUserEnable(user.id, enable, user.version);
@@ -682,7 +709,7 @@ async function changeEnable(user: UserListOutput, enable: boolean) {
   }
 }
 async function confirmDelete() {
-  if (!deletingUser.value) return;
+  if (!deletingUser.value || deleting.value) return;
   deleting.value = true;
   try {
     await deleteUser(deletingUser.value.id, deletingUser.value.version);
