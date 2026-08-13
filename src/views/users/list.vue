@@ -3,14 +3,25 @@
     <n-card :bordered="false" :title="t('users.title')">
       <div class="toolbar">
         <n-space :wrap="true">
-          <n-input v-model:value="keyword" :placeholder="t('users.filters.keyword')" class="keyword-input" clearable />
+          <n-input
+            v-model:value="keyword"
+            :disabled="actionLoading"
+            :placeholder="t('users.filters.keyword')"
+            class="keyword-input"
+            clearable
+          />
           <n-select
             v-model:value="statusFilter"
+            :disabled="actionLoading"
             :options="statusOptions"
             :placeholder="t('users.filters.status')"
             class="status-select"
             clearable
           />
+          <n-button :disabled="actionLoading" type="primary" @click="searchUsers">{{
+            t("users.actions.search")
+          }}</n-button>
+          <n-button :disabled="actionLoading" @click="resetFilters">{{ t("users.actions.reset") }}</n-button>
         </n-space>
         <n-button v-if="canCreate" :disabled="actionLoading" type="primary" @click="openCreate">
           {{ t("users.actions.create") }}
@@ -18,8 +29,10 @@
       </div>
       <n-data-table
         :columns="columns"
-        :data="filteredUsers"
+        :data="users"
         :loading="loading"
+        :pagination="pagination"
+        remote
         :row-key="row => row.id"
         :scroll-x="hasActions ? 1160 : 830"
         striped
@@ -190,6 +203,7 @@ import {
   type DataTableColumns,
   type FormInst,
   type FormRules,
+  type PaginationProps,
   NAlert,
   NButton,
   NCard,
@@ -251,6 +265,26 @@ const organizations = ref<OrganizationListOutput[]>([]);
 const defaultPages = ref<DefaultPageOptionOutput[]>([]);
 const keyword = ref("");
 const statusFilter = ref<StatusFilter | null>(null);
+const appliedKeyword = ref("");
+const appliedStatus = ref<StatusFilter | null>(null);
+const pagination = reactive<PaginationProps>({
+  page: 1,
+  pageSize: 20,
+  itemCount: 0,
+  pageSizes: [10, 20, 50, 100],
+  showSizePicker: true,
+  onChange: page => {
+    if (actionLoading.value) return;
+    pagination.page = page;
+    void loadUsers();
+  },
+  onUpdatePageSize: pageSize => {
+    if (actionLoading.value) return;
+    pagination.pageSize = pageSize;
+    pagination.page = 1;
+    void loadUsers();
+  },
+});
 const loading = ref(false);
 const organizationsLoading = ref(false);
 const defaultPagesLoading = ref(false);
@@ -266,9 +300,17 @@ const showResetPasswordConfirm = ref(false);
 const showResetPasswordResult = ref(false);
 const showAuthorization = ref(false);
 const authorizationLoading = ref(false);
-// 表格操作互斥：任一异步操作执行期间禁用全部操作控件。
+// 页面操作统一互斥，避免列表刷新与增删改等异步请求并发修改界面状态。
 const actionLoading = computed(
-  () => editingLoadingId.value !== null || authorizationLoading.value || enablingIds.value.size > 0
+  () =>
+    loading.value ||
+    submitting.value ||
+    deleting.value ||
+    resettingPassword.value ||
+    editingLoadingId.value !== null ||
+    authorizationLoading.value ||
+    authorizationSaving.value ||
+    enablingIds.value.size > 0
 );
 const authorizationSaving = ref(false);
 const authorizingUser = ref<UserListOutput | null>(null);
@@ -288,18 +330,7 @@ const canDelete = computed(() => permissionsStore.hasPermission(PermissionCode.U
 const canAuthorize = computed(() => permissionsStore.hasPermission(PermissionCode.UsersAuthorize));
 const canResetPassword = computed(() => permissionsStore.hasPermission(PermissionCode.UsersResetPassword));
 const hasActions = computed(() => canUpdate.value || canAuthorize.value || canResetPassword.value || canDelete.value);
-const hasFilter = computed(() => Boolean(keyword.value.trim()) || statusFilter.value !== null);
-const filteredUsers = computed(() => {
-  const value = keyword.value.trim().toLocaleLowerCase();
-  return users.value.filter(
-    user =>
-      (!value ||
-        [user.username, user.displayName, user.phone, user.email].some(field =>
-          field.toLocaleLowerCase().includes(value)
-        )) &&
-      (statusFilter.value === null || (statusFilter.value === "enabled" ? user.enable : !user.enable))
-  );
-});
+const hasFilter = computed(() => Boolean(appliedKeyword.value) || appliedStatus.value !== null);
 const emptyDescription = computed(() => t(hasFilter.value ? "users.empty.filtered" : "users.empty.data"));
 const editorTitle = computed(() => t(formModel.id ? "users.editor.updateTitle" : "users.editor.createTitle"));
 const statusOptions = computed(() => [
@@ -724,11 +755,41 @@ async function confirmDelete() {
 }
 async function loadUsers() {
   loading.value = true;
+  pagination.disabled = true;
   try {
-    users.value = (await getUserList()) ?? [];
+    const result = await getUserList({
+      index: pagination.page ?? 1,
+      limit: pagination.pageSize ?? 20,
+      keyword: appliedKeyword.value || undefined,
+      enable: appliedStatus.value === null ? undefined : appliedStatus.value === "enabled",
+    });
+    users.value = result?.list ?? [];
+    pagination.itemCount = result?.total ?? 0;
+    const lastPage = Math.max(1, Math.ceil((pagination.itemCount ?? 0) / (pagination.pageSize ?? 20)));
+    if ((pagination.page ?? 1) > lastPage) {
+      pagination.page = lastPage;
+      await loadUsers();
+    }
   } finally {
     loading.value = false;
+    pagination.disabled = false;
   }
+}
+function searchUsers() {
+  if (actionLoading.value) return;
+  appliedKeyword.value = keyword.value.trim();
+  appliedStatus.value = statusFilter.value;
+  pagination.page = 1;
+  void loadUsers();
+}
+function resetFilters() {
+  if (actionLoading.value) return;
+  keyword.value = "";
+  statusFilter.value = null;
+  appliedKeyword.value = "";
+  appliedStatus.value = null;
+  pagination.page = 1;
+  void loadUsers();
 }
 async function loadOrganizations() {
   organizationsLoading.value = true;

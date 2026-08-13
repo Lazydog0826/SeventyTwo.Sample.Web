@@ -1,6 +1,7 @@
 // noinspection JSUnusedGlobalSymbols
 
 import http from "@/utils/request";
+import type { PageRequest, PageResponse } from "@/api/paging.ts";
 
 export interface DataDictionaryListOutput {
   id: string;
@@ -52,8 +53,15 @@ export interface DataDictionaryOptionOutput {
 
 const basePath = "/api/dataDictionaries";
 
-export function getDataDictionaryList() {
-  return http.get<DataDictionaryListOutput[]>(`${basePath}/list`);
+export function getDataDictionaryList(request: PageRequest) {
+  return http.get<PageResponse<DataDictionaryListOutput>>(`${basePath}/list`, {
+    searchParams: {
+      index: request.index,
+      limit: request.limit,
+      keyword: request.keyword,
+      enable: request.enable,
+    },
+  });
 }
 
 export function getDataDictionaryItems(id: string) {

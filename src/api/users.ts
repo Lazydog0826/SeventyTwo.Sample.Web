@@ -2,6 +2,7 @@
 
 import http from "@/utils/request";
 import type { PermissionListOutput } from "@/api/permissions.ts";
+import type { PageRequest, PageResponse } from "@/api/paging.ts";
 
 /** 用户登录请求。 */
 export interface LoginRequest {
@@ -84,8 +85,15 @@ export function logout() {
   return http.post<void>("/api/users/Logout");
 }
 
-export function getUserList() {
-  return http.get<UserListOutput[]>("/api/users/list");
+export function getUserList(request: PageRequest) {
+  return http.get<PageResponse<UserListOutput>>("/api/users/list", {
+    searchParams: {
+      index: request.index,
+      limit: request.limit,
+      keyword: request.keyword,
+      enable: request.enable,
+    },
+  });
 }
 export function getDefaultPageOptions() {
   return http.get<DefaultPageOptionOutput[]>("/api/users/default-page-options");

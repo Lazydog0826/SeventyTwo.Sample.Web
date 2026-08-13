@@ -8,26 +8,36 @@
             <n-space :wrap="true">
               <n-input
                 v-model:value="keyword"
+                :disabled="actionLoading"
                 :placeholder="t('dataDictionaries.filters.keyword')"
                 class="keyword-input"
                 clearable
               />
               <n-select
                 v-model:value="statusFilter"
+                :disabled="actionLoading"
                 :options="statusOptions"
                 :placeholder="t('dataDictionaries.filters.status')"
                 class="status-select"
                 clearable
               />
+              <n-button :disabled="actionLoading" type="primary" @click="searchDictionaries">{{
+                t("dataDictionaries.actions.search")
+              }}</n-button>
+              <n-button :disabled="actionLoading" @click="resetFilters">{{
+                t("dataDictionaries.actions.reset")
+              }}</n-button>
             </n-space>
-            <n-button v-if="canCreate" type="primary" @click="openCreateDictionary">
+            <n-button v-if="canCreate" :disabled="actionLoading" type="primary" @click="openCreateDictionary">
               {{ t("dataDictionaries.actions.create") }}
             </n-button>
           </div>
           <n-data-table
             :columns="dictionaryColumns"
-            :data="filteredDictionaries"
+            :data="dictionaries"
             :loading="dictionaryLoading"
+            :pagination="pagination"
+            remote
             :row-key="(row: DataDictionaryListOutput) => row.id"
             :row-props="dictionaryRowProps"
             :scroll-x="canUpdate || canDelete ? 878 : 748"
@@ -42,7 +52,12 @@
       <n-grid-item>
         <n-card :bordered="false" :title="itemCardTitle">
           <template #header-extra>
-            <n-button v-if="selectedDictionary && canUpdate" type="primary" @click="openCreateItem">
+            <n-button
+              v-if="selectedDictionary && canUpdate"
+              :disabled="actionLoading"
+              type="primary"
+              @click="openCreateItem"
+            >
               {{ t("dataDictionaries.actions.createItem") }}
             </n-button>
           </template>
@@ -183,6 +198,7 @@ import {
   type DataTableColumns,
   type FormInst,
   type FormRules,
+  type PaginationProps,
   NButton,
   NCard,
   NDataTable,
@@ -239,6 +255,26 @@ const items = ref<DataDictionaryItemOutput[]>([]);
 const selectedDictionaryId = ref<string | null>(null);
 const keyword = ref("");
 const statusFilter = ref<StatusFilter | null>(null);
+const appliedKeyword = ref("");
+const appliedStatus = ref<StatusFilter | null>(null);
+const pagination = reactive<PaginationProps>({
+  page: 1,
+  pageSize: 20,
+  itemCount: 0,
+  pageSizes: [10, 20, 50, 100],
+  showSizePicker: true,
+  onChange: page => {
+    if (actionLoading.value) return;
+    pagination.page = page;
+    void loadDictionaries();
+  },
+  onUpdatePageSize: pageSize => {
+    if (actionLoading.value) return;
+    pagination.pageSize = pageSize;
+    pagination.page = 1;
+    void loadDictionaries();
+  },
+});
 const dictionaryLoading = ref(false);
 const itemLoading = ref(false);
 const submitting = ref(false);
@@ -258,6 +294,10 @@ let itemLoadSequence = 0;
 const canCreate = computed(() => permissionsStore.hasPermission(PermissionCode.DataDictionariesCreate));
 const canUpdate = computed(() => permissionsStore.hasPermission(PermissionCode.DataDictionariesUpdate));
 const canDelete = computed(() => permissionsStore.hasPermission(PermissionCode.DataDictionariesDelete));
+// 页面操作统一互斥，避免列表、字典项和增删改请求并发修改界面状态。
+const actionLoading = computed(
+  () => dictionaryLoading.value || itemLoading.value || submitting.value || deleting.value
+);
 const selectedDictionary = computed(
   () => dictionaries.value.find(item => item.id === selectedDictionaryId.value) ?? null
 );
@@ -265,21 +305,9 @@ const statusOptions = computed(() => [
   { label: t("dataDictionaries.statuses.enabled"), value: "enabled" },
   { label: t("dataDictionaries.statuses.disabled"), value: "disabled" },
 ]);
-const filteredDictionaries = computed(() => {
-  const normalized = keyword.value.trim().toLocaleLowerCase();
-  return dictionaries.value.filter(item => {
-    const matchesKeyword =
-      !normalized ||
-      item.code.toLocaleLowerCase().includes(normalized) ||
-      item.name.toLocaleLowerCase().includes(normalized);
-    const matchesStatus =
-      statusFilter.value === null || (statusFilter.value === "enabled" ? item.enable : !item.enable);
-    return matchesKeyword && matchesStatus;
-  });
-});
 const dictionaryEmptyDescription = computed(() =>
   t(
-    keyword.value.trim() || statusFilter.value
+    appliedKeyword.value || appliedStatus.value
       ? "dataDictionaries.empty.filtered"
       : "dataDictionaries.empty.dictionaries"
   )
@@ -347,6 +375,7 @@ const dictionaryColumns = computed<DataTableColumns<DataDictionaryListOutput>>((
       render: row =>
         h(NRadio, {
           checked: row.id === selectedDictionaryId.value,
+          disabled: actionLoading.value,
           "aria-label": row.name,
           onClick: (event: MouseEvent) => event.stopPropagation(),
           onUpdateChecked: checked => {
@@ -390,6 +419,7 @@ const dictionaryColumns = computed<DataTableColumns<DataDictionaryListOutput>>((
                   {
                     text: true,
                     type: "primary",
+                    disabled: actionLoading.value,
                     onClick: (event: MouseEvent) => {
                       event.stopPropagation();
                       openEditDictionary(row);
@@ -404,6 +434,7 @@ const dictionaryColumns = computed<DataTableColumns<DataDictionaryListOutput>>((
                   {
                     text: true,
                     type: "error",
+                    disabled: actionLoading.value,
                     onClick: (event: MouseEvent) => {
                       event.stopPropagation();
                       openDeleteDictionary(row);
@@ -444,12 +475,12 @@ const itemColumns = computed<DataTableColumns<DataDictionaryItemOutput>>(() => {
           default: () => [
             h(
               NButton,
-              { text: true, type: "primary", onClick: () => openEditItem(row) },
+              { text: true, type: "primary", disabled: actionLoading.value, onClick: () => openEditItem(row) },
               { default: () => t("dataDictionaries.actions.edit") }
             ),
             h(
               NButton,
-              { text: true, type: "error", onClick: () => openDeleteItem(row) },
+              { text: true, type: "error", disabled: actionLoading.value, onClick: () => openDeleteItem(row) },
               { default: () => t("dataDictionaries.actions.delete") }
             ),
           ],
@@ -470,11 +501,14 @@ function textCell(value: string, maxWidth: number) {
 function dictionaryRowProps(row: DataDictionaryListOutput) {
   return {
     class: row.id === selectedDictionaryId.value ? "selected-row" : "",
-    onClick: () => selectDictionary(row.id),
+    onClick: () => {
+      if (!actionLoading.value) void selectDictionary(row.id);
+    },
   };
 }
 
 async function selectDictionary(id: string) {
+  if (actionLoading.value) return;
   if (selectedDictionaryId.value === id && items.value.length) return;
   if (selectedDictionaryId.value !== id) items.value = [];
   selectedDictionaryId.value = id;
@@ -482,26 +516,32 @@ async function selectDictionary(id: string) {
 }
 
 function openCreateDictionary() {
+  if (actionLoading.value) return;
   Object.assign(dictionaryForm, emptyDictionaryForm());
   showDictionaryEditor.value = true;
 }
 function openEditDictionary(row: DataDictionaryListOutput) {
+  if (actionLoading.value) return;
   Object.assign(dictionaryForm, row);
   showDictionaryEditor.value = true;
 }
 function openDeleteDictionary(row: DataDictionaryListOutput) {
+  if (actionLoading.value) return;
   deletingDictionary.value = row;
   showDictionaryDelete.value = true;
 }
 function openCreateItem() {
+  if (actionLoading.value) return;
   Object.assign(itemForm, emptyItemForm());
   showItemEditor.value = true;
 }
 function openEditItem(row: DataDictionaryItemOutput) {
+  if (actionLoading.value) return;
   Object.assign(itemForm, row);
   showItemEditor.value = true;
 }
 function openDeleteItem(row: DataDictionaryItemOutput) {
+  if (actionLoading.value) return;
   deletingItem.value = row;
   showItemDelete.value = true;
 }
@@ -608,15 +648,48 @@ async function confirmDeleteItem() {
 
 async function loadDictionaries() {
   dictionaryLoading.value = true;
+  pagination.disabled = true;
   try {
-    dictionaries.value = (await getDataDictionaryList()) ?? [];
+    const result = await getDataDictionaryList({
+      index: pagination.page ?? 1,
+      limit: pagination.pageSize ?? 20,
+      keyword: appliedKeyword.value || undefined,
+      enable: appliedStatus.value === null ? undefined : appliedStatus.value === "enabled",
+    });
+    dictionaries.value = result?.list ?? [];
+    pagination.itemCount = result?.total ?? 0;
+    const lastPage = Math.max(1, Math.ceil((pagination.itemCount ?? 0) / (pagination.pageSize ?? 20)));
+    if ((pagination.page ?? 1) > lastPage) {
+      pagination.page = lastPage;
+      await loadDictionaries();
+      return;
+    }
     if (selectedDictionaryId.value && !dictionaries.value.some(item => item.id === selectedDictionaryId.value))
       selectedDictionaryId.value = null;
     if (!selectedDictionaryId.value && dictionaries.value.length) selectedDictionaryId.value = dictionaries.value[0].id;
     if (selectedDictionaryId.value) await loadItems();
   } finally {
     dictionaryLoading.value = false;
+    pagination.disabled = false;
   }
+}
+
+function searchDictionaries() {
+  if (actionLoading.value) return;
+  appliedKeyword.value = keyword.value.trim();
+  appliedStatus.value = statusFilter.value;
+  pagination.page = 1;
+  void loadDictionaries();
+}
+
+function resetFilters() {
+  if (actionLoading.value) return;
+  keyword.value = "";
+  statusFilter.value = null;
+  appliedKeyword.value = "";
+  appliedStatus.value = null;
+  pagination.page = 1;
+  void loadDictionaries();
 }
 
 async function loadItems() {

@@ -22,6 +22,8 @@ export default {
     delete: "Delete",
     cancel: "Cancel",
     save: "Save",
+    search: "Search",
+    reset: "Reset",
   },
   editor: { createTitle: "New user", updateTitle: "Edit user" },
   form: {

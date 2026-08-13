@@ -15,7 +15,16 @@ export default {
     actions: "操作",
   },
   statuses: { enabled: "启用", disabled: "禁用" },
-  actions: { create: "新增字典", createItem: "新增字典项", edit: "编辑", delete: "删除", save: "保存", cancel: "取消" },
+  actions: {
+    create: "新增字典",
+    createItem: "新增字典项",
+    edit: "编辑",
+    delete: "删除",
+    save: "保存",
+    cancel: "取消",
+    search: "查询",
+    reset: "重置",
+  },
   editor: {
     createTitle: "新增字典",
     updateTitle: "编辑字典",

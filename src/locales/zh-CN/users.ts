@@ -11,6 +11,8 @@ export default {
     delete: "删除",
     cancel: "取消",
     save: "保存",
+    search: "查询",
+    reset: "重置",
     copy: "复制密码",
     close: "关闭",
   },
