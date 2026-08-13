@@ -2,9 +2,9 @@
   <slot v-if="hasPermission"></slot>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { computed, onMounted } from "vue";
-import { usePermissionsStore, type PermissionMatchMode } from "@/stores/permissions.ts";
+import { type PermissionMatchMode, usePermissionsStore } from "@/stores/permissions.ts";
 
 const permissionsStore = usePermissionsStore();
 
@@ -30,4 +30,4 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped lang="scss"></style>
+<style lang="scss" scoped></style>

@@ -14,7 +14,7 @@
       <article v-for="item in metrics" :key="item.id" class="metric-card">
         <div class="metric-card__top">
           <span>{{ item.label }}</span>
-          <span class="metric-icon" :style="{ color: item.color, backgroundColor: item.background }">
+          <span :style="{ color: item.color, backgroundColor: item.background }" class="metric-icon">
             <component :is="item.icon" :size="19" />
           </span>
         </div>
@@ -42,7 +42,7 @@
             <span><i class="legend-dot legend-dot--cyan"></i>{{ t("home.orderCount") }}</span>
           </div>
         </div>
-        <v-chart class="chart chart--trend" :option="salesOption" autoresize />
+        <v-chart :option="salesOption" autoresize class="chart chart--trend" />
       </article>
 
       <article class="panel">
@@ -51,11 +51,11 @@
             <h2>{{ t("home.orderSource.title") }}</h2>
             <p>{{ t("home.orderSource.description") }}</p>
           </div>
-          <button class="more-button" type="button" :aria-label="t('home.viewMore')">
+          <button :aria-label="t('home.viewMore')" class="more-button" type="button">
             <Ellipsis :size="20" />
           </button>
         </div>
-        <v-chart class="chart chart--pie" :option="sourceOption" autoresize />
+        <v-chart :option="sourceOption" autoresize class="chart chart--pie" />
         <div class="source-legend">
           <div v-for="item in sourceData" :key="item.name">
             <span><i :style="{ backgroundColor: item.itemStyle.color }"></i>{{ item.name }}</span>
@@ -73,7 +73,7 @@
             <p>{{ t("home.channelConversion.description") }}</p>
           </div>
         </div>
-        <v-chart class="chart chart--bar" :option="channelOption" autoresize />
+        <v-chart :option="channelOption" autoresize class="chart chart--bar" />
       </article>
 
       <article class="panel order-panel">
@@ -86,7 +86,7 @@
         </div>
         <div class="order-list">
           <div v-for="order in recentOrders" :key="order.id" class="order-row">
-            <div class="customer-avatar" :style="{ background: order.avatarColor }">{{ order.customer[0] }}</div>
+            <div :style="{ background: order.avatarColor }" class="customer-avatar">{{ order.customer[0] }}</div>
             <div class="order-customer">
               <strong>{{ order.customer }}</strong>
               <span>{{ order.id }}</span>
@@ -101,8 +101,8 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { computed, inject, type Component, type Ref } from "vue";
+<script lang="ts" setup>
+import { type Component, computed, inject, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
 import VChart from "vue-echarts";
 import { use } from "echarts/core";
@@ -365,7 +365,7 @@ const recentOrders = computed(() => [
 ]);
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .dashboard {
   width: 100%;
   max-width: 1600px;

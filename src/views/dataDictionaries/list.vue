@@ -1,23 +1,23 @@
 <!--suppress ExceptionCaughtLocallyJS -->
 <template>
   <div class="data-dictionary-page">
-    <n-grid responsive="self" cols="1 900:2" :x-gap="16" :y-gap="16">
+    <n-grid :x-gap="16" :y-gap="16" cols="1 900:2" responsive="self">
       <n-grid-item>
         <n-card :bordered="false" :title="t('dataDictionaries.dictionaryTitle')">
           <div class="toolbar">
             <n-space :wrap="true">
               <n-input
                 v-model:value="keyword"
-                clearable
                 :placeholder="t('dataDictionaries.filters.keyword')"
                 class="keyword-input"
+                clearable
               />
               <n-select
                 v-model:value="statusFilter"
-                clearable
-                :placeholder="t('dataDictionaries.filters.status')"
                 :options="statusOptions"
+                :placeholder="t('dataDictionaries.filters.status')"
                 class="status-select"
+                clearable
               />
             </n-space>
             <n-button v-if="canCreate" type="primary" @click="openCreateDictionary">
@@ -65,8 +65,8 @@
 
     <n-modal
       v-model:show="showDictionaryEditor"
-      preset="card"
       :title="dictionaryEditorTitle"
+      preset="card"
       style="width: 560px; max-width: calc(100vw - 32px)"
     >
       <n-form
@@ -85,8 +85,8 @@
         <n-form-item :label="t('dataDictionaries.form.description')" path="description">
           <n-input
             v-model:value="dictionaryForm.description"
-            type="textarea"
             :placeholder="t('dataDictionaries.placeholders.description')"
+            type="textarea"
           />
         </n-form-item>
         <n-form-item :label="t('dataDictionaries.form.enable')" path="enable">
@@ -96,7 +96,7 @@
       <template #footer>
         <n-space justify="end">
           <n-button @click="showDictionaryEditor = false">{{ t("dataDictionaries.actions.cancel") }}</n-button>
-          <n-button type="primary" :loading="submitting" @click="submitDictionary">{{
+          <n-button :loading="submitting" type="primary" @click="submitDictionary">{{
             t("dataDictionaries.actions.save")
           }}</n-button>
         </n-space>
@@ -105,8 +105,8 @@
 
     <n-modal
       v-model:show="showItemEditor"
-      preset="card"
       :title="itemEditorTitle"
+      preset="card"
       style="width: 560px; max-width: calc(100vw - 32px)"
     >
       <n-form ref="itemFormRef" :model="itemForm" :rules="itemRules" label-placement="left" label-width="auto">
@@ -123,7 +123,7 @@
       <template #footer>
         <n-space justify="end">
           <n-button @click="showItemEditor = false">{{ t("dataDictionaries.actions.cancel") }}</n-button>
-          <n-button type="primary" :loading="submitting" @click="submitItem">{{
+          <n-button :loading="submitting" type="primary" @click="submitItem">{{
             t("dataDictionaries.actions.save")
           }}</n-button>
         </n-space>
@@ -132,15 +132,15 @@
 
     <n-modal
       v-model:show="showDictionaryDelete"
+      :title="t('dataDictionaries.delete.dictionaryTitle')"
       preset="dialog"
       type="warning"
-      :title="t('dataDictionaries.delete.dictionaryTitle')"
     >
       {{ t("dataDictionaries.delete.dictionaryContent", { name: deletingDictionary?.name ?? "" }) }}
       <template #action>
         <n-space justify="end">
           <n-button @click="showDictionaryDelete = false">{{ t("dataDictionaries.actions.cancel") }}</n-button>
-          <n-button type="error" :loading="deleting" @click="confirmDeleteDictionary">{{
+          <n-button :loading="deleting" type="error" @click="confirmDeleteDictionary">{{
             t("dataDictionaries.actions.delete")
           }}</n-button>
         </n-space>
@@ -149,15 +149,15 @@
 
     <n-modal
       v-model:show="showItemDelete"
+      :title="t('dataDictionaries.delete.itemTitle')"
       preset="dialog"
       type="warning"
-      :title="t('dataDictionaries.delete.itemTitle')"
     >
       {{ t("dataDictionaries.delete.itemContent", { label: deletingItem?.label ?? "" }) }}
       <template #action>
         <n-space justify="end">
           <n-button @click="showItemDelete = false">{{ t("dataDictionaries.actions.cancel") }}</n-button>
-          <n-button type="error" :loading="deleting" @click="confirmDeleteItem">{{
+          <n-button :loading="deleting" type="error" @click="confirmDeleteItem">{{
             t("dataDictionaries.actions.delete")
           }}</n-button>
         </n-space>
@@ -166,10 +166,13 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { computed, h, onMounted, reactive, ref } from "vue";
 import { HTTPError } from "ky";
 import {
+  type DataTableColumns,
+  type FormInst,
+  type FormRules,
   NButton,
   NCard,
   NDataTable,
@@ -187,22 +190,19 @@ import {
   NSpace,
   NSwitch,
   NTag,
-  type DataTableColumns,
-  type FormInst,
-  type FormRules,
 } from "naive-ui";
 import {
   createDataDictionary,
   createDataDictionaryItem,
+  type DataDictionaryItemOutput,
+  type DataDictionaryListOutput,
+  type DataDictionaryMutationInput,
   deleteDataDictionary,
   deleteDataDictionaryItem,
   getDataDictionaryItems,
   getDataDictionaryList,
   updateDataDictionary,
   updateDataDictionaryItem,
-  type DataDictionaryItemOutput,
-  type DataDictionaryListOutput,
-  type DataDictionaryMutationInput,
 } from "@/api/dataDictionaries.ts";
 import { PermissionCode } from "@/constants/permissions.ts";
 import { usePermissionsStore } from "@/stores/permissions.ts";
@@ -410,8 +410,18 @@ const dictionaryColumns = computed<DataTableColumns<DataDictionaryListOutput>>((
 
 const itemColumns = computed<DataTableColumns<DataDictionaryItemOutput>>(() => {
   const columns: DataTableColumns<DataDictionaryItemOutput> = [
-    { title: t("dataDictionaries.columns.value"), key: "value", minWidth: 180, render: row => textCell(row.value, 160) },
-    { title: t("dataDictionaries.columns.label"), key: "label", minWidth: 200, render: row => textCell(row.label, 180) },
+    {
+      title: t("dataDictionaries.columns.value"),
+      key: "value",
+      minWidth: 180,
+      render: row => textCell(row.value, 160),
+    },
+    {
+      title: t("dataDictionaries.columns.label"),
+      key: "label",
+      minWidth: 200,
+      render: row => textCell(row.label, 180),
+    },
     { title: t("dataDictionaries.columns.sortOrder"), key: "sortOrder", minWidth: 90 },
   ];
   if (canUpdate.value)
@@ -661,7 +671,7 @@ async function reloadOnConflict(error: unknown) {
 onMounted(() => Promise.all([loadDictionaries(), permissionsStore.getPermissions()]));
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .data-dictionary-page {
   min-width: 0;
 }

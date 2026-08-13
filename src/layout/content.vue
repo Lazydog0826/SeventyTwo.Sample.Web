@@ -1,7 +1,7 @@
 <template>
   <n-layout-content class="layout-content" content-style="padding: 24px;">
     <router-view v-slot="{ Component, route }">
-      <transition name="content-route" mode="out-in">
+      <transition mode="out-in" name="content-route">
         <div :key="route.matched[route.matched.length - 1]?.path ?? route.path" class="content-route-page">
           <component :is="Component" />
         </div>
@@ -10,11 +10,11 @@
   </n-layout-content>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { NLayoutContent } from "naive-ui";
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .layout-content {
   background-color: var(--color-bg-page);
   height: calc(100vh - 64px);

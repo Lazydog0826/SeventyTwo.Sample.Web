@@ -1,11 +1,11 @@
 <template>
-  <main class="error-page" :lang="locale">
+  <main :lang="locale" class="error-page">
     <div class="error-toolbar">
       <n-button
-        quaternary
-        circle
-        :title="t(isDark ? 'theme.switchToLight' : 'theme.switchToDark')"
         :aria-label="t(isDark ? 'theme.switchToLight' : 'theme.switchToDark')"
+        :title="t(isDark ? 'theme.switchToLight' : 'theme.switchToDark')"
+        circle
+        quaternary
         @click="toggleTheme"
       >
         <template #icon>
@@ -28,9 +28,9 @@
       </n-dropdown>
     </div>
 
-    <n-card class="error-card" :bordered="false">
+    <n-card :bordered="false" class="error-card">
       <div class="error-content">
-        <div class="error-icon error-icon--warning" aria-hidden="true">
+        <div aria-hidden="true" class="error-icon error-icon--warning">
           <ShieldAlert :size="38" :stroke-width="1.8"></ShieldAlert>
         </div>
         <div class="status-code status-code--warning">403</div>
@@ -41,7 +41,7 @@
   </main>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { Languages, Moon, ShieldAlert, Sun } from "@lucide/vue";
 import { NButton, NCard, NDropdown, NIcon, NText } from "naive-ui";
 import { inject, type Ref } from "vue";
@@ -64,7 +64,7 @@ const handleLanguageChange = (key: string | number) => {
 };
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .error-page {
   min-height: 100vh;
   box-sizing: border-box;

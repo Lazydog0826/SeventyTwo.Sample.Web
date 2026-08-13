@@ -1,5 +1,5 @@
 <template>
-  <n-layout class="app-layout" :lang="locale">
+  <n-layout :lang="locale" class="app-layout">
     <layout-header></layout-header>
 
     <n-layout class="app-body" has-sider>
@@ -9,7 +9,7 @@
   </n-layout>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { NLayout } from "naive-ui";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -21,7 +21,7 @@ const { locale } = useI18n();
 const collapsed = ref(false);
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .app-layout {
   height: 100vh;
 }

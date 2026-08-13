@@ -2,26 +2,26 @@
   <div class="permission-list-page">
     <n-card :bordered="false" :title="t('permissions.title')">
       <div class="toolbar">
-        <n-space class="filters" :wrap="true">
+        <n-space :wrap="true" class="filters">
           <n-input
             v-model:value="keyword"
-            clearable
             :placeholder="t('permissions.filters.keyword')"
             class="keyword-input"
+            clearable
           />
           <n-select
             v-model:value="typeFilter"
-            clearable
-            :placeholder="t('permissions.filters.type')"
             :options="typeOptions"
+            :placeholder="t('permissions.filters.type')"
             class="filter-select"
+            clearable
           />
           <n-select
             v-model:value="statusFilter"
-            clearable
-            :placeholder="t('permissions.filters.status')"
             :options="statusOptions"
+            :placeholder="t('permissions.filters.status')"
             class="filter-select"
+            clearable
           />
         </n-space>
         <n-button v-if="canCreate" type="primary" @click="openCreate">
@@ -47,8 +47,8 @@
 
     <n-modal
       v-model:show="showEditor"
-      preset="card"
       :title="editorTitle"
+      preset="card"
       style="width: 600px; max-width: calc(100vw - 32px)"
     >
       <n-form ref="formRef" :model="formModel" :rules="formRules" label-placement="left" label-width="auto">
@@ -68,10 +68,10 @@
         <n-form-item :label="t('permissions.form.parent')" path="parentId">
           <n-tree-select
             v-model:value="formModel.parentId"
-            clearable
-            filterable
             :options="parentOptions"
             :placeholder="t('permissions.placeholders.parent')"
+            clearable
+            filterable
           />
         </n-form-item>
         <n-form-item :label="t('permissions.form.sortOrder')" path="sortOrder">
@@ -87,11 +87,11 @@
         <n-form-item :label="t('permissions.form.icon')" path="icon">
           <n-select
             v-model:value="formModel.icon"
-            clearable
-            filterable
             :options="iconOptions"
             :placeholder="t('permissions.placeholders.icon')"
             :render-label="renderIconOption"
+            clearable
+            filterable
           />
         </n-form-item>
         <n-form-item :label="t('permissions.form.componentPath')" path="vueComponentPath">
@@ -113,19 +113,19 @@
       <template #footer>
         <n-space justify="end">
           <n-button @click="showEditor = false">{{ t("permissions.actions.cancel") }}</n-button>
-          <n-button type="primary" :loading="submitting" @click="submitEditor">
+          <n-button :loading="submitting" type="primary" @click="submitEditor">
             {{ t("permissions.actions.save") }}
           </n-button>
         </n-space>
       </template>
     </n-modal>
 
-    <n-modal v-model:show="showDeleteConfirm" preset="dialog" type="warning" :title="t('permissions.delete.title')">
+    <n-modal v-model:show="showDeleteConfirm" :title="t('permissions.delete.title')" preset="dialog" type="warning">
       {{ t("permissions.delete.content", { title: deletingPermission?.title ?? "" }) }}
       <template #action>
         <n-space justify="end">
           <n-button @click="showDeleteConfirm = false">{{ t("permissions.actions.cancel") }}</n-button>
-          <n-button type="error" :loading="deleting" @click="confirmDelete">
+          <n-button :loading="deleting" type="error" @click="confirmDelete">
             {{ t("permissions.actions.delete") }}
           </n-button>
         </n-space>
@@ -134,10 +134,14 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { computed, h, onMounted, reactive, ref, watch, type Component } from "vue";
+<script lang="ts" setup>
+import { type Component, computed, h, onMounted, reactive, ref, watch } from "vue";
 import * as LucideIcons from "@lucide/vue";
 import {
+  type DataTableColumns,
+  type DataTableRowKey,
+  type FormInst,
+  type FormRules,
   NButton,
   NCard,
   NDataTable,
@@ -154,10 +158,6 @@ import {
   NSwitch,
   NTag,
   NTreeSelect,
-  type DataTableColumns,
-  type DataTableRowKey,
-  type FormInst,
-  type FormRules,
   type SelectOption,
   type TreeSelectOption,
 } from "naive-ui";
@@ -166,10 +166,10 @@ import {
   deletePermission,
   getPermissionDetail,
   getPermissionList,
-  updatePermission,
   type PermissionListOutput,
   type PermissionMutationInput,
   type PermissionType,
+  updatePermission,
 } from "@/api/permissions.ts";
 import { usePermissionsStore } from "@/stores/permissions.ts";
 import { PermissionCode } from "@/constants/permissions.ts";
@@ -564,7 +564,7 @@ watch([keyword, typeFilter, statusFilter], () => {
 onMounted(() => Promise.all([loadPermissions(), permissionsStore.getPermissions()]));
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .permission-list-page {
   min-width: 0;
 }

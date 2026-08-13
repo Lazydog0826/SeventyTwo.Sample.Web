@@ -1,11 +1,11 @@
 <template>
-  <main class="login-page" :class="{ 'login-page--dark': isDark }" :lang="locale">
+  <main :class="{ 'login-page--dark': isDark }" :lang="locale" class="login-page">
     <div class="login-toolbar">
       <n-button
-        quaternary
-        circle
-        :title="t(isDark ? 'theme.switchToLight' : 'theme.switchToDark')"
         :aria-label="t(isDark ? 'theme.switchToLight' : 'theme.switchToDark')"
+        :title="t(isDark ? 'theme.switchToLight' : 'theme.switchToDark')"
+        circle
+        quaternary
         @click="toggleTheme"
       >
         <template #icon>
@@ -29,7 +29,7 @@
     </div>
 
     <div class="login-content">
-      <n-card class="login-card" :bordered="false">
+      <n-card :bordered="false" class="login-card">
         <header class="login-header">
           <h1>{{ t("login.welcome") }}</h1>
           <n-text depth="3">{{ t("login.subtitle") }}</n-text>
@@ -39,12 +39,12 @@
           ref="formRef"
           :model="formValue"
           :rules="rules"
+          :show-require-mark="false"
           label-placement="top"
           size="large"
-          :show-require-mark="false"
           @submit.prevent="handleLogin"
         >
-          <n-form-item path="account" :label="t('login.account')">
+          <n-form-item :label="t('login.account')" path="account">
             <n-input
               v-model:value="formValue.account"
               :placeholder="t('login.accountPlaceholder')"
@@ -53,13 +53,13 @@
             ></n-input>
           </n-form-item>
 
-          <n-form-item path="password" :label="t('login.password')">
+          <n-form-item :label="t('login.password')" path="password">
             <n-input
               v-model:value="formValue.password"
-              type="password"
               :placeholder="t('login.passwordPlaceholder')"
               autocomplete="current-password"
               show-password-on="click"
+              type="password"
             ></n-input>
           </n-form-item>
 
@@ -69,7 +69,7 @@
             </n-button>
           </div>
 
-          <n-button type="primary" attr-type="submit" size="large" :loading="loading" block>
+          <n-button :loading="loading" attr-type="submit" block size="large" type="primary">
             {{ t("common.login") }}
           </n-button>
         </n-form>
@@ -87,9 +87,9 @@
   </main>
 </template>
 
-<script setup lang="ts">
-import { NButton, NCard, NDropdown, NForm, NFormItem, NIcon, NInput, NText } from "naive-ui";
+<script lang="ts" setup>
 import type { FormInst, FormRules } from "naive-ui";
+import { NButton, NCard, NDropdown, NForm, NFormItem, NIcon, NInput, NText } from "naive-ui";
 import { Languages, Moon, Sun } from "@lucide/vue";
 import { computed, inject, reactive, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -154,7 +154,7 @@ const handleLogin = async () => {
 };
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .login-page {
   display: grid;
   min-height: 100vh;

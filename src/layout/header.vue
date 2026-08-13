@@ -1,8 +1,8 @@
 <template>
-  <n-layout-header class="app-header" bordered>
+  <n-layout-header bordered class="app-header">
     <div class="header-main">
       <div class="brand">
-        <img class="brand-logo" :src="logoUrl" alt="SeventyTwo" />
+        <img :src="logoUrl" alt="SeventyTwo" class="brand-logo" />
       </div>
     </div>
 
@@ -19,10 +19,10 @@
       </n-dropdown>
 
       <n-button
-        quaternary
-        circle
-        :title="t(isDark ? 'theme.switchToLight' : 'theme.switchToDark')"
         :aria-label="t(isDark ? 'theme.switchToLight' : 'theme.switchToDark')"
+        :title="t(isDark ? 'theme.switchToLight' : 'theme.switchToDark')"
+        circle
+        quaternary
         @click="toggleTheme"
       >
         <template #icon>
@@ -33,9 +33,9 @@
         </template>
       </n-button>
 
-      <n-dropdown trigger="click" :options="userOptions" @select="handleUserAction">
-        <button class="user-summary" type="button" :aria-label="userStore.user.username">
-          <n-skeleton v-if="userStore.isLoading" circle width="28px" height="28px" />
+      <n-dropdown :options="userOptions" trigger="click" @select="handleUserAction">
+        <button :aria-label="userStore.user.username" class="user-summary" type="button">
+          <n-skeleton v-if="userStore.isLoading" circle height="28px" width="28px" />
           <n-avatar v-else round size="small">{{ avatarInitial }}</n-avatar>
           <n-skeleton v-if="userStore.isLoading" text width="72px" />
           <span v-else>{{ userStore.user.username }}</span>
@@ -45,8 +45,8 @@
   </n-layout-header>
 </template>
 
-<script setup lang="ts">
-import { NAvatar, NButton, NDropdown, NIcon, NLayoutHeader, NSkeleton, type DropdownOption } from "naive-ui";
+<script lang="ts" setup>
+import { type DropdownOption, NAvatar, NButton, NDropdown, NIcon, NLayoutHeader, NSkeleton } from "naive-ui";
 import { Languages, Moon, Sun } from "@lucide/vue";
 import { computed, inject, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -98,7 +98,7 @@ async function handleUserAction(key: string | number) {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .app-header {
   height: 64px;
   padding: 0 20px;

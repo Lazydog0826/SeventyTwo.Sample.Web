@@ -3,13 +3,13 @@
     <n-card :bordered="false" :title="t('users.title')">
       <div class="toolbar">
         <n-space :wrap="true">
-          <n-input v-model:value="keyword" clearable :placeholder="t('users.filters.keyword')" class="keyword-input" />
+          <n-input v-model:value="keyword" :placeholder="t('users.filters.keyword')" class="keyword-input" clearable />
           <n-select
             v-model:value="statusFilter"
-            clearable
-            :placeholder="t('users.filters.status')"
             :options="statusOptions"
+            :placeholder="t('users.filters.status')"
             class="status-select"
+            clearable
           />
         </n-space>
         <n-button v-if="canCreate" type="primary" @click="openCreate">{{ t("users.actions.create") }}</n-button>
@@ -28,8 +28,8 @@
 
     <n-modal
       v-model:show="showEditor"
-      preset="card"
       :title="editorTitle"
+      preset="card"
       style="width: 560px; max-width: calc(100vw - 32px)"
     >
       <n-form ref="formRef" :model="formModel" :rules="formRules" label-placement="left" label-width="auto">
@@ -42,9 +42,9 @@
         <n-form-item v-if="!formModel.id" :label="t('users.form.password')" path="password"
           ><n-input
             v-model:value="formModel.password"
-            type="password"
-            show-password-on="click"
             :placeholder="t('users.placeholders.password')"
+            show-password-on="click"
+            type="password"
         /></n-form-item>
         <n-form-item :label="t('users.form.displayName')" path="displayName"
           ><n-input v-model:value="formModel.displayName" :placeholder="t('users.placeholders.displayName')"
@@ -58,16 +58,16 @@
         <n-form-item :label="t('users.form.organization')" path="orgId"
           ><n-tree-select
             v-model:value="formModel.orgId"
-            :options="organizationOptions"
             :loading="organizationsLoading"
+            :options="organizationOptions"
             :placeholder="t('users.placeholders.organization')"
             filterable
         /></n-form-item>
         <n-form-item :label="t('users.form.defaultPage')" path="defaultPageId"
           ><n-tree-select
             v-model:value="formModel.defaultPageId"
-            :options="defaultPageOptions"
             :loading="defaultPagesLoading"
+            :options="defaultPageOptions"
             :placeholder="t('users.placeholders.defaultPage')"
             clearable
             filterable
@@ -79,7 +79,7 @@
       <template #footer
         ><n-space justify="end"
           ><n-button @click="showEditor = false">{{ t("users.actions.cancel") }}</n-button
-          ><n-button type="primary" :loading="submitting" @click="submitEditor">{{
+          ><n-button :loading="submitting" type="primary" @click="submitEditor">{{
             t("users.actions.save")
           }}</n-button></n-space
         ></template
@@ -88,18 +88,18 @@
 
     <n-modal
       v-model:show="showAuthorization"
-      preset="card"
       :title="t('users.authorization.title', { name: authorizingUser?.displayName ?? '' })"
+      preset="card"
       style="width: 640px; max-width: calc(100vw - 32px)"
     >
       <n-spin :show="authorizationLoading">
         <n-tree
           v-if="authorizationOptions.length"
           :checked-keys="authorizationCheckedKeys"
-          :indeterminate-keys="authorizationIndeterminateKeys"
           :data="authorizationOptions"
-          checkable
+          :indeterminate-keys="authorizationIndeterminateKeys"
           block-line
+          checkable
           default-expand-all
           @update:checked-keys="handleAuthorizationCheck"
         />
@@ -109,9 +109,9 @@
         <n-space justify="end">
           <n-button @click="showAuthorization = false">{{ t("users.actions.cancel") }}</n-button>
           <n-button
-            type="primary"
-            :loading="authorizationSaving"
             :disabled="authorizationLoading"
+            :loading="authorizationSaving"
+            type="primary"
             @click="saveAuthorization"
           >
             {{ t("users.actions.save") }}
@@ -120,12 +120,12 @@
       </template>
     </n-modal>
 
-    <n-modal v-model:show="showDeleteConfirm" preset="dialog" type="warning" :title="t('users.delete.title')">
+    <n-modal v-model:show="showDeleteConfirm" :title="t('users.delete.title')" preset="dialog" type="warning">
       {{ t("users.delete.content", { name: deletingUser?.displayName ?? "" }) }}
       <template #action
         ><n-space justify="end"
           ><n-button @click="showDeleteConfirm = false">{{ t("users.actions.cancel") }}</n-button
-          ><n-button type="error" :loading="deleting" @click="confirmDelete">{{
+          ><n-button :loading="deleting" type="error" @click="confirmDelete">{{
             t("users.actions.delete")
           }}</n-button></n-space
         ></template
@@ -134,15 +134,15 @@
 
     <n-modal
       v-model:show="showResetPasswordConfirm"
+      :title="t('users.resetPassword.confirmTitle')"
       preset="dialog"
       type="warning"
-      :title="t('users.resetPassword.confirmTitle')"
     >
       {{ t("users.resetPassword.confirmContent", { name: resettingUser?.displayName ?? "" }) }}
       <template #action>
         <n-space justify="end">
           <n-button @click="showResetPasswordConfirm = false">{{ t("users.actions.cancel") }}</n-button>
-          <n-button type="warning" :loading="resettingPassword" @click="confirmResetPassword">
+          <n-button :loading="resettingPassword" type="warning" @click="confirmResetPassword">
             {{ t("users.actions.resetPassword") }}
           </n-button>
         </n-space>
@@ -151,13 +151,13 @@
 
     <n-modal
       v-model:show="showResetPasswordResult"
-      preset="card"
       :title="t('users.resetPassword.resultTitle')"
+      preset="card"
       style="width: 520px; max-width: calc(100vw - 32px)"
       @after-leave="resetPasswordResult = ''"
     >
-      <n-alert type="warning" :bordered="false">{{ t("users.resetPassword.resultHint") }}</n-alert>
-      <n-input :value="resetPasswordResult" readonly class="reset-password-value" />
+      <n-alert :bordered="false" type="warning">{{ t("users.resetPassword.resultHint") }}</n-alert>
+      <n-input :value="resetPasswordResult" class="reset-password-value" readonly />
       <template #footer>
         <n-space justify="end">
           <n-button @click="showResetPasswordResult = false">{{ t("users.actions.close") }}</n-button>
@@ -168,11 +168,14 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { computed, h, onMounted, reactive, ref } from "vue";
 import {
-  NButton,
+  type DataTableColumns,
+  type FormInst,
+  type FormRules,
   NAlert,
+  NButton,
   NCard,
   NDataTable,
   NEllipsis,
@@ -183,30 +186,27 @@ import {
   NModal,
   NSelect,
   NSpace,
+  NSpin,
   NSwitch,
   NTag,
   NTree,
   NTreeSelect,
-  NSpin,
-  type DataTableColumns,
-  type FormInst,
-  type FormRules,
-  type TreeSelectOption,
   type TreeOption,
+  type TreeSelectOption,
 } from "naive-ui";
 import {
   authorizeUser,
   createUser,
+  type DefaultPageOptionOutput,
   deleteUser,
+  getDefaultPageOptions,
   getUserAuthorization,
   getUserDetail,
   getUserList,
-  getDefaultPageOptions,
   resetUserPassword,
   setUserEnable,
   updateUser,
   type UserListOutput,
-  type DefaultPageOptionOutput,
 } from "@/api/users.ts";
 import type { PermissionListOutput } from "@/api/permissions.ts";
 import { getUserOrganizationOptions, type OrganizationListOutput } from "@/api/organizations.ts";
@@ -267,9 +267,7 @@ const canUpdate = computed(() => permissionsStore.hasPermission(PermissionCode.U
 const canDelete = computed(() => permissionsStore.hasPermission(PermissionCode.UsersDelete));
 const canAuthorize = computed(() => permissionsStore.hasPermission(PermissionCode.UsersAuthorize));
 const canResetPassword = computed(() => permissionsStore.hasPermission(PermissionCode.UsersResetPassword));
-const hasActions = computed(
-  () => canUpdate.value || canAuthorize.value || canResetPassword.value || canDelete.value
-);
+const hasActions = computed(() => canUpdate.value || canAuthorize.value || canResetPassword.value || canDelete.value);
 const hasFilter = computed(() => Boolean(keyword.value.trim()) || statusFilter.value !== null);
 const filteredUsers = computed(() => {
   const value = keyword.value.trim().toLocaleLowerCase();
@@ -730,7 +728,7 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .user-list-page {
   min-width: 0;
 }

@@ -5,16 +5,16 @@
         <n-space :wrap="true">
           <n-input
             v-model:value="keyword"
-            clearable
             :placeholder="t('organizations.filters.keyword')"
             class="keyword-input"
+            clearable
           />
           <n-select
             v-model:value="statusFilter"
-            clearable
-            :placeholder="t('organizations.filters.status')"
             :options="statusOptions"
+            :placeholder="t('organizations.filters.status')"
             class="status-select"
+            clearable
           />
         </n-space>
         <n-button v-if="canCreate" type="primary" @click="openCreate">
@@ -40,8 +40,8 @@
 
     <n-modal
       v-model:show="showEditor"
-      preset="card"
       :title="editorTitle"
+      preset="card"
       style="width: 560px; max-width: calc(100vw - 32px)"
     >
       <n-form ref="formRef" :model="formModel" :rules="formRules" label-placement="left" label-width="auto">
@@ -55,8 +55,8 @@
           <n-input-number
             v-model:value="formModel.sortOrder"
             :min="0"
-            :precision="0"
             :placeholder="t('organizations.placeholders.sortOrder')"
+            :precision="0"
             style="width: 100%"
           />
         </n-form-item>
@@ -64,10 +64,10 @@
           <n-tree-select
             v-model:value="formModel.parentId"
             :clearable="editingOrganization === null"
-            filterable
             :disabled="editingRoot"
             :options="parentOptions"
             :placeholder="t('organizations.placeholders.parent')"
+            filterable
           />
         </n-form-item>
         <n-form-item :label="t('organizations.form.enable')" path="enable">
@@ -77,19 +77,19 @@
       <template #footer>
         <n-space justify="end">
           <n-button @click="showEditor = false">{{ t("organizations.actions.cancel") }}</n-button>
-          <n-button type="primary" :loading="submitting" @click="submitEditor">
+          <n-button :loading="submitting" type="primary" @click="submitEditor">
             {{ t("organizations.actions.save") }}
           </n-button>
         </n-space>
       </template>
     </n-modal>
 
-    <n-modal v-model:show="showDeleteConfirm" preset="dialog" type="warning" :title="t('organizations.delete.title')">
+    <n-modal v-model:show="showDeleteConfirm" :title="t('organizations.delete.title')" preset="dialog" type="warning">
       {{ t("organizations.delete.content", { name: deletingOrganization?.name ?? "" }) }}
       <template #action>
         <n-space justify="end">
           <n-button @click="showDeleteConfirm = false">{{ t("organizations.actions.cancel") }}</n-button>
-          <n-button type="error" :loading="deleting" @click="confirmDelete">
+          <n-button :loading="deleting" type="error" @click="confirmDelete">
             {{ t("organizations.actions.delete") }}
           </n-button>
         </n-space>
@@ -98,9 +98,13 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { computed, h, onMounted, reactive, ref, watch } from "vue";
 import {
+  type DataTableColumns,
+  type DataTableRowKey,
+  type FormInst,
+  type FormRules,
   NButton,
   NCard,
   NDataTable,
@@ -116,10 +120,6 @@ import {
   NSwitch,
   NTag,
   NTreeSelect,
-  type DataTableColumns,
-  type DataTableRowKey,
-  type FormInst,
-  type FormRules,
   type TreeSelectOption,
 } from "naive-ui";
 import {
@@ -127,9 +127,9 @@ import {
   deleteOrganization,
   getOrganizationDetail,
   getOrganizationList,
-  updateOrganization,
   type OrganizationListOutput,
   type OrganizationMutationInput,
+  updateOrganization,
 } from "@/api/organizations.ts";
 import { PermissionCode } from "@/constants/permissions.ts";
 import { usePermissionsStore } from "@/stores/permissions.ts";
@@ -431,7 +431,7 @@ watch([keyword, statusFilter], () => {
 onMounted(() => Promise.all([loadOrganizations(), permissionsStore.getPermissions()]));
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .organization-list-page {
   min-width: 0;
 }

@@ -1,33 +1,33 @@
 <template>
   <n-layout-sider
-    bordered
-    collapse-mode="width"
     :collapsed="collapsed"
     :collapsed-width="64"
-    :width="240"
     :native-scrollbar="false"
+    :width="240"
+    bordered
+    collapse-mode="width"
   >
     <div class="sidebar-content">
-      <div v-if="loading" class="menu-loading" aria-live="polite" :aria-label="t('common.menuLoading')">
+      <div v-if="loading" :aria-label="t('common.menuLoading')" aria-live="polite" class="menu-loading">
         <n-spin size="small"></n-spin>
       </div>
       <n-menu
         v-else
-        :default-expanded-keys="defaultExpandedKeys"
-        :watch-props="['defaultExpandedKeys']"
-        :value="activeMenu"
         :collapsed="collapsed"
-        :collapsed-width="64"
         :collapsed-icon-size="22"
+        :collapsed-width="64"
+        :default-expanded-keys="defaultExpandedKeys"
         :options="menuOptions"
+        :value="activeMenu"
+        :watch-props="['defaultExpandedKeys']"
         @update:value="handleUpdateValue"
       ></n-menu>
 
-      <div class="sidebar-footer" :class="{ 'sidebar-footer--collapsed': collapsed }">
+      <div :class="{ 'sidebar-footer--collapsed': collapsed }" class="sidebar-footer">
         <n-button
-          quaternary
-          circle
           :aria-label="t(collapsed ? 'common.expandSidebar' : 'common.collapseSidebar')"
+          circle
+          quaternary
           @click="emit('toggle')"
         >
           <template #icon>
@@ -43,14 +43,14 @@
 </template>
 
 <!--suppress SpellCheckingInspection -->
-<script setup lang="ts">
-import { NButton, NLayoutSider, NMenu, type MenuOption, NIcon, NSpin } from "naive-ui";
+<script lang="ts" setup>
+import { type MenuOption, NButton, NIcon, NLayoutSider, NMenu, NSpin } from "naive-ui";
+import * as LucideIcons from "@lucide/vue";
 import { PanelLeftClose, PanelLeftOpen } from "@lucide/vue";
 import { type Component, computed, h, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import { usePermissionsStore } from "@/stores/permissions.ts";
-import * as LucideIcons from "@lucide/vue";
 import type { PermissionMenuOutput } from "@/api/permissions.ts";
 
 defineProps<{
@@ -157,7 +157,7 @@ function handleUpdateValue(key: string, _menuOption: MenuOption) {
 </script>
 
 <!--suppress SpellCheckingInspection -->
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .n-layout-sider {
   height: calc(100vh - 64px);
 }

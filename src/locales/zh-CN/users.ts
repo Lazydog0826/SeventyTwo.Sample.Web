@@ -4,8 +4,15 @@ export default {
   columns: { username: "用户名", displayName: "姓名", phone: "手机", email: "邮箱", status: "状态", actions: "操作" },
   statuses: { enabled: "已启用", disabled: "已禁用" },
   actions: {
-    create: "新增用户", edit: "编辑", authorize: "授权", resetPassword: "重置密码", delete: "删除",
-    cancel: "取消", save: "保存", copy: "复制密码", close: "关闭",
+    create: "新增用户",
+    edit: "编辑",
+    authorize: "授权",
+    resetPassword: "重置密码",
+    delete: "删除",
+    cancel: "取消",
+    save: "保存",
+    copy: "复制密码",
+    close: "关闭",
   },
   editor: { createTitle: "新增用户", updateTitle: "编辑用户" },
   form: {
