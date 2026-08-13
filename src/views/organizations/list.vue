@@ -86,8 +86,8 @@
 
     <n-modal
       v-model:show="showDeleteConfirm"
-      :close-on-esc="!deleting"
       :closable="!deleting"
+      :close-on-esc="!deleting"
       :mask-closable="!deleting"
       :title="t('organizations.delete.title')"
       preset="dialog"

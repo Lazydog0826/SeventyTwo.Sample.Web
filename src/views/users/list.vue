@@ -124,8 +124,8 @@
 
     <n-modal
       v-model:show="showDeleteConfirm"
-      :close-on-esc="!deleting"
       :closable="!deleting"
+      :close-on-esc="!deleting"
       :mask-closable="!deleting"
       :show-icon="true"
       :title="t('users.delete.title')"
@@ -145,8 +145,8 @@
 
     <n-modal
       v-model:show="showResetPasswordConfirm"
-      :close-on-esc="!resettingPassword"
       :closable="!resettingPassword"
+      :close-on-esc="!resettingPassword"
       :mask-closable="!resettingPassword"
       :title="t('users.resetPassword.confirmTitle')"
       preset="dialog"
@@ -441,7 +441,8 @@ const columns = computed<DataTableColumns<UserListOutput>>(() => {
                   {
                     text: true,
                     type: "warning",
-                    disabled: row.username === SystemUsername.SuperAdmin || resettingPassword.value || actionLoading.value,
+                    disabled:
+                      row.username === SystemUsername.SuperAdmin || resettingPassword.value || actionLoading.value,
                     onClick: () => openResetPassword(row),
                   },
                   { default: () => t("users.actions.resetPassword") }

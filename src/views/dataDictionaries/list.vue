@@ -132,8 +132,8 @@
 
     <n-modal
       v-model:show="showDictionaryDelete"
-      :close-on-esc="!deleting"
       :closable="!deleting"
+      :close-on-esc="!deleting"
       :mask-closable="!deleting"
       :title="t('dataDictionaries.delete.dictionaryTitle')"
       preset="dialog"
@@ -154,8 +154,8 @@
 
     <n-modal
       v-model:show="showItemDelete"
-      :close-on-esc="!deleting"
       :closable="!deleting"
+      :close-on-esc="!deleting"
       :mask-closable="!deleting"
       :title="t('dataDictionaries.delete.itemTitle')"
       preset="dialog"
