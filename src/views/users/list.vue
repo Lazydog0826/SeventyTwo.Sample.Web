@@ -106,11 +106,11 @@
             :loading="submitting"
             type="primary"
             @click="submitEditor"
-          >{{
-            t("users.actions.save")
-          }}</n-button></n-space
-        ></template
-      >
+          >
+            {{ t("users.actions.save") }}</n-button
+          >
+        </n-space>
+      </template>
     </n-modal>
 
     <n-modal
@@ -236,6 +236,7 @@ import {
   type TreeOption,
   type TreeSelectOption,
 } from "naive-ui";
+import type { DataPermissionType } from "@/api/users.ts";
 import {
   authorizeUser,
   createUser,
@@ -250,8 +251,7 @@ import {
   updateUser,
   type UserListOutput,
 } from "@/api/users.ts";
-import { getDataDictionaryOptions, type DataDictionaryOptionOutput } from "@/api/dataDictionaries.ts";
-import type { DataPermissionType } from "@/api/users.ts";
+import { type DataDictionaryOptionOutput, getDataDictionaryOptions } from "@/api/dataDictionaries.ts";
 import type { PermissionListOutput } from "@/api/permissions.ts";
 import { getUserOrganizationOptions, type OrganizationListOutput } from "@/api/organizations.ts";
 import { PermissionCode } from "@/constants/permissions.ts";

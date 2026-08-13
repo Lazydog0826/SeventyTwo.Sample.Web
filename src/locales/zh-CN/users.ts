@@ -1,7 +1,15 @@
 export default {
   title: "用户管理",
   filters: { keyword: "搜索用户名、姓名、手机或邮箱", status: "用户状态" },
-  columns: { username: "用户名", displayName: "姓名", phone: "手机", email: "邮箱", dataPermissionType: "数据权限", status: "状态", actions: "操作" },
+  columns: {
+    username: "用户名",
+    displayName: "姓名",
+    phone: "手机",
+    email: "邮箱",
+    dataPermissionType: "数据权限",
+    status: "状态",
+    actions: "操作",
+  },
   statuses: { enabled: "已启用", disabled: "已禁用" },
   actions: {
     create: "新增用户",
