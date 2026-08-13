@@ -32,9 +32,9 @@
         :data="users"
         :loading="loading"
         :pagination="pagination"
-        remote
         :row-key="row => row.id"
         :scroll-x="hasActions ? 1160 : 830"
+        remote
         striped
       >
         <template #empty><n-empty :description="emptyDescription" /></template>
@@ -203,7 +203,6 @@ import {
   type DataTableColumns,
   type FormInst,
   type FormRules,
-  type PaginationProps,
   NAlert,
   NButton,
   NCard,
@@ -221,6 +220,7 @@ import {
   NTag,
   NTree,
   NTreeSelect,
+  type PaginationProps,
   type TreeOption,
   type TreeSelectOption,
 } from "naive-ui";

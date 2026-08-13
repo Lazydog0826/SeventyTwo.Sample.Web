@@ -37,11 +37,11 @@
             :data="dictionaries"
             :loading="dictionaryLoading"
             :pagination="pagination"
-            remote
             :row-key="(row: DataDictionaryListOutput) => row.id"
             :row-props="dictionaryRowProps"
             :scroll-x="canUpdate || canDelete ? 878 : 748"
             :single-line="false"
+            remote
             striped
           >
             <template #empty><n-empty :description="dictionaryEmptyDescription" /></template>
@@ -198,7 +198,6 @@ import {
   type DataTableColumns,
   type FormInst,
   type FormRules,
-  type PaginationProps,
   NButton,
   NCard,
   NDataTable,
@@ -216,6 +215,7 @@ import {
   NSpace,
   NSwitch,
   NTag,
+  type PaginationProps,
 } from "naive-ui";
 import {
   createDataDictionary,
