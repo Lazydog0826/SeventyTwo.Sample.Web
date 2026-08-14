@@ -1,6 +1,9 @@
 export default {
   welcome: "欢迎回来",
   subtitle: "登录后继续访问你的工作空间",
+  demoDescription: "本系统仅用于功能演示",
+  demoAccount: "账号：superadmin",
+  demoPassword: "密码：123456",
   account: "账号",
   accountPlaceholder: "请输入账号或邮箱",
   accountRequired: "请输入账号",

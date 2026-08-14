@@ -35,6 +35,12 @@
           <n-text depth="3">{{ t("login.subtitle") }}</n-text>
         </header>
 
+        <n-alert class="demo-notice" type="info">
+          <p class="demo-description">{{ t("login.demoDescription") }}</p>
+          <p class="demo-credential">{{ t("login.demoAccount") }}</p>
+          <p class="demo-credential">{{ t("login.demoPassword") }}</p>
+        </n-alert>
+
         <n-form
           ref="formRef"
           :model="formValue"
@@ -89,7 +95,7 @@
 
 <script lang="ts" setup>
 import type { FormInst, FormRules } from "naive-ui";
-import { NButton, NCard, NDropdown, NForm, NFormItem, NIcon, NInput, NText } from "naive-ui";
+import { NAlert, NButton, NCard, NDropdown, NForm, NFormItem, NIcon, NInput, NText } from "naive-ui";
 import { Languages, Moon, Sun } from "@lucide/vue";
 import { computed, inject, reactive, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -178,7 +184,7 @@ const handleLogin = async () => {
 }
 
 .login-content {
-  width: min(100%, 400px);
+  width: min(100%, 480px);
 }
 
 .login-toolbar {
@@ -204,6 +210,18 @@ const handleLogin = async () => {
   font-size: 28px;
 }
 
+.demo-notice {
+  margin-bottom: 24px;
+}
+
+.demo-description {
+  margin: 0 0 8px;
+}
+
+.demo-credential {
+  margin: 0;
+}
+
 .form-options {
   display: flex;
   align-items: center;
@@ -223,5 +241,26 @@ const handleLogin = async () => {
   display: block;
   margin-top: 20px;
   text-align: center;
+}
+
+// 窄屏下让工具栏参与页面布局，避免与高度可变的登录卡片重叠。
+@media (max-width: 480px) {
+  .login-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .login-toolbar {
+    position: static;
+    flex: none;
+    align-self: flex-end;
+    margin-bottom: 24px;
+  }
+
+  .login-content {
+    flex: none;
+    margin-block: auto;
+  }
 }
 </style>

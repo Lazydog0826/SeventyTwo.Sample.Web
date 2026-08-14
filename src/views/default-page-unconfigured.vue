@@ -115,7 +115,7 @@ h1 {
 }
 
 .n-text {
-  max-width: 360px;
+  max-width: 440px;
   font-size: 15px;
   line-height: 1.7;
 }
