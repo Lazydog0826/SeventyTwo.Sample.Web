@@ -65,8 +65,10 @@ npm run build
 ## 预览构建结果
 
 ```bash
-npm run preview
+npm run preview -- --port 5173
 ```
+
+规范：预览端口需与后端 `CorsConfiguration:Origins` 一致；示例后端配置默认允许 `http://localhost:5173`。
 
 ## 目录结构
 
