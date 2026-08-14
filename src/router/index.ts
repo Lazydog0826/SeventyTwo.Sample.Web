@@ -37,6 +37,9 @@ const defaultRouter: RouteRecordRaw[] = [
 
 const router = createRouter({
   routes: defaultRouter,
+  // 规范：HTML5 History 部署必须将非静态、非 API 路径回退到 index.html。
+  // 当前 createWebHistory() 明确约定部署在站点根路径；若改为子路径部署，必须同时为 Router
+  // 配置 import.meta.env.BASE_URL，并复核所有整页跳转生成的 href。
   history: createWebHistory(),
 });
 
