@@ -1,12 +1,7 @@
-import type { RouteRecordNameGeneric, Router } from "vue-router";
+import type { Router, RouteRecordNameGeneric } from "vue-router";
 import type { DynamicRouteManager } from "@/router/dynamicRouteManager.ts";
 
-const AuthIndependentRouteNames = new Set<RouteRecordNameGeneric>([
-  "login",
-  "403",
-  "404",
-  "defaultPageUnconfigured",
-]);
+const AuthIndependentRouteNames = new Set<RouteRecordNameGeneric>(["login", "403", "404", "defaultPageUnconfigured"]);
 
 /** 判断目标路由是否不依赖用户菜单及动态路由。 */
 export function isAuthIndependentRoute(name: RouteRecordNameGeneric | null | undefined) {
