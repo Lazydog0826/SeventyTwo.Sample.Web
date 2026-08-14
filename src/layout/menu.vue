@@ -13,7 +13,6 @@
       </div>
       <n-menu
         v-else
-        accordion
         :collapsed="collapsed"
         :collapsed-icon-size="22"
         :collapsed-width="64"
@@ -21,6 +20,7 @@
         :options="menuOptions"
         :value="activeMenu"
         :watch-props="['defaultExpandedKeys']"
+        accordion
         @update:value="handleUpdateValue"
       ></n-menu>
 
