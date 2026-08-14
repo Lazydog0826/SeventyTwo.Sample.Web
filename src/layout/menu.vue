@@ -13,6 +13,7 @@
       </div>
       <n-menu
         v-else
+        accordion
         :collapsed="collapsed"
         :collapsed-icon-size="22"
         :collapsed-width="64"
