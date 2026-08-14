@@ -115,6 +115,7 @@ export default {
     disabled: "User is disabled",
     phoneRequired: "Phone is required",
     emailRequired: "Email is required",
+    dataPermissionTypeInvalid: "User data permission type is invalid",
     orgIdRequired: "User organization is required",
     organizationNotFound: "User organization not found",
     organizationDisabled: "User organization is disabled",

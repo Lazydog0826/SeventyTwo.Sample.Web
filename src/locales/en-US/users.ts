@@ -34,6 +34,7 @@ export default {
     phone: "Phone",
     email: "Email",
     organization: "Organization",
+    dataPermissionType: "Data permission",
     defaultPage: "Default page",
     enable: "Enabled",
   },

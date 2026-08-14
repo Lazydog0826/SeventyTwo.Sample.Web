@@ -115,6 +115,7 @@ export default {
     disabled: "用户已禁用",
     phoneRequired: "手机号码不能为空",
     emailRequired: "电子邮箱不能为空",
+    dataPermissionTypeInvalid: "用户数据权限类型无效",
     orgIdRequired: "用户所属机构不能为空",
     organizationNotFound: "用户所属机构不存在",
     organizationDisabled: "用户所属机构已禁用",
