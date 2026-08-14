@@ -1,9 +1,12 @@
 // noinspection JSUnusedGlobalSymbols,ExceptionCaughtLocallyJS
 
 import ky, { HTTPError, type Options } from "ky";
-import router from "@/router";
+import router, { resetRouter } from "@/router";
 import i18n from "@/locales";
 import type { MessageReactive } from "naive-ui";
+import store from "@/stores";
+import { usePermissionsStore } from "@/stores/permissions.ts";
+import { useUserStore } from "@/stores/users.ts";
 
 /**
  * 后端统一响应结构。
@@ -62,22 +65,26 @@ function translateBackendMessage(message: string) {
 }
 
 /**
- * 跳转到登录页，并通过 redirect 参数保存当前完整路由。
- * 使用整页导航重建 Router、Pinia 等运行时状态，避免重新登录其他账号后
- * 沿用旧账号的动态路由、权限和用户信息。
- * 如果已经位于登录页则不再跳转，避免形成嵌套重定向。
+ * 重置当前认证会话并跳转登录页，通过 redirect 参数保存原始完整路由。
+ * 使用 SPA 导航保留全局消息组件，同时显式清理旧账号的动态路由、权限和用户信息。
  */
-function redirectToAuthPage() {
+async function redirectToAuthPage() {
   const currentRoute = router.resolve(router.options.history.location);
+
+  window.$accessToken = "";
+  usePermissionsStore(store).reset();
+  useUserStore(store).reset();
+  resetRouter();
+
+  // 已在登录页时只重置认证状态，避免追加嵌套的 redirect 参数。
   if (currentRoute.path === AuthPagePath) {
     return;
   }
 
-  const authRoute = router.resolve({
+  await router.replace({
     path: AuthPagePath,
     query: { redirect: currentRoute.fullPath },
   });
-  window.location.replace(authRoute.href);
 }
 
 export const kyInstance = ky.create({
@@ -114,8 +121,7 @@ export const kyInstance = ky.create({
           // 刷新接口自身返回 401，说明访问 Token 和刷新 Token 均已失效。
           // 此时不能再次刷新，否则会形成刷新接口递归调用。
           if (new URL(request.url).pathname === RefreshTokenApiPath) {
-            window.$accessToken = "";
-            redirectToAuthPage();
+            await redirectToAuthPage();
             return Promise.reject(new Error("登录已过期,请重新登录"));
           }
 
@@ -123,8 +129,7 @@ export const kyInstance = ky.create({
           // 使用新 Token 后仍返回 401，说明新 Token 也无法通过认证；必须终止流程，
           // 否则该请求会在“刷新 → 重试 → 401”之间持续循环。
           if (retryCount > 0) {
-            window.$accessToken = "";
-            redirectToAuthPage();
+            await redirectToAuthPage();
             return Promise.reject(new Error("刷新 Token 后请求仍返回 401"));
           }
 

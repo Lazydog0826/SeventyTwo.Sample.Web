@@ -1,6 +1,9 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router";
-import { routeGuard } from "@/router/routeGuard";
+import { routeRedirect } from "@/router/routeRedirect.ts";
 import { documentTitleGuard } from "@/router/documentTitleGuard";
+import { createDynamicRouteManager } from "@/router/dynamicRouteManager.ts";
+import { dynamicRouteLoader } from "@/router/dynamicRouteLoader.ts";
+import { routeProgress } from "@/router/routeProgress.ts";
 
 const defaultRouter: RouteRecordRaw[] = [
   {
@@ -43,7 +46,17 @@ const router = createRouter({
   history: createWebHistory(),
 });
 
-routeGuard(router);
+const dynamicRouteManager = createDynamicRouteManager(router);
+routeProgress(router);
+dynamicRouteLoader(router, dynamicRouteManager);
+routeRedirect(router, dynamicRouteManager);
 documentTitleGuard(router);
+
+/** 清空运行时添加的路由，并恢复应用初始化时的静态路由。 */
+export function resetRouter() {
+  dynamicRouteManager.reset();
+  router.clearRoutes();
+  defaultRouter.forEach(route => router.addRoute(route));
+}
 
 export default router;
