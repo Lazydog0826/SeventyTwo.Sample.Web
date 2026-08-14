@@ -86,6 +86,8 @@ export default {
     vueComponentPathRequired: "页面 Vue 组件路径不能为空",
     routePathRequired: "页面路由路径不能为空",
     routeNameRequired: "页面路由名称不能为空",
+    routePathExists: "页面路由路径已存在",
+    routeNameExists: "页面路由名称已存在",
     routeMetadataRequired: "路由元数据不能为空",
     authorizationInvalid: "用户授权包含重复或不存在的权限",
     authorizationHierarchyInvalid: "用户授权未包含所选权限的完整上级权限链",

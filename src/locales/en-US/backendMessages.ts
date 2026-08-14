@@ -86,6 +86,8 @@ export default {
     vueComponentPathRequired: "Vue component path is required for a page",
     routePathRequired: "Route path is required for a page",
     routeNameRequired: "Route name is required for a page",
+    routePathExists: "Page route path already exists",
+    routeNameExists: "Page route name already exists",
     routeMetadataRequired: "Route metadata is required",
     authorizationInvalid: "User authorization contains duplicate or nonexistent permissions",
     authorizationHierarchyInvalid: "User authorization does not include the complete parent permission chain",
