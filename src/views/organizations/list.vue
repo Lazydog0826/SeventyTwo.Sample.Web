@@ -230,7 +230,7 @@ const formRules = computed<FormRules>(() => ({
 
 const columns = computed<DataTableColumns<OrganizationTreeNode>>(() => {
   const result: DataTableColumns<OrganizationTreeNode> = [
-    { title: t("organizations.columns.name"), key: "name", minWidth: 260, fixed: "left", ellipsis: { tooltip: true } },
+    { title: t("organizations.columns.name"), key: "name", minWidth: 260, fixed: "left" },
     { title: t("organizations.columns.code"), key: "code", minWidth: 220, render: row => renderText(row.code, 200) },
     { title: t("organizations.columns.sortOrder"), key: "sortOrder", minWidth: 90 },
     {
