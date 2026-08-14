@@ -296,7 +296,7 @@ const formRules = computed<FormRules>(() => ({
 
 const columns = computed<DataTableColumns<PermissionTreeNode>>(() => {
   const result: DataTableColumns<PermissionTreeNode> = [
-    { title: t("permissions.columns.title"), key: "title", minWidth: 190, fixed: "left", ellipsis: { tooltip: true } },
+    { title: t("permissions.columns.title"), key: "title", minWidth: 190, fixed: "left" },
     { title: t("permissions.columns.code"), key: "code", minWidth: 180, render: row => renderText(row.code, 160) },
     {
       title: t("permissions.columns.type"),
