@@ -8,4 +8,5 @@ export default {
   dataDictionariesList: "列表",
   users: "用户管理",
   usersList: "列表",
+  productCategories: "商品类目管理",
 };

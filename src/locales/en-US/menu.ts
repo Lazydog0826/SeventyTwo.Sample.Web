@@ -8,4 +8,5 @@ export default {
   dataDictionariesList: "List",
   users: "Users",
   usersList: "List",
+  productCategories: "Product Categories",
 };

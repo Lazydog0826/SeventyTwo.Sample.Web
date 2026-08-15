@@ -13,4 +13,7 @@ export const PermissionCode = {
   DataDictionariesCreate: "dataDictionariesCreate",
   DataDictionariesUpdate: "dataDictionariesUpdate",
   DataDictionariesDelete: "dataDictionariesDelete",
+  ProductCategoriesCreate: "productCategoriesCreate",
+  ProductCategoriesUpdate: "productCategoriesUpdate",
+  ProductCategoriesDelete: "productCategoriesDelete",
 } as const;

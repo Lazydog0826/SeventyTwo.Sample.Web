@@ -6,6 +6,7 @@ import login from "./login";
 import menu from "./menu";
 import organizations from "./organizations";
 import permissions from "./permissions";
+import productCategories from "./productCategories";
 import users from "./users";
 
 export default {
@@ -18,6 +19,7 @@ export default {
   dataDictionaries,
   users,
   permissions,
+  productCategories,
   home,
   notFound,
   noPermission,
