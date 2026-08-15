@@ -9,4 +9,6 @@ export default {
   users: "用户管理",
   usersList: "列表",
   productCategories: "商品类目管理",
+  products: "商品管理",
+  productsList: "列表",
 };

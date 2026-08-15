@@ -9,4 +9,6 @@ export default {
   users: "Users",
   usersList: "List",
   productCategories: "Product Categories",
+  products: "Products",
+  productsList: "List",
 };

@@ -16,4 +16,7 @@ export const PermissionCode = {
   ProductCategoriesCreate: "productCategoriesCreate",
   ProductCategoriesUpdate: "productCategoriesUpdate",
   ProductCategoriesDelete: "productCategoriesDelete",
+  ProductsCreate: "productsCreate",
+  ProductsUpdate: "productsUpdate",
+  ProductsDelete: "productsDelete",
 } as const;

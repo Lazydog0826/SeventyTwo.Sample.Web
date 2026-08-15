@@ -7,6 +7,7 @@ import menu from "./menu";
 import organizations from "./organizations";
 import permissions from "./permissions";
 import productCategories from "./productCategories";
+import products from "./products";
 import users from "./users";
 
 export default {
@@ -20,6 +21,7 @@ export default {
   users,
   permissions,
   productCategories,
+  products,
   home,
   notFound,
   noPermission,
