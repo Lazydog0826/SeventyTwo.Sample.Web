@@ -8,14 +8,7 @@
             {{ t("products.editor.backToList") }}
           </n-button>
         </div>
-        <n-form
-          v-else
-          ref="formRef"
-          :model="formModel"
-          :rules="formRules"
-          label-placement="left"
-          label-width="auto"
-        >
+        <n-form v-else ref="formRef" :model="formModel" :rules="formRules" label-placement="left" label-width="auto">
           <n-form-item :label="t('products.form.name')" path="name">
             <n-input v-model:value="formModel.name" :placeholder="t('products.placeholders.name')" />
           </n-form-item>
