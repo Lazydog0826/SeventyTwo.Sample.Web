@@ -162,9 +162,7 @@ const categoryChildrenByParent = computed(() => {
 });
 const categoryTree = computed(() => buildCategoryTree(categories.value));
 const hasFilter = computed(() => Boolean(keyword.value.trim()));
-const filteredTree = computed(() =>
-  hasFilter.value ? filterCategoryTree(categoryTree.value) : categoryTree.value
-);
+const filteredTree = computed(() => (hasFilter.value ? filterCategoryTree(categoryTree.value) : categoryTree.value));
 const emptyDescription = computed(() =>
   t(hasFilter.value ? "productCategories.empty.filtered" : "productCategories.empty.data")
 );
@@ -177,7 +175,12 @@ const excludedParentIds = computed(() =>
 );
 const parentOptions = computed<TreeSelectOption[]>(() => buildParentOptions(categoryTree.value));
 const formRules = computed<FormRules>(() => ({
-  name: { required: true, whitespace: true, message: t("productCategories.validation.name"), trigger: ["input", "blur"] },
+  name: {
+    required: true,
+    whitespace: true,
+    message: t("productCategories.validation.name"),
+    trigger: ["input", "blur"],
+  },
 }));
 
 const columns = computed<DataTableColumns<ProductCategoryTreeNode>>(() => {

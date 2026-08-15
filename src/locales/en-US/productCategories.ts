@@ -10,7 +10,7 @@ export default {
     parent: "Select a parent category; leave empty for a top-level category",
   },
   validation: { name: "Please enter the category name" },
-  delete: { title: "Delete Category", content: "Are you sure you want to delete category \"{name}\"?" },
+  delete: { title: "Delete Category", content: 'Are you sure you want to delete category "{name}"?' },
   messages: { created: "Category created", updated: "Category updated", deleted: "Category deleted" },
   empty: { data: "No category data", filtered: "No categories match the filter" },
 };
