@@ -11,4 +11,5 @@ export default {
   productCategories: "商品类目管理",
   products: "商品管理",
   productsList: "列表",
+  productsEdit: "商品编辑",
 };

@@ -22,7 +22,7 @@ export default {
     search: "搜索",
     reset: "重置",
   },
-  editor: { createTitle: "新增商品", updateTitle: "编辑商品" },
+  editor: { createTitle: "新增商品", updateTitle: "编辑商品", loadFailed: "商品信息加载失败", backToList: "返回列表" },
   form: {
     name: "商品名称",
     code: "商品编码",

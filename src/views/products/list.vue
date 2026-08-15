@@ -44,69 +44,6 @@
     </n-card>
 
     <n-modal
-      v-model:show="showEditor"
-      :closable="!submitting"
-      :close-on-esc="!submitting"
-      :mask-closable="!submitting"
-      :title="editorTitle"
-      preset="card"
-      style="width: 560px; max-width: calc(100vw - 32px)"
-    >
-      <n-form ref="formRef" :model="formModel" :rules="formRules" label-placement="left" label-width="auto">
-        <n-form-item :label="t('products.form.name')" path="name">
-          <n-input v-model:value="formModel.name" :placeholder="t('products.placeholders.name')" />
-        </n-form-item>
-        <n-form-item :label="t('products.form.code')" path="code">
-          <n-input v-model:value="formModel.code" :placeholder="t('products.placeholders.code')" />
-        </n-form-item>
-        <n-form-item :label="t('products.form.price')" path="price">
-          <n-input-number
-            v-model:value="formModel.price"
-            :min="0.01"
-            :placeholder="t('products.placeholders.price')"
-            :precision="2"
-            style="width: 100%"
-          >
-            <template #prefix>￥</template>
-          </n-input-number>
-        </n-form-item>
-        <n-form-item :label="t('products.form.category')" path="categoryId">
-          <n-tree-select
-            v-model:value="formModel.categoryId"
-            :options="categoryOptions"
-            :placeholder="t('products.placeholders.category')"
-            clearable
-          />
-        </n-form-item>
-        <n-form-item :label="t('products.form.unit')" path="unit">
-          <n-input v-model:value="formModel.unit" :placeholder="t('products.placeholders.unit')" />
-        </n-form-item>
-        <n-form-item :label="t('products.form.description')" path="description">
-          <n-input
-            v-model:value="formModel.description"
-            :maxlength="2000"
-            :placeholder="t('products.placeholders.description')"
-            show-count
-            type="textarea"
-          />
-        </n-form-item>
-        <n-form-item :label="t('products.form.status')" path="status">
-          <n-switch v-model:value="statusChecked" />
-        </n-form-item>
-      </n-form>
-      <template #footer>
-        <n-space justify="end">
-          <n-button :disabled="submitting" @click="showEditor = false">
-            {{ t("products.actions.cancel") }}
-          </n-button>
-          <n-button :loading="submitting" type="primary" @click="submitEditor">
-            {{ t("products.actions.save") }}
-          </n-button>
-        </n-space>
-      </template>
-    </n-modal>
-
-    <n-modal
       v-model:show="showDeleteConfirm"
       :closable="!deleting"
       :close-on-esc="!deleting"
@@ -134,80 +71,46 @@
 import { computed, h, onMounted, reactive, ref } from "vue";
 import {
   type DataTableColumns,
-  type FormInst,
-  type FormRules,
   NButton,
   NCard,
   NDataTable,
   NEllipsis,
   NEmpty,
-  NForm,
-  NFormItem,
   NInput,
-  NInputNumber,
   NModal,
   NSelect,
   NSpace,
-  NSwitch,
   NTag,
-  NTreeSelect,
   type PaginationProps,
-  type TreeSelectOption,
 } from "naive-ui";
-import { getProductCategoryList, type ProductCategoryListOutput } from "@/api/productCategories.ts";
 import {
   changeProductStatus,
-  createProduct,
   deleteProduct,
-  getProductDetail,
   getProductPage,
-  type ProductMutationInput,
   type ProductOutput,
   productStatus,
   type ProductStatus,
-  updateProduct,
 } from "@/api/products.ts";
 import { PermissionCode } from "@/constants/permissions.ts";
 import { usePermissionsStore } from "@/stores/permissions.ts";
 import { useI18n } from "vue-i18n";
-
-interface ProductFormModel extends ProductMutationInput {
-  id: string | null;
-  version: string | null;
-}
-
-interface CategoryTreeNode extends ProductCategoryListOutput {
-  children?: CategoryTreeNode[];
-}
+import { useRouter } from "vue-router";
 
 const { t } = useI18n();
+const router = useRouter();
 const permissionsStore = usePermissionsStore();
 const products = ref<ProductOutput[]>([]);
-const categories = ref<ProductCategoryListOutput[]>([]);
 const keyword = ref("");
 const statusFilter = ref<ProductStatus | null>(null);
 const appliedKeyword = ref("");
 const appliedStatus = ref<ProductStatus | null>(null);
 const loading = ref(false);
-const submitting = ref(false);
 const deleting = ref(false);
 const changingStatusId = ref<string | null>(null);
-const editingLoadingId = ref<string | null>(null);
-// 表格与弹窗操作互斥：列表加载、编辑详情加载、提交、上下架、删除期间禁用其他操作入口。
-const actionLoading = computed(
-  () =>
-    changingStatusId.value !== null ||
-    editingLoadingId.value !== null ||
-    loading.value ||
-    submitting.value ||
-    deleting.value
-);
-let editRequestSequence = 0;
-const showEditor = ref(false);
+// 表格内操作互斥：列表加载、上下架、删除期间禁用其他操作入口。
+const actionLoading = computed(() => changingStatusId.value !== null || loading.value || deleting.value);
 const showDeleteConfirm = ref(false);
 const deletingProduct = ref<ProductOutput | null>(null);
-const formRef = ref<FormInst | null>(null);
-const formModel = reactive<ProductFormModel>(createEmptyForm());
 const pagination = reactive<PaginationProps>({
   page: 1,
   pageSize: 20,
@@ -233,30 +136,10 @@ const canDelete = computed(() => permissionsStore.hasPermission(PermissionCode.P
 const hasActions = computed(() => canUpdate.value || canDelete.value);
 const hasFilter = computed(() => Boolean(appliedKeyword.value) || appliedStatus.value !== null);
 const emptyDescription = computed(() => t(hasFilter.value ? "products.empty.filtered" : "products.empty.data"));
-const editorTitle = computed(() => t(formModel.id ? "products.editor.updateTitle" : "products.editor.createTitle"));
 const statusOptions = computed(() => [
   { label: t("products.statuses.onShelf"), value: productStatus.onShelf },
   { label: t("products.statuses.offShelf"), value: productStatus.offShelf },
 ]);
-const categoryOptions = computed<TreeSelectOption[]>(() => buildCategoryOptions(buildCategoryTree(categories.value)));
-const formRules = computed<FormRules>(() => ({
-  name: { required: true, whitespace: true, message: t("products.validation.name"), trigger: ["input", "blur"] },
-  code: { required: true, whitespace: true, message: t("products.validation.code"), trigger: ["input", "blur"] },
-  price: {
-    required: true,
-    type: "number",
-    validator: (_rule, value) =>
-      typeof value === "number" && value > 0 ? true : new Error(t("products.validation.price")),
-    trigger: ["input", "blur"],
-  },
-}));
-// 编辑弹窗用开关表达上架状态：开=上架（OnShelf），关=下架（OffShelf）。
-const statusChecked = computed({
-  get: () => formModel.status === productStatus.onShelf,
-  set: value => {
-    formModel.status = value ? productStatus.onShelf : productStatus.offShelf;
-  },
-});
 
 const columns = computed<DataTableColumns<ProductOutput>>(() => {
   const result: DataTableColumns<ProductOutput> = [
@@ -347,85 +230,19 @@ const columns = computed<DataTableColumns<ProductOutput>>(() => {
   return result;
 });
 
-function createEmptyForm(): ProductFormModel {
-  return {
-    id: null,
-    version: null,
-    name: "",
-    code: "",
-    price: null as unknown as number,
-    description: null,
-    unit: null,
-    categoryId: null,
-    status: productStatus.offShelf,
-  };
-}
-
 function renderText(value: string, maxWidth: number) {
   return h(NEllipsis, { tooltip: true, style: { maxWidth: `${maxWidth}px` } }, { default: () => value || "-" });
 }
 
-function buildCategoryTree(items: ProductCategoryListOutput[]): CategoryTreeNode[] {
-  const nodes = new Map<string, CategoryTreeNode>();
-  const roots: CategoryTreeNode[] = [];
-  items.forEach(item => nodes.set(item.id, { ...item }));
-  items.forEach(item => {
-    const node = nodes.get(item.id)!;
-    const parent = item.parentId ? nodes.get(item.parentId) : undefined;
-    if (parent) (parent.children ??= []).push(node);
-    else roots.push(node);
-  });
-  const sortNodes = (list: CategoryTreeNode[]) => {
-    list.sort((left, right) => left.sortOrder - right.sortOrder || left.id.localeCompare(right.id));
-    list.forEach(node => node.children && sortNodes(node.children));
-  };
-  sortNodes(roots);
-  return roots;
-}
-
-function buildCategoryOptions(nodes: CategoryTreeNode[]): TreeSelectOption[] {
-  return nodes.map(node => ({
-    label: node.name,
-    key: node.id,
-    children: node.children?.length ? buildCategoryOptions(node.children) : undefined,
-  }));
-}
-
+// 路径 "/products/edit" 对应后端 productsEdit 页面权限下发的 RoutePath。
 function openCreate() {
   if (actionLoading.value) return;
-  editRequestSequence++;
-  editingLoadingId.value = null;
-  Object.assign(formModel, createEmptyForm());
-  showEditor.value = true;
+  void router.push("/products/edit");
 }
 
-async function openEdit(product: ProductOutput) {
+function openEdit(product: ProductOutput) {
   if (actionLoading.value) return;
-  const requestSequence = ++editRequestSequence;
-  showEditor.value = false;
-  editingLoadingId.value = product.id;
-  const loadingMessage = window.$message.loading(t("common.loading"), { duration: 0 });
-  try {
-    const detail = await getProductDetail(product.id);
-    if (!detail || requestSequence !== editRequestSequence) return;
-    Object.assign(formModel, createEmptyForm(), {
-      id: detail.id,
-      version: detail.version,
-      name: detail.name,
-      code: detail.code,
-      price: detail.price,
-      description: detail.description,
-      unit: detail.unit,
-      categoryId: detail.categoryId,
-      status: detail.status,
-    });
-    showEditor.value = true;
-  } catch {
-    // 错误由统一请求处理展示，详情失败时保持编辑弹窗关闭。
-  } finally {
-    loadingMessage.destroy();
-    if (requestSequence === editRequestSequence) editingLoadingId.value = null;
-  }
+  void router.push({ path: "/products/edit", query: { id: product.id } });
 }
 
 function openDelete(product: ProductOutput) {
@@ -447,33 +264,6 @@ async function changeStatus(product: ProductOutput) {
     await loadProducts();
   } finally {
     changingStatusId.value = null;
-  }
-}
-
-async function submitEditor() {
-  await formRef.value?.validate();
-  submitting.value = true;
-  try {
-    const input: ProductMutationInput = {
-      name: formModel.name.trim(),
-      code: formModel.code.trim(),
-      price: formModel.price,
-      description: formModel.description?.trim() || null,
-      unit: formModel.unit?.trim() || null,
-      categoryId: formModel.categoryId,
-      status: formModel.status,
-    };
-    if (formModel.id && formModel.version) {
-      await updateProduct({ ...input, id: formModel.id, version: formModel.version });
-      window.$message.success(t("products.messages.updated"));
-    } else {
-      await createProduct(input);
-      window.$message.success(t("products.messages.created"));
-    }
-    showEditor.value = false;
-    await loadProducts();
-  } finally {
-    submitting.value = false;
   }
 }
 
@@ -532,11 +322,7 @@ function resetFilters() {
   void loadProducts();
 }
 
-async function loadCategories() {
-  categories.value = (await getProductCategoryList()) ?? [];
-}
-
-onMounted(() => Promise.all([loadProducts(), loadCategories(), permissionsStore.getPermissions()]));
+onMounted(() => Promise.all([loadProducts(), permissionsStore.getPermissions()]));
 </script>
 
 <style lang="scss" scoped>

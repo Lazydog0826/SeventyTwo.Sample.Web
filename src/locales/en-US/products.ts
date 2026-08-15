@@ -22,7 +22,12 @@ export default {
     search: "Search",
     reset: "Reset",
   },
-  editor: { createTitle: "Create product", updateTitle: "Edit product" },
+  editor: {
+    createTitle: "Create product",
+    updateTitle: "Edit product",
+    loadFailed: "Failed to load product",
+    backToList: "Back to list",
+  },
   form: {
     name: "Name",
     code: "Code",

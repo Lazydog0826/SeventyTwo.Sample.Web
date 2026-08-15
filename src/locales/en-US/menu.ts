@@ -11,4 +11,5 @@ export default {
   productCategories: "Product Categories",
   products: "Products",
   productsList: "List",
+  productsEdit: "Product Edit",
 };
