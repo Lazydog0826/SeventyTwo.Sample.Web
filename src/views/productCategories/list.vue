@@ -21,7 +21,7 @@
         :data="filteredTree"
         :loading="loading"
         :row-key="row => row.id"
-        :scroll-x="hasActions ? 640 : 480"
+        :scroll-x="hasActions ? 760 : 600"
         :single-line="false"
         striped
       >
@@ -187,13 +187,10 @@ const columns = computed<DataTableColumns<ProductCategoryTreeNode>>(() => {
   const result: DataTableColumns<ProductCategoryTreeNode> = [
     { title: t("productCategories.columns.name"), key: "name", minWidth: 280, fixed: "left" },
     {
-      title: t("productCategories.columns.parent"),
-      key: "parentName",
-      minWidth: 220,
-      render: row => {
-        const parent = row.parentId ? categoryById.value.get(row.parentId) : undefined;
-        return renderText(parent?.name ?? "-", 200);
-      },
+      title: t("productCategories.columns.path"),
+      key: "path",
+      minWidth: 320,
+      render: row => renderText(formatCategoryPath(row), 300),
     },
   ];
   if (hasActions.value) {
@@ -237,6 +234,15 @@ function createEmptyForm(): ProductCategoryFormModel {
 
 function renderText(value: string, maxWidth: number) {
   return h(NEllipsis, { tooltip: true, style: { maxWidth: `${maxWidth}px` } }, { default: () => value || "-" });
+}
+
+// Path 由类目 ID 以“/”连接（顶级类目仅含自身 ID），展示时逐段映射为类目名称，如“家用电器 / 大家电 / 冰箱”。
+function formatCategoryPath(category: ProductCategoryListOutput): string {
+  if (!category.path) return "";
+  return category.path
+    .split("/")
+    .map(id => categoryById.value.get(id)?.name ?? id)
+    .join(" / ");
 }
 
 function buildCategoryTree(items: ProductCategoryListOutput[]): ProductCategoryTreeNode[] {

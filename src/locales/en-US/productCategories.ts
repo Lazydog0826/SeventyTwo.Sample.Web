@@ -1,7 +1,7 @@
 export default {
   title: "Product Categories",
   filters: { keyword: "Search category name" },
-  columns: { name: "Category Name", parent: "Parent Category", actions: "Actions" },
+  columns: { name: "Category Name", path: "Category Path", actions: "Actions" },
   actions: { create: "Create", edit: "Edit", delete: "Delete", cancel: "Cancel", save: "Save" },
   editor: { createTitle: "Create Category", updateTitle: "Edit Category" },
   form: { name: "Category Name", parent: "Parent Category" },

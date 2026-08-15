@@ -1,7 +1,7 @@
 export default {
   title: "商品类目",
   filters: { keyword: "搜索类目名称" },
-  columns: { name: "类目名称", parent: "上级类目", actions: "操作" },
+  columns: { name: "类目名称", path: "类目层级路径", actions: "操作" },
   actions: { create: "新增类目", edit: "编辑", delete: "删除", cancel: "取消", save: "保存" },
   editor: { createTitle: "新增类目", updateTitle: "编辑类目" },
   form: { name: "类目名称", parent: "上级类目" },
