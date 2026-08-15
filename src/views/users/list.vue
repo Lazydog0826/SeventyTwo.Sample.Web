@@ -18,9 +18,9 @@
             class="status-select"
             clearable
           />
-          <n-button :disabled="actionLoading" type="primary" @click="searchUsers">{{
-            t("users.actions.search")
-          }}</n-button>
+          <n-button :disabled="actionLoading" type="primary" @click="searchUsers">
+            {{ t("users.actions.search") }}
+          </n-button>
           <n-button :disabled="actionLoading" @click="resetFilters">{{ t("users.actions.reset") }}</n-button>
         </n-space>
         <n-button v-if="canCreate" :disabled="actionLoading" type="primary" @click="openCreate">
@@ -48,61 +48,66 @@
       style="width: 560px; max-width: calc(100vw - 32px)"
     >
       <n-form ref="formRef" :model="formModel" :rules="formRules" label-placement="left" label-width="auto">
-        <n-form-item :label="t('users.form.username')" path="username"
-          ><n-input
+        <n-form-item :label="t('users.form.username')" path="username">
+          <n-input
             v-model:value="formModel.username"
             :disabled="Boolean(formModel.id)"
             :placeholder="t('users.placeholders.username')"
-        /></n-form-item>
-        <n-form-item v-if="!formModel.id" :label="t('users.form.password')" path="password"
-          ><n-input
+          />
+        </n-form-item>
+        <n-form-item v-if="!formModel.id" :label="t('users.form.password')" path="password">
+          <n-input
             v-model:value="formModel.password"
             :placeholder="t('users.placeholders.password')"
             show-password-on="click"
             type="password"
-        /></n-form-item>
-        <n-form-item :label="t('users.form.displayName')" path="displayName"
-          ><n-input v-model:value="formModel.displayName" :placeholder="t('users.placeholders.displayName')"
-        /></n-form-item>
-        <n-form-item :label="t('users.form.phone')" path="phone"
-          ><n-input v-model:value="formModel.phone" :placeholder="t('users.placeholders.phone')"
-        /></n-form-item>
-        <n-form-item :label="t('users.form.email')" path="email"
-          ><n-input v-model:value="formModel.email" :placeholder="t('users.placeholders.email')"
-        /></n-form-item>
-        <n-form-item :label="t('users.form.organization')" path="orgId"
-          ><n-tree-select
+          />
+        </n-form-item>
+        <n-form-item :label="t('users.form.displayName')" path="displayName">
+          <n-input v-model:value="formModel.displayName" :placeholder="t('users.placeholders.displayName')" />
+        </n-form-item>
+        <n-form-item :label="t('users.form.phone')" path="phone">
+          <n-input v-model:value="formModel.phone" :placeholder="t('users.placeholders.phone')" />
+        </n-form-item>
+        <n-form-item :label="t('users.form.email')" path="email">
+          <n-input v-model:value="formModel.email" :placeholder="t('users.placeholders.email')" />
+        </n-form-item>
+        <n-form-item :label="t('users.form.organization')" path="orgId">
+          <n-tree-select
             v-model:value="formModel.orgId"
             :loading="organizationsLoading"
             :options="organizationOptions"
             :placeholder="t('users.placeholders.organization')"
             filterable
-        /></n-form-item>
-        <n-form-item :label="t('users.form.dataPermissionType')" path="dataPermissionType"
-          ><n-select
+          />
+        </n-form-item>
+        <n-form-item :label="t('users.form.dataPermissionType')" path="dataPermissionType">
+          <n-select
             v-model:value="formModel.dataPermissionType"
             :options="dataPermissionTypeOptions"
             :placeholder="t('users.placeholders.dataPermissionType')"
-        /></n-form-item>
-        <n-form-item :label="t('users.form.defaultPage')" path="defaultPageId"
-          ><n-tree-select
+          />
+        </n-form-item>
+        <n-form-item :label="t('users.form.defaultPage')" path="defaultPageId">
+          <n-tree-select
             v-model:value="formModel.defaultPageId"
             :loading="defaultPagesLoading"
             :options="defaultPageOptions"
             :placeholder="t('users.placeholders.defaultPage')"
             clearable
             filterable
-        /></n-form-item>
-        <n-form-item v-if="!formModel.id" :label="t('users.form.enable')"
-          ><n-switch v-model:value="formModel.enable"
-        /></n-form-item>
+          />
+        </n-form-item>
+        <n-form-item v-if="!formModel.id" :label="t('users.form.enable')">
+          <n-switch v-model:value="formModel.enable" />
+        </n-form-item>
       </n-form>
-      <template #footer
-        ><n-space justify="end"
-          ><n-button @click="showEditor = false">{{ t("users.actions.cancel") }}</n-button
-          ><n-button :loading="submitting" type="primary" @click="submitEditor">
-            {{ t("users.actions.save") }}</n-button
-          >
+      <template #footer>
+        <n-space justify="end">
+          <n-button @click="showEditor = false">{{ t("users.actions.cancel") }}</n-button>
+          <n-button :loading="submitting" type="primary" @click="submitEditor">
+            {{ t("users.actions.save") }}
+          </n-button>
         </n-space>
       </template>
     </n-modal>
@@ -152,14 +157,12 @@
       type="warning"
     >
       {{ t("users.delete.content", { name: deletingUser?.displayName ?? "" }) }}
-      <template #action
-        ><n-space justify="end"
-          ><n-button :disabled="deleting" @click="showDeleteConfirm = false">{{ t("users.actions.cancel") }}</n-button
-          ><n-button :loading="deleting" type="error" @click="confirmDelete">{{
-            t("users.actions.delete")
-          }}</n-button></n-space
-        ></template
-      >
+      <template #action>
+        <n-space justify="end">
+          <n-button :disabled="deleting" @click="showDeleteConfirm = false">{{ t("users.actions.cancel") }}</n-button>
+          <n-button :loading="deleting" type="error" @click="confirmDelete">{{ t("users.actions.delete") }}</n-button>
+        </n-space>
+      </template>
     </n-modal>
 
     <n-modal

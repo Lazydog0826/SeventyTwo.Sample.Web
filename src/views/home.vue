@@ -38,8 +38,14 @@
             <p>{{ t("home.salesTrend.description") }}</p>
           </div>
           <div class="legend-summary">
-            <span><i class="legend-dot legend-dot--blue"></i>{{ t("home.salesAmount") }}</span>
-            <span><i class="legend-dot legend-dot--cyan"></i>{{ t("home.orderCount") }}</span>
+            <span>
+              <i class="legend-dot legend-dot--blue"></i>
+              {{ t("home.salesAmount") }}
+            </span>
+            <span>
+              <i class="legend-dot legend-dot--cyan"></i>
+              {{ t("home.orderCount") }}
+            </span>
           </div>
         </div>
         <v-chart :option="salesOption" autoresize class="chart chart--trend" />
@@ -58,7 +64,10 @@
         <v-chart :option="sourceOption" autoresize class="chart chart--pie" />
         <div class="source-legend">
           <div v-for="item in sourceData" :key="item.name">
-            <span><i :style="{ backgroundColor: item.itemStyle.color }"></i>{{ item.name }}</span>
+            <span>
+              <i :style="{ backgroundColor: item.itemStyle.color }"></i>
+              {{ item.name }}
+            </span>
             <strong>{{ item.value }}%</strong>
           </div>
         </div>
@@ -82,7 +91,10 @@
             <h2>{{ t("home.recentOrders.title") }}</h2>
             <p>{{ t("home.recentOrders.description") }}</p>
           </div>
-          <button class="text-button" type="button">{{ t("home.viewAll") }} <ChevronRight :size="15" /></button>
+          <button class="text-button" type="button">
+            {{ t("home.viewAll") }}
+            <ChevronRight :size="15" />
+          </button>
         </div>
         <div class="order-list">
           <div v-for="order in recentOrders" :key="order.id" class="order-row">

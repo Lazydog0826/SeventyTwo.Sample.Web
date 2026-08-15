@@ -21,12 +21,12 @@
                 class="status-select"
                 clearable
               />
-              <n-button :disabled="actionLoading" type="primary" @click="searchDictionaries">{{
-                t("dataDictionaries.actions.search")
-              }}</n-button>
-              <n-button :disabled="actionLoading" @click="resetFilters">{{
-                t("dataDictionaries.actions.reset")
-              }}</n-button>
+              <n-button :disabled="actionLoading" type="primary" @click="searchDictionaries">
+                {{ t("dataDictionaries.actions.search") }}
+              </n-button>
+              <n-button :disabled="actionLoading" @click="resetFilters">
+                {{ t("dataDictionaries.actions.reset") }}
+              </n-button>
             </n-space>
             <n-button v-if="canCreate" :disabled="actionLoading" type="primary" @click="openCreateDictionary">
               {{ t("dataDictionaries.actions.create") }}
@@ -111,9 +111,9 @@
       <template #footer>
         <n-space justify="end">
           <n-button @click="showDictionaryEditor = false">{{ t("dataDictionaries.actions.cancel") }}</n-button>
-          <n-button :loading="submitting" type="primary" @click="submitDictionary">{{
-            t("dataDictionaries.actions.save")
-          }}</n-button>
+          <n-button :loading="submitting" type="primary" @click="submitDictionary">
+            {{ t("dataDictionaries.actions.save") }}
+          </n-button>
         </n-space>
       </template>
     </n-modal>
@@ -138,9 +138,9 @@
       <template #footer>
         <n-space justify="end">
           <n-button @click="showItemEditor = false">{{ t("dataDictionaries.actions.cancel") }}</n-button>
-          <n-button :loading="submitting" type="primary" @click="submitItem">{{
-            t("dataDictionaries.actions.save")
-          }}</n-button>
+          <n-button :loading="submitting" type="primary" @click="submitItem">
+            {{ t("dataDictionaries.actions.save") }}
+          </n-button>
         </n-space>
       </template>
     </n-modal>
@@ -160,9 +160,9 @@
           <n-button :disabled="deleting" @click="showDictionaryDelete = false">
             {{ t("dataDictionaries.actions.cancel") }}
           </n-button>
-          <n-button :loading="deleting" type="error" @click="confirmDeleteDictionary">{{
-            t("dataDictionaries.actions.delete")
-          }}</n-button>
+          <n-button :loading="deleting" type="error" @click="confirmDeleteDictionary">
+            {{ t("dataDictionaries.actions.delete") }}
+          </n-button>
         </n-space>
       </template>
     </n-modal>
@@ -182,9 +182,9 @@
           <n-button :disabled="deleting" @click="showItemDelete = false">
             {{ t("dataDictionaries.actions.cancel") }}
           </n-button>
-          <n-button :loading="deleting" type="error" @click="confirmDeleteItem">{{
-            t("dataDictionaries.actions.delete")
-          }}</n-button>
+          <n-button :loading="deleting" type="error" @click="confirmDeleteItem">
+            {{ t("dataDictionaries.actions.delete") }}
+          </n-button>
         </n-space>
       </template>
     </n-modal>
