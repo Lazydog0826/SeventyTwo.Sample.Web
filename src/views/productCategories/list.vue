@@ -21,7 +21,7 @@
         :data="filteredTree"
         :loading="loading"
         :row-key="row => row.id"
-        :scroll-x="hasActions ? 760 : 600"
+        :scroll-x="hasActions ? 850 : 690"
         :single-line="false"
         striped
       >
@@ -40,6 +40,15 @@
       <n-form ref="formRef" :model="formModel" :rules="formRules" label-placement="left" label-width="auto">
         <n-form-item :label="t('productCategories.form.name')" path="name">
           <n-input v-model:value="formModel.name" :placeholder="t('productCategories.placeholders.name')" />
+        </n-form-item>
+        <n-form-item :label="t('productCategories.form.sortOrder')" path="sortOrder">
+          <n-input-number
+            v-model:value="formModel.sortOrder"
+            :min="0"
+            :placeholder="t('productCategories.placeholders.sortOrder')"
+            :precision="0"
+            style="width: 100%"
+          />
         </n-form-item>
         <n-form-item :label="t('productCategories.form.parent')" path="parentId">
           <n-tree-select
@@ -100,6 +109,7 @@ import {
   NForm,
   NFormItem,
   NInput,
+  NInputNumber,
   NModal,
   NSpace,
   NTreeSelect,
@@ -181,6 +191,15 @@ const formRules = computed<FormRules>(() => ({
     message: t("productCategories.validation.name"),
     trigger: ["input", "blur"],
   },
+  sortOrder: {
+    required: true,
+    type: "number",
+    validator: (_rule, value) =>
+      typeof value === "number" && Number.isInteger(value) && value >= 0
+        ? true
+        : new Error(t("productCategories.validation.sortOrder")),
+    trigger: ["input", "blur"],
+  },
 }));
 
 const columns = computed<DataTableColumns<ProductCategoryTreeNode>>(() => {
@@ -192,6 +211,7 @@ const columns = computed<DataTableColumns<ProductCategoryTreeNode>>(() => {
       minWidth: 320,
       render: row => renderText(formatCategoryPath(row), 300),
     },
+    { title: t("productCategories.columns.sortOrder"), key: "sortOrder", minWidth: 90 },
   ];
   if (hasActions.value) {
     result.push({
@@ -229,7 +249,7 @@ const columns = computed<DataTableColumns<ProductCategoryTreeNode>>(() => {
 });
 
 function createEmptyForm(): ProductCategoryFormModel {
-  return { id: null, version: null, name: "", parentId: null };
+  return { id: null, version: null, name: "", parentId: null, sortOrder: 0 };
 }
 
 function renderText(value: string, maxWidth: number) {
@@ -255,6 +275,11 @@ function buildCategoryTree(items: ProductCategoryListOutput[]): ProductCategoryT
     if (parent) (parent.children ??= []).push(node);
     else roots.push(node);
   });
+  // 同级按排序号升序、其次按 ID 兜底，保证树形展示顺序稳定。
+  const compareNodes = (left: ProductCategoryTreeNode, right: ProductCategoryTreeNode) =>
+    left.sortOrder - right.sortOrder || left.id.localeCompare(right.id);
+  roots.sort(compareNodes);
+  nodes.forEach(node => node.children?.sort(compareNodes));
   return roots;
 }
 
@@ -331,6 +356,7 @@ async function submitEditor() {
     const input: ProductCategoryMutationInput = {
       name: formModel.name,
       parentId: formModel.parentId,
+      sortOrder: formModel.sortOrder,
     };
     if (formModel.id && formModel.version) {
       await updateProductCategory({ ...input, id: formModel.id, version: formModel.version });

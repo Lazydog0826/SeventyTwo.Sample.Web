@@ -5,12 +5,14 @@ export interface ProductCategoryListOutput {
   name: string;
   parentId: string | null;
   path: string;
+  sortOrder: number;
   version: string;
 }
 
 export interface ProductCategoryMutationInput {
   name: string;
   parentId: string | null;
+  sortOrder: number;
 }
 
 export interface UpdateProductCategoryInput extends ProductCategoryMutationInput {

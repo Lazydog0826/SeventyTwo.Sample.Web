@@ -118,6 +118,7 @@ export default {
     parentNotFound: "上级类目不存在",
     descendantCannotBeParent: "商品类目不能将自身或下级类目设为上级类目",
     hasChildren: "商品类目存在下级类目，不能删除",
+    sortMustNotBeNegative: "商品类目排序号不能小于零",
   },
   user: {
     idRequired: "用户 ID 不能为空",

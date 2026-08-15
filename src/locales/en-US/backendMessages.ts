@@ -118,6 +118,7 @@ export default {
     parentNotFound: "Parent category not found",
     descendantCannotBeParent: "A product category cannot use itself or a descendant as its parent",
     hasChildren: "The product category has child categories and cannot be deleted",
+    sortMustNotBeNegative: "Product category sort order cannot be negative",
   },
   user: {
     idRequired: "User ID is required",
