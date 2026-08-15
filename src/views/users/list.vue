@@ -100,11 +100,7 @@
       <template #footer
         ><n-space justify="end"
           ><n-button @click="showEditor = false">{{ t("users.actions.cancel") }}</n-button
-          ><n-button
-            :loading="submitting"
-            type="primary"
-            @click="submitEditor"
-          >
+          ><n-button :loading="submitting" type="primary" @click="submitEditor">
             {{ t("users.actions.save") }}</n-button
           >
         </n-space>
@@ -449,9 +445,7 @@ const columns = computed<DataTableColumns<UserListOutput>>(() => {
       key: "dataPermissionType",
       minWidth: 190,
       render: row =>
-        dataPermissionTypeLabel(
-          dataPermissionTypeItemValues.get(row.dataPermissionType) ?? row.dataPermissionType
-        ),
+        dataPermissionTypeLabel(dataPermissionTypeItemValues.get(row.dataPermissionType) ?? row.dataPermissionType),
     },
     {
       title: t("users.columns.status"),
