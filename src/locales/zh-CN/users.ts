@@ -11,6 +11,12 @@ export default {
     actions: "操作",
   },
   statuses: { enabled: "已启用", disabled: "已禁用" },
+  dataPermissionTypes: {
+    all: "全部数据",
+    organization: "本机构数据",
+    organizationAndDescendants: "本机构与下级机构数据",
+    self: "自己的数据",
+  },
   actions: {
     create: "新增用户",
     edit: "编辑",

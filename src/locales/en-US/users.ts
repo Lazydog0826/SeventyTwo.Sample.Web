@@ -13,6 +13,12 @@ export default {
     actions: "Actions",
   },
   statuses: { enabled: "Enabled", disabled: "Disabled" },
+  dataPermissionTypes: {
+    all: "All data",
+    organization: "Current organization data",
+    organizationAndDescendants: "Current and child organization data",
+    self: "Own data",
+  },
   actions: {
     create: "New user",
     edit: "Edit",

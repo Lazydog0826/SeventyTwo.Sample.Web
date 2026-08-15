@@ -81,7 +81,6 @@
         <n-form-item :label="t('users.form.dataPermissionType')" path="dataPermissionType"
           ><n-select
             v-model:value="formModel.dataPermissionType"
-            :loading="dataPermissionTypesLoading"
             :options="dataPermissionTypeOptions"
             :placeholder="t('users.placeholders.dataPermissionType')"
         /></n-form-item>
@@ -102,7 +101,6 @@
         ><n-space justify="end"
           ><n-button @click="showEditor = false">{{ t("users.actions.cancel") }}</n-button
           ><n-button
-            :disabled="!dataPermissionTypesAvailable"
             :loading="submitting"
             type="primary"
             @click="submitEditor"
@@ -251,7 +249,6 @@ import {
   updateUser,
   type UserListOutput,
 } from "@/api/users.ts";
-import { type DataDictionaryOptionOutput, getDataDictionaryOptions } from "@/api/dataDictionaries.ts";
 import type { PermissionListOutput } from "@/api/permissions.ts";
 import { getUserOrganizationOptions, type OrganizationListOutput } from "@/api/organizations.ts";
 import { PermissionCode } from "@/constants/permissions.ts";
@@ -273,12 +270,11 @@ interface UserFormModel {
   defaultPageId: string | null;
   enable: boolean;
 }
-const { t } = useI18n();
+const { t, te } = useI18n();
 const permissionsStore = usePermissionsStore();
 const users = ref<UserListOutput[]>([]);
 const organizations = ref<OrganizationListOutput[]>([]);
 const defaultPages = ref<DefaultPageOptionOutput[]>([]);
-const dataPermissionTypes = ref<DataDictionaryOptionOutput[]>([]);
 const keyword = ref("");
 const statusFilter = ref<StatusFilter | null>(null);
 const appliedKeyword = ref("");
@@ -304,7 +300,6 @@ const pagination = reactive<PaginationProps>({
 const loading = ref(false);
 const organizationsLoading = ref(false);
 const defaultPagesLoading = ref(false);
-const dataPermissionTypesLoading = ref(false);
 const submitting = ref(false);
 const deleting = ref(false);
 const resettingPassword = ref(false);
@@ -356,14 +351,30 @@ const statusOptions = computed(() => [
 ]);
 const organizationOptions = computed<TreeSelectOption[]>(() => buildOrganizationOptions(organizations.value));
 const defaultPageOptions = computed<TreeSelectOption[]>(() => buildDefaultPageOptions(defaultPages.value));
-const dataPermissionTypeOptions = computed(() =>
-  dataPermissionTypes.value
-    .filter((item): item is DataDictionaryOptionOutput & { value: DataPermissionType } =>
-      isDataPermissionType(item.value)
-    )
-    .map(item => ({ label: item.label, value: item.value }))
+// 数据权限类型选项与后端 DataPermissionType 枚举写死对应：
+// 选项 value 直接使用帕斯卡枚举值，表单提交无需转换；
+// 小驼峰仅作为 i18n 消息键，文案维护在 locales/{语言}/users.ts 的 dataPermissionTypes 分组。
+const dataPermissionTypeApiValues = new Map<string, DataPermissionType>([
+  ["all", "All"],
+  ["organization", "Organization"],
+  ["organizationAndDescendants", "OrganizationAndDescendants"],
+  ["self", "Self"],
+]);
+const dataPermissionTypeItemValues = new Map<DataPermissionType, string>(
+  [...dataPermissionTypeApiValues].map(([itemValue, apiValue]) => [apiValue, itemValue] as const)
 );
-const dataPermissionTypesAvailable = computed(() => dataPermissionTypeOptions.value.length > 0);
+// 缺少翻译时回退显示传入的原始值，避免把消息键暴露给用户
+function dataPermissionTypeLabel(itemValue: string): string {
+  const messageKey = `users.dataPermissionTypes.${itemValue}`;
+  return te(messageKey) ? t(messageKey) : itemValue;
+}
+// computed 保证切换语言时选项文案随之刷新
+const dataPermissionTypeOptions = computed(() =>
+  [...dataPermissionTypeApiValues].map(([itemValue, apiValue]) => ({
+    label: dataPermissionTypeLabel(itemValue),
+    value: apiValue,
+  }))
+);
 const formRules = computed<FormRules>(() => ({
   username: {
     required: true,
@@ -422,9 +433,6 @@ function buildDefaultPageOptions(items: DefaultPageOptionOutput[]): TreeSelectOp
     .sort((left, right) => left.sortOrder - right.sortOrder || left.id.localeCompare(right.id))
     .map(item => ({ label: item.title, key: item.id }));
 }
-function isDataPermissionType(value: string): value is DataPermissionType {
-  return ["All", "Organization", "OrganizationAndDescendants", "Self"].includes(value);
-}
 const columns = computed<DataTableColumns<UserListOutput>>(() => {
   const result: DataTableColumns<UserListOutput> = [
     { title: t("users.columns.username"), key: "username", minWidth: 160, fixed: "left" },
@@ -441,8 +449,9 @@ const columns = computed<DataTableColumns<UserListOutput>>(() => {
       key: "dataPermissionType",
       minWidth: 190,
       render: row =>
-        dataPermissionTypes.value.find(item => item.value === row.dataPermissionType)?.label ??
-        String(row.dataPermissionType),
+        dataPermissionTypeLabel(
+          dataPermissionTypeItemValues.get(row.dataPermissionType) ?? row.dataPermissionType
+        ),
     },
     {
       title: t("users.columns.status"),
@@ -852,24 +861,13 @@ async function loadDefaultPages() {
     defaultPagesLoading.value = false;
   }
 }
-async function loadDataPermissionTypes() {
-  dataPermissionTypesLoading.value = true;
-  try {
-    dataPermissionTypes.value = (await getDataDictionaryOptions("DATA_PERMISSION_TYPE")) ?? [];
-  } catch {
-    // 字典加载失败由统一请求层提示；保留空选项，避免辅助数据请求中断用户列表初始化。
-    dataPermissionTypes.value = [];
-  } finally {
-    dataPermissionTypesLoading.value = false;
-  }
-}
 onMounted(async () => {
   await permissionsStore.getPermissions();
   const editorOptionsTask =
     canCreate.value || canUpdate.value
       ? await Promise.all([loadOrganizations(), loadDefaultPages()])
       : await Promise.resolve();
-  await Promise.all([loadUsers(), loadDataPermissionTypes(), editorOptionsTask]);
+  await Promise.all([loadUsers(), editorOptionsTask]);
 });
 </script>
 
