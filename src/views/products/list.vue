@@ -45,10 +45,10 @@
 
     <n-modal
       v-model:show="showEditor"
-      :title="editorTitle"
       :closable="!submitting"
       :close-on-esc="!submitting"
       :mask-closable="!submitting"
+      :title="editorTitle"
       preset="card"
       style="width: 560px; max-width: calc(100vw - 32px)"
     >
@@ -161,9 +161,9 @@ import {
   deleteProduct,
   getProductDetail,
   getProductPage,
-  productStatus,
   type ProductMutationInput,
   type ProductOutput,
+  productStatus,
   type ProductStatus,
   updateProduct,
 } from "@/api/products.ts";
@@ -232,12 +232,8 @@ const canUpdate = computed(() => permissionsStore.hasPermission(PermissionCode.P
 const canDelete = computed(() => permissionsStore.hasPermission(PermissionCode.ProductsDelete));
 const hasActions = computed(() => canUpdate.value || canDelete.value);
 const hasFilter = computed(() => Boolean(appliedKeyword.value) || appliedStatus.value !== null);
-const emptyDescription = computed(() =>
-  t(hasFilter.value ? "products.empty.filtered" : "products.empty.data")
-);
-const editorTitle = computed(() =>
-  t(formModel.id ? "products.editor.updateTitle" : "products.editor.createTitle")
-);
+const emptyDescription = computed(() => t(hasFilter.value ? "products.empty.filtered" : "products.empty.data"));
+const editorTitle = computed(() => t(formModel.id ? "products.editor.updateTitle" : "products.editor.createTitle"));
 const statusOptions = computed(() => [
   { label: t("products.statuses.onShelf"), value: productStatus.onShelf },
   { label: t("products.statuses.offShelf"), value: productStatus.offShelf },
@@ -326,7 +322,9 @@ const columns = computed<DataTableColumns<ProductOutput>>(() => {
                   },
                   {
                     default: () =>
-                      t(row.status === productStatus.onShelf ? "products.actions.offShelf" : "products.actions.onShelf"),
+                      t(
+                        row.status === productStatus.onShelf ? "products.actions.offShelf" : "products.actions.onShelf"
+                      ),
                   }
                 )
               : null,

@@ -40,8 +40,12 @@ export default {
     unit: "Enter unit, e.g. piece",
     description: "Enter description",
   },
-  validation: { name: "Product name is required", code: "Product code is required", price: "Price must be a positive number" },
-  delete: { title: "Delete product", content: "Delete product \"{name}\"?" },
+  validation: {
+    name: "Product name is required",
+    code: "Product code is required",
+    price: "Price must be a positive number",
+  },
+  delete: { title: "Delete product", content: 'Delete product "{name}"?' },
   messages: {
     created: "Product created",
     updated: "Product updated",
