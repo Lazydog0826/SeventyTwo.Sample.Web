@@ -57,6 +57,8 @@ export default {
     deleted: "Product deleted",
     onShelf: "Product is now on shelf",
     offShelf: "Product is now off shelf",
+    onShelfLoading: "Putting product on shelf…",
+    offShelfLoading: "Taking product off shelf…",
   },
   empty: { data: "No products yet", filtered: "No products match the filters" },
 };

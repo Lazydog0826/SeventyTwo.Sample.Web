@@ -48,6 +48,8 @@ export default {
     deleted: "商品删除成功",
     onShelf: "商品已上架",
     offShelf: "商品已下架",
+    onShelfLoading: "正在上架商品…",
+    offShelfLoading: "正在下架商品…",
   },
   empty: { data: "暂无商品数据", filtered: "没有符合筛选条件的商品" },
 };

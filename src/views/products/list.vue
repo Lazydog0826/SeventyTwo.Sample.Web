@@ -255,13 +255,22 @@ async function changeStatus(product: ProductOutput) {
   if (actionLoading.value) return;
   const nextStatus: ProductStatus =
     product.status === productStatus.onShelf ? productStatus.offShelf : productStatus.onShelf;
+  const toOnShelf = nextStatus === productStatus.onShelf;
   changingStatusId.value = product.id;
+  // duration 为 0 让 loading 提示常驻：成功后原地切换为成功提示并延时关闭；失败时直接关闭，错误由请求层统一提示。
+  const messageReactive = window.$message.loading(
+    t(toOnShelf ? "products.messages.onShelfLoading" : "products.messages.offShelfLoading"),
+    { duration: 0 }
+  );
   try {
     await changeProductStatus({ id: product.id, status: nextStatus, version: product.version });
-    window.$message.success(
-      t(nextStatus === productStatus.onShelf ? "products.messages.onShelf" : "products.messages.offShelf")
-    );
+    messageReactive.type = "success";
+    messageReactive.content = t(toOnShelf ? "products.messages.onShelf" : "products.messages.offShelf");
+    window.setTimeout(() => messageReactive.destroy(), 3000);
     await loadProducts();
+  } catch (error) {
+    messageReactive.destroy();
+    throw error;
   } finally {
     changingStatusId.value = null;
   }
