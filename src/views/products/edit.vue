@@ -10,14 +10,15 @@
         </div>
         <n-form v-else ref="formRef" :model="formModel" :rules="formRules" label-placement="left" label-width="auto">
           <n-form-item :label="t('products.form.name')" path="name">
-            <n-input v-model:value="formModel.name" :placeholder="t('products.placeholders.name')" />
+            <n-input v-model:value="formModel.name" :maxlength="255" :placeholder="t('products.placeholders.name')" />
           </n-form-item>
           <n-form-item :label="t('products.form.code')" path="code">
-            <n-input v-model:value="formModel.code" :placeholder="t('products.placeholders.code')" />
+            <n-input v-model:value="formModel.code" :maxlength="64" :placeholder="t('products.placeholders.code')" />
           </n-form-item>
           <n-form-item :label="t('products.form.price')" path="price">
             <n-input-number
               v-model:value="formModel.price"
+              :max="maxPrice"
               :min="0.01"
               :placeholder="t('products.placeholders.price')"
               :precision="2"
@@ -35,7 +36,7 @@
             />
           </n-form-item>
           <n-form-item :label="t('products.form.unit')" path="unit">
-            <n-input v-model:value="formModel.unit" :placeholder="t('products.placeholders.unit')" />
+            <n-input v-model:value="formModel.unit" :maxlength="20" :placeholder="t('products.placeholders.unit')" />
           </n-form-item>
           <n-form-item :label="t('products.form.description')" path="description">
             <n-input
@@ -125,14 +126,20 @@ const canSubmit = computed(() =>
     : permissionsStore.hasPermission(PermissionCode.ProductsCreate)
 );
 const categoryOptions = computed<TreeSelectOption[]>(() => buildCategoryOptions(buildCategoryTree(categories.value)));
+// 后端价格上限为 9999999999999999.99,超出 Number 安全整数范围,超界输入无法在前端精确校验;
+// 边界取 Number.MAX_SAFE_INTEGER,保证参与比较的值可被精确表示,避免浮点舍入误放行。
+const maxPrice = Number.MAX_SAFE_INTEGER;
 const formRules = computed<FormRules>(() => ({
   name: { required: true, whitespace: true, message: t("products.validation.name"), trigger: ["input", "blur"] },
   code: { required: true, whitespace: true, message: t("products.validation.code"), trigger: ["input", "blur"] },
   price: {
     required: true,
     type: "number",
-    validator: (_rule, value) =>
-      typeof value === "number" && value > 0 ? true : new Error(t("products.validation.price")),
+    validator: (_rule, value) => {
+      if (typeof value !== "number" || value <= 0) return new Error(t("products.validation.price"));
+      // 上限校验复用后端错误消息键,与接口报错文案保持一致。
+      return value <= maxPrice ? true : new Error(t("product.priceOutOfRange"));
+    },
     trigger: ["input", "blur"],
   },
 }));

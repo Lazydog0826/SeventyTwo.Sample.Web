@@ -21,6 +21,7 @@ export interface PermissionMenuOutput {
   routeName: string;
   metaData: PermissionMetaData;
   parentId: string | null;
+  path: string;
 }
 
 /** 当前登录用户的权限。 */
@@ -43,6 +44,7 @@ export interface PermissionListOutput {
   routeName: string;
   metaData: PermissionMetaData;
   parentId: string | null;
+  path: string;
   version: string;
 }
 
