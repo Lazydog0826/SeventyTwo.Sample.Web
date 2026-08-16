@@ -3,7 +3,7 @@
     <n-card :bordered="false">
       <!-- 布局规范与商品列表页一致：筛选区一行五列，搜索/重置按钮固定第一行最后一列，不足五列用空项补齐。 -->
       <div class="toolbar">
-        <n-grid :x-gap="16" :y-gap="16" :cols="5">
+        <n-grid :cols="5" :x-gap="16" :y-gap="16">
           <n-gi>
             <n-input
               v-model:value="keyword"
@@ -67,11 +67,7 @@
                   @toggle="toggleColumn"
                 >
                   <template #trigger>
-                    <n-button
-                      :aria-label="t('users.actions.settings')"
-                      :title="t('users.actions.settings')"
-                      quaternary
-                    >
+                    <n-button :aria-label="t('users.actions.settings')" :title="t('users.actions.settings')" quaternary>
                       <template #icon>
                         <n-icon>
                           <Settings :size="16" :stroke-width="1.5"></Settings>
@@ -610,8 +606,7 @@ const actionsColumn = computed<DataTableColumn<UserListOutput>>(() => ({
               {
                 text: true,
                 type: "warning",
-                disabled:
-                  row.username === SystemUsername.SuperAdmin || resettingPassword.value || actionLoading.value,
+                disabled: row.username === SystemUsername.SuperAdmin || resettingPassword.value || actionLoading.value,
                 onClick: () => openResetPassword(row),
               },
               { default: () => t("users.actions.resetPassword") }

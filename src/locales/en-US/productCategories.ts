@@ -3,7 +3,15 @@ export default {
   title: "Product Categories",
   filters: { keyword: "Search category name" },
   columns: { name: "Category Name", path: "Category Path", sortOrder: "Sort", actions: "Actions" },
-  actions: { create: "Create", edit: "Edit", delete: "Delete", cancel: "Cancel", save: "Save", refresh: "Refresh", settings: "Settings" },
+  actions: {
+    create: "Create",
+    edit: "Edit",
+    delete: "Delete",
+    cancel: "Cancel",
+    save: "Save",
+    refresh: "Refresh",
+    settings: "Settings",
+  },
   editor: { createTitle: "Create Category", updateTitle: "Edit Category" },
   form: { name: "Category Name", sortOrder: "Sort", parent: "Parent Category" },
   placeholders: {

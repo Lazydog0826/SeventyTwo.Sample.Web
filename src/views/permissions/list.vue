@@ -4,7 +4,7 @@
       <!-- 布局规范与商品列表页一致：筛选区一行五列，不足五列用空项补齐。
            树形数据为即时过滤（输入即过滤），因此筛选区无搜索/重置按钮。 -->
       <div class="toolbar">
-        <n-grid :x-gap="16" :y-gap="16" :cols="5">
+        <n-grid :cols="5" :x-gap="16" :y-gap="16">
           <n-gi>
             <n-input
               v-model:value="keyword"

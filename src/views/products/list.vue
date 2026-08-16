@@ -4,7 +4,7 @@
       <div class="toolbar">
         <!-- 筛选区一行五列：前四列为查询条件，按钮组固定在第一行最后一列；
              条件不足五列时用空项补齐占位，展开的占位条件排到第二行并同样补齐。 -->
-        <n-grid :x-gap="16" :y-gap="16" :cols="5">
+        <n-grid :cols="5" :x-gap="16" :y-gap="16">
           <n-gi>
             <n-input
               v-model:value="keyword"
