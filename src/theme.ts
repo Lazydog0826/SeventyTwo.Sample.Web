@@ -3,22 +3,14 @@ import { darkTheme, type GlobalThemeOverrides } from "naive-ui";
 
 /*
 red: 红色
-orangered: 橙红色
 orange: 橙色
-gold: 金色
-yellow: 黄色
-lime: 青柠色
 green: 绿色
-cyan: 青色
 blue: 蓝色
 arcoblue: Arco 蓝
-purple: 紫色
-pinkpurple: 粉紫色
-magenta: 品红色
 gray: 灰色
 */
 const semanticPalettes = {
-  primary: "cyan",
+  primary: "arcoblue",
   info: "blue",
   success: "green",
   warning: "orange",

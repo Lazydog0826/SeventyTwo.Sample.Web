@@ -2,35 +2,19 @@
 
 $light-palette: (
         "red": (#ffece8, #fdcdc5, #fbaca3, #f98981, #f76560, #f53f3f, #cb272d, #a1151e, #770813, #4d000a),
-        "orangered": (#fff3e8, #fdddc3, #fcc59f, #faac7b, #f99057, #f77234, #cc5120, #a23511, #771f06, #4d0e00),
         "orange": (#fff7e8, #ffe4ba, #ffcf8b, #ffb65d, #ff9a2e, #ff7d00, #d25f00, #a64500, #792e00, #4d1b00),
-        "gold": (#fffce8, #fdf4bf, #fce996, #fadc6d, #f9cc45, #f7ba1e, #cc9213, #a26d0a, #774b04, #4d2d00),
-        "yellow": (#feffe8, #fefebe, #fdfa94, #fcf26b, #fbe842, #fadc19, #cfaf0f, #a38408, #785d03, #4d3800),
-        "lime": (#fcffe8, #edf8bb, #dcf190, #c9e968, #b5e241, #9fdb1d, #7eb712, #5f940a, #437004, #2a4d00),
         "green": (#e8ffea, #aff0b5, #7be188, #4cd263, #23c343, #00b42a, #009a29, #008026, #006622, #004d1c),
-        "cyan": (#e8fffb, #b7f4ec, #89e9e0, #5edfd6, #37d4cf, #14c9c9, #0da5aa, #07828b, #03616c, #00424d),
         "blue": (#e8f7ff, #c3e7fe, #9fd4fd, #7bc0fc, #57a9fb, #3491fa, #206ccf, #114ba3, #063078, #001a4d),
         "arcoblue": (#e8f3ff, #bedaff, #94bfff, #6aa1ff, #4080ff, #165dff, #0e42d2, #072ca6, #031a79, #000d4d),
-        "purple": (#f5e8ff, #ddbef6, #c396ed, #a871e3, #8d4eda, #722ed1, #551db0, #3c108f, #27066e, #16004d),
-        "pinkpurple": (#ffe8fb, #f7baef, #f08ee6, #e865df, #e13edb, #d91ad9, #b010b6, #8a0993, #650370, #42004d),
-        "magenta": (#ffe8f1, #fdc2db, #fb9dc7, #f979b7, #f754a8, #f5319d, #cb1e83, #a11069, #77064f, #4d0034),
         "gray": (#f7f8fa, #f2f3f5, #e5e6eb, #c9cdd4, #a9aeb8, #86909c, #6b7785, #4e5969, #272e3b, #1d2129),
 );
 
 $dark-palette: (
         "red": (#4d000a, #770611, #a1161f, #cb2e34, #f54e4e, #f76965, #f98d86, #fbb0a7, #fdd1ca, #fff0ec),
-        "orangered": (#4d0e00, #771e05, #a23714, #cc5729, #f77e45, #f9925a, #faad7d, #fcc6a1, #fddec5, #fff4eb),
         "orange": (#4d1b00, #793004, #a64b0a, #d26913, #ff8d1f, #ff9626, #ffb357, #ffcd87, #ffe3b8, #fff7e8),
-        "gold": (#4d2d00, #774b04, #a26f0f, #cc961f, #f7c034, #f9cc44, #fadc6c, #fce995, #fdf4be, #fffce8),
-        "yellow": (#4d3800, #785e07, #a38614, #cfb325, #fae13c, #fbe94b, #fcf374, #fdfa9d, #fefec6, #fefff0),
-        "lime": (#2a4d00, #447006, #629412, #84b723, #a8db39, #b8e24b, #cbe970, #def198, #eef8c2, #fdffee),
         "green": (#004d1c, #046625, #0a802d, #129a37, #1db440, #27c346, #50d266, #7ee18b, #b2f0b7, #ebffec),
-        "cyan": (#00424d, #06616c, #11838b, #1fa6aa, #30c9c9, #3fd4cf, #66dfd7, #90e9e1, #bef4ed, #f0fffc),
         "blue": (#001a4d, #052f78, #134ca3, #2971cf, #469afa, #5aaafb, #7dc1fc, #a1d5fd, #c6e8fe, #eaf8ff),
         "arcoblue": (#000d4d, #041b79, #0e32a6, #1d4dd2, #306fff, #3c7eff, #689fff, #93beff, #bedaff, #eaf4ff),
-        "purple": (#16004d, #27066e, #3e138f, #5a25b0, #7b3dd1, #8e51da, #a974e3, #c59aed, #dfc2f6, #f7edff),
-        "pinkpurple": (#42004d, #650370, #8a0d93, #b01bb6, #d92ed9, #e13ddb, #e866df, #f092e6, #f7c1f0, #fff2fd),
-        "magenta": (#4d0034, #770850, #a1176c, #cb2b88, #f545a6, #f756a9, #f97ab8, #fb9ec8, #fdc3db, #ffe8f1),
         "gray": (#1d2129, #272e3b, #4e5969, #6b7785, #86909c, #a9aeb8, #c9cdd4, #e5e6eb, #f2f3f5, #f7f8fa),
 );
 

@@ -69,6 +69,8 @@ function handleClose(name: string) {
 
   .layout-tabs {
     flex: 0 0 auto;
+    // 标签栏使用容器底色，与页面灰底区分，深浅主题由语义变量自动适配。
+    background-color: var(--color-bg-container);
   }
 
   .layout-router-view {
