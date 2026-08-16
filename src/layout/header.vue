@@ -94,7 +94,7 @@ import {
   NSkeleton,
 } from "naive-ui";
 import { BellRing, KeyRound, Languages, LogOut, Maximize, Minimize, Moon, Settings, Sun, User } from "@lucide/vue";
-import { computed, h, inject, onMounted, onUnmounted, ref, type Component, type Ref } from "vue";
+import { type Component, computed, h, inject, onMounted, onUnmounted, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { logout as logoutApi } from "@/api/users.ts";
 import logoUrl from "@/assets/seventytwo-logo.svg";

@@ -105,7 +105,7 @@
                 maxlength="6"
               >
                 <template #suffix>
-                  <n-button text type="primary" :disabled="smsCountdown > 0" @click="handleSendCode">
+                  <n-button :disabled="smsCountdown > 0" text type="primary" @click="handleSendCode">
                     {{ smsCountdown > 0 ? t("login.smsRetry", { seconds: smsCountdown }) : t("login.smsSend") }}
                   </n-button>
                 </template>
@@ -119,20 +119,20 @@
 
           <div v-else key="qrcode" class="qrcode-panel">
             <div class="qrcode-box">
-              <svg class="qrcode-svg" viewBox="0 0 25 25" shape-rendering="crispEdges" aria-hidden="true">
+              <svg aria-hidden="true" class="qrcode-svg" shape-rendering="crispEdges" viewBox="0 0 25 25">
                 <rect
                   v-for="cell in qrCells"
                   :key="`c-${cell.x}-${cell.y}`"
                   :x="cell.x"
                   :y="cell.y"
-                  width="1"
-                  height="1"
                   fill="currentColor"
+                  height="1"
+                  width="1"
                 ></rect>
                 <template v-for="pos in qrFinders" :key="`f-${pos.x}-${pos.y}`">
-                  <rect :x="pos.x" :y="pos.y" width="7" height="7" fill="currentColor"></rect>
-                  <rect :x="pos.x + 1" :y="pos.y + 1" width="5" height="5" fill="#fff"></rect>
-                  <rect :x="pos.x + 2" :y="pos.y + 2" width="3" height="3" fill="currentColor"></rect>
+                  <rect :x="pos.x" :y="pos.y" fill="currentColor" height="7" width="7"></rect>
+                  <rect :x="pos.x + 1" :y="pos.y + 1" fill="#fff" height="5" width="5"></rect>
+                  <rect :x="pos.x + 2" :y="pos.y + 2" fill="currentColor" height="3" width="3"></rect>
                 </template>
               </svg>
             </div>
