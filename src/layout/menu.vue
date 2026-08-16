@@ -33,8 +33,8 @@
         >
           <template #icon>
             <n-icon>
-              <PanelLeftOpen v-if="collapsed" :size="16" :stroke-width="1"></PanelLeftOpen>
-              <PanelLeftClose v-else :size="16" :stroke-width="1"></PanelLeftClose>
+              <PanelLeftOpen v-if="collapsed" :size="16" :stroke-width="1.5"></PanelLeftOpen>
+              <PanelLeftClose v-else :size="16" :stroke-width="1.5"></PanelLeftClose>
             </n-icon>
           </template>
         </n-button>
@@ -91,7 +91,7 @@ function renderIcon(name?: string): MenuOption["icon"] {
 
   return () =>
     h(NIcon, null, {
-      default: () => h(icon, { size: 16, strokeWidth: 1 }),
+      default: () => h(icon, { size: 16, strokeWidth: 1.5 }),
     });
 }
 

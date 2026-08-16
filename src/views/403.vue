@@ -10,8 +10,8 @@
       >
         <template #icon>
           <n-icon>
-            <Sun v-if="isDark" :size="16" :stroke-width="1"></Sun>
-            <Moon v-else :size="16" :stroke-width="1"></Moon>
+            <Sun v-if="isDark" :size="16" :stroke-width="1.5"></Sun>
+            <Moon v-else :size="16" :stroke-width="1.5"></Moon>
           </n-icon>
         </template>
       </n-button>
@@ -20,7 +20,7 @@
         <n-button :aria-label="t('language.switch')" :title="t('language.switch')" circle quaternary>
           <template #icon>
             <n-icon>
-              <Languages :size="16" :stroke-width="1"></Languages>
+              <Languages :size="16" :stroke-width="1.5"></Languages>
             </n-icon>
           </template>
         </n-button>
@@ -30,7 +30,7 @@
     <n-card :bordered="false" class="error-card">
       <div class="error-content">
         <div aria-hidden="true" class="error-icon error-icon--warning">
-          <ShieldAlert :size="38" :stroke-width="1.8"></ShieldAlert>
+          <ShieldAlert :size="38" :stroke-width="1.5"></ShieldAlert>
         </div>
         <div class="status-code status-code--warning">403</div>
         <h1>{{ t("noPermission.title") }}</h1>

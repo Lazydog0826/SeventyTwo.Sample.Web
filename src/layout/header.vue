@@ -19,7 +19,7 @@
             <n-button :aria-label="t('notifications.title')" :title="t('notifications.title')" circle quaternary>
               <template #icon>
                 <n-icon>
-                  <Bell :size="16" :stroke-width="1"></Bell>
+                  <BellRing :size="16" :stroke-width="1.5"></BellRing>
                 </n-icon>
               </template>
             </n-button>
@@ -64,7 +64,7 @@
           </ul>
           <div v-else class="notification-empty">
             <n-icon :size="28">
-              <Inbox :size="28" :stroke-width="1"></Inbox>
+              <Inbox :size="28" :stroke-width="1.5"></Inbox>
             </n-icon>
             <p>{{ t("notifications.empty") }}</p>
           </div>
@@ -80,8 +80,8 @@
       >
         <template #icon>
           <n-icon>
-            <Minimize v-if="isFullscreen" :size="16" :stroke-width="1"></Minimize>
-            <Maximize v-else :size="16" :stroke-width="1"></Maximize>
+            <Minimize v-if="isFullscreen" :size="16" :stroke-width="1.5"></Minimize>
+            <Maximize v-else :size="16" :stroke-width="1.5"></Maximize>
           </n-icon>
         </template>
       </n-button>
@@ -95,8 +95,8 @@
       >
         <template #icon>
           <n-icon>
-            <Sun v-if="isDark" :size="16" :stroke-width="1"></Sun>
-            <Moon v-else :size="16" :stroke-width="1"></Moon>
+            <Sun v-if="isDark" :size="16" :stroke-width="1.5"></Sun>
+            <Moon v-else :size="16" :stroke-width="1.5"></Moon>
           </n-icon>
         </template>
       </n-button>
@@ -105,7 +105,7 @@
         <n-button :aria-label="t('language.switch')" :title="t('language.switch')" circle quaternary>
           <template #icon>
             <n-icon>
-              <Languages :size="16" :stroke-width="1"></Languages>
+              <Languages :size="16" :stroke-width="1.5"></Languages>
             </n-icon>
           </template>
         </n-button>
@@ -136,7 +136,7 @@ import {
   NSkeleton,
   NTag,
 } from "naive-ui";
-import { Bell, Inbox, Languages, Maximize, Minimize, Moon, Sun } from "@lucide/vue";
+import { BellRing, Inbox, Languages, Maximize, Minimize, Moon, Sun } from "@lucide/vue";
 import { computed, inject, onMounted, onUnmounted, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { logout as logoutApi } from "@/api/users.ts";

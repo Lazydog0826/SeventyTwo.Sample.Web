@@ -15,14 +15,14 @@
         <div class="metric-card__top">
           <span>{{ item.label }}</span>
           <span :style="{ color: item.color, backgroundColor: item.background }" class="metric-icon">
-            <component :is="item.icon" :size="16" :stroke-width="1" />
+            <component :is="item.icon" :size="16" :stroke-width="1.5" />
           </span>
         </div>
         <strong>{{ item.value }}</strong>
         <div class="metric-card__footer">
           <span :class="['trend', item.trend > 0 ? 'trend--up' : 'trend--down']">
-            <TrendingUp v-if="item.trend > 0" :size="16" :stroke-width="1" />
-            <TrendingDown v-else :size="16" :stroke-width="1" />
+            <TrendingUp v-if="item.trend > 0" :size="16" :stroke-width="1.5" />
+            <TrendingDown v-else :size="16" :stroke-width="1.5" />
             {{ Math.abs(item.trend) }}%
           </span>
           <span>{{ t("home.comparedToYesterday") }}</span>
@@ -58,7 +58,7 @@
             <p>{{ t("home.orderSource.description") }}</p>
           </div>
           <button :aria-label="t('home.viewMore')" class="more-button" type="button">
-            <Ellipsis :size="16" :stroke-width="1" />
+            <Ellipsis :size="16" :stroke-width="1.5" />
           </button>
         </div>
         <v-chart :option="sourceOption" autoresize class="chart chart--pie" />
@@ -93,7 +93,7 @@
           </div>
           <button class="text-button" type="button">
             {{ t("home.viewAll") }}
-            <ChevronRight :size="16" :stroke-width="1" />
+            <ChevronRight :size="16" :stroke-width="1.5" />
           </button>
         </div>
         <div class="order-list">
