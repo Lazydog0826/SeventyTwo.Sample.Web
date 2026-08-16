@@ -7,9 +7,15 @@
     </div>
 
     <div class="header-actions">
-      <n-popover trigger="click" placement="bottom-end" :width="320" :show-arrow="false" :content-style="{ padding: 0 }">
+      <n-popover
+        :content-style="{ padding: 0 }"
+        :show-arrow="false"
+        :width="320"
+        placement="bottom-end"
+        trigger="click"
+      >
         <template #trigger>
-          <n-badge :value="unreadNotificationCount" :max="99" :offset="[-4, 4]">
+          <n-badge :max="99" :offset="[-4, 4]" :value="unreadNotificationCount">
             <n-button :aria-label="t('notifications.title')" :title="t('notifications.title')" circle quaternary>
               <template #icon>
                 <n-icon>
@@ -24,7 +30,7 @@
           <div class="notification-header">
             <div class="notification-title">
               <span>{{ t("notifications.title") }}</span>
-              <n-tag v-if="unreadNotificationCount > 0" size="small" round :bordered="false" type="error">
+              <n-tag v-if="unreadNotificationCount > 0" :bordered="false" round size="small" type="error">
                 {{ unreadNotificationCount > 99 ? "99+" : unreadNotificationCount }}
               </n-tag>
             </div>
@@ -43,8 +49,8 @@
             <li
               v-for="item in notifications"
               :key="item.id"
-              class="notification-item"
               :class="{ 'is-unread': !item.read }"
+              class="notification-item"
             >
               <span aria-hidden="true" class="notification-item-dot"></span>
               <div class="notification-item-body">
@@ -163,15 +169,21 @@ interface NotificationItem {
 }
 
 const notifications = ref<Array<NotificationItem>>([
-  { id: 1, title: "系统维护通知", content: "系统将于本周六 02:00 - 04:00 升级维护，期间暂停访问。", time: "10:24", read: false },
+  {
+    id: 1,
+    title: "系统维护通知",
+    content: "系统将于本周六 02:00 - 04:00 升级维护，期间暂停访问。",
+    time: "10:24",
+    read: false,
+  },
   { id: 2, title: "待办审核提醒", content: "商品「示例商品 A」已提交审核，请及时处理。", time: "09:15", read: false },
   { id: 3, title: "操作手册更新", content: "新版操作手册已发布，可在帮助中心查看。", time: "昨天", read: true },
 ]);
 
-const unreadNotificationCount = computed(() => notifications.value.filter((item) => !item.read).length);
+const unreadNotificationCount = computed(() => notifications.value.filter(item => !item.read).length);
 
 function markAllNotificationsRead() {
-  notifications.value.forEach((item) => (item.read = true));
+  notifications.value.forEach(item => (item.read = true));
 }
 const { isDark, toggleTheme } = inject<{
   isDark: Ref<boolean>;

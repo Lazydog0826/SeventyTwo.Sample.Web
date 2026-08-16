@@ -1,4 +1,13 @@
-import { common, defaultPageUnconfigured, fullscreen, language, noPermission, notFound, notifications, theme } from "./common";
+import {
+  common,
+  defaultPageUnconfigured,
+  fullscreen,
+  language,
+  noPermission,
+  notFound,
+  notifications,
+  theme,
+} from "./common";
 import backendMessages from "./backendMessages";
 import dataDictionaries from "./dataDictionaries";
 import home from "./home";
