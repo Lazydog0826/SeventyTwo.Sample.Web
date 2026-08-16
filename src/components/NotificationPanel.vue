@@ -13,12 +13,7 @@
     </div>
 
     <ul v-if="notifications.length > 0" class="notification-list">
-      <li
-        v-for="item in notifications"
-        :key="item.id"
-        :class="{ 'is-unread': !item.read }"
-        class="notification-item"
-      >
+      <li v-for="item in notifications" :key="item.id" :class="{ 'is-unread': !item.read }" class="notification-item">
         <span aria-hidden="true" class="notification-item-dot"></span>
         <div class="notification-item-body">
           <div class="notification-item-meta">
