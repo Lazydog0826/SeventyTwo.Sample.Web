@@ -24,6 +24,10 @@ export function getProductCategoryList() {
   return http.get<ProductCategoryListOutput[]>("/api/productCategories/list");
 }
 
+export function getProductCategoryOptions() {
+  return http.get<ProductCategoryListOutput[]>("/api/products/category-options");
+}
+
 export function getProductCategoryDetail(id: string) {
   return http.get<ProductCategoryListOutput>("/api/productCategories/detail", { searchParams: { id } });
 }

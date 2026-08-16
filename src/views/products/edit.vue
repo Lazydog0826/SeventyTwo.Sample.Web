@@ -57,7 +57,7 @@
           <n-button :disabled="submitting" @click="goBack">
             {{ t("products.actions.cancel") }}
           </n-button>
-          <n-button v-if="canSubmit" :loading="submitting" type="primary" @click="submit">
+          <n-button v-if="canSubmit && !loadFailed" :loading="submitting" type="primary" @click="submit">
             {{ t("products.actions.save") }}
           </n-button>
         </n-space>
@@ -85,7 +85,7 @@ import {
   NTreeSelect,
   type TreeSelectOption,
 } from "naive-ui";
-import { getProductCategoryList, type ProductCategoryListOutput } from "@/api/productCategories.ts";
+import { getProductCategoryOptions, type ProductCategoryListOutput } from "@/api/productCategories.ts";
 import {
   createProduct,
   getProductDetail,
@@ -220,7 +220,7 @@ async function loadDetail() {
 }
 
 async function loadCategories() {
-  categories.value = (await getProductCategoryList()) ?? [];
+  categories.value = (await getProductCategoryOptions()) ?? [];
 }
 
 function goBack() {
