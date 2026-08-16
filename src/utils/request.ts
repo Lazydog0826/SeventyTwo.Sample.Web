@@ -6,6 +6,7 @@ import i18n from "@/locales";
 import type { MessageReactive } from "naive-ui";
 import store from "@/stores";
 import { usePermissionsStore } from "@/stores/permissions.ts";
+import { useTabsStore } from "@/stores/tabs.ts";
 import { useUserStore } from "@/stores/users.ts";
 
 /**
@@ -77,6 +78,8 @@ async function redirectToAuthPage() {
   window.$accessToken = "";
   usePermissionsStore(store).reset();
   useUserStore(store).reset();
+  // 页签缓存一并销毁，避免 SPA 内跳登录时残留上一账号的页面实例。
+  useTabsStore(store).reset();
   resetRouter();
 
   // 已在登录页时只重置认证状态，避免追加嵌套的 redirect 参数。

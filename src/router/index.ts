@@ -4,6 +4,7 @@ import { documentTitleGuard } from "@/router/documentTitleGuard";
 import { createDynamicRouteManager } from "@/router/dynamicRouteManager.ts";
 import { dynamicRouteLoader } from "@/router/dynamicRouteLoader.ts";
 import { routeProgress } from "@/router/routeProgress.ts";
+import { tabsGuard } from "@/router/tabsGuard.ts";
 
 const defaultRouter: RouteRecordRaw[] = [
   {
@@ -51,6 +52,7 @@ routeProgress(router);
 dynamicRouteLoader(router, dynamicRouteManager);
 routeRedirect(router, dynamicRouteManager);
 documentTitleGuard(router);
+tabsGuard(router);
 
 /** 清空运行时添加的路由，并恢复应用初始化时的静态路由。 */
 export function resetRouter() {

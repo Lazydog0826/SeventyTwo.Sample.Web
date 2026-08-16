@@ -67,7 +67,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onActivated, onMounted, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
   type FormInst,
@@ -116,12 +116,16 @@ const loadFailed = ref(false);
 const submitting = ref(false);
 const formRef = ref<FormInst | null>(null);
 const formModel = reactive<ProductFormModel>(createEmptyForm());
-// 编辑模式通过 query.id 区分；本页仅由列表页跳转进入，路由切换必然重新挂载，mounted 读取一次即可。
-const editId = typeof route.query.id === "string" && route.query.id ? route.query.id : null;
-const pageTitle = computed(() => t(editId ? "products.editor.updateTitle" : "products.editor.createTitle"));
+// 编辑模式通过 query.id 区分；本页仅由列表页跳转进入。页面纳入页签缓存后组件实例
+// 可能被复用，激活时需按最新 query 重新识别编辑目标（见 onActivated）。
+function resolveEditId(): string | null {
+  return typeof route.query.id === "string" && route.query.id ? route.query.id : null;
+}
+const editId = ref<string | null>(resolveEditId());
+const pageTitle = computed(() => t(editId.value ? "products.editor.updateTitle" : "products.editor.createTitle"));
 // 保存动作沿用按钮权限：新增用 productsCreate，编辑用 productsUpdate。
 const canSubmit = computed(() =>
-  editId
+  editId.value
     ? permissionsStore.hasPermission(PermissionCode.ProductsUpdate)
     : permissionsStore.hasPermission(PermissionCode.ProductsCreate)
 );
@@ -194,11 +198,11 @@ function buildCategoryOptions(nodes: CategoryTreeNode[]): TreeSelectOption[] {
 }
 
 async function loadDetail() {
-  if (!editId) return;
+  if (!editId.value) return;
   const currentSequence = ++requestSequence;
   detailLoading.value = true;
   try {
-    const detail = await getProductDetail(editId);
+    const detail = await getProductDetail(editId.value);
     if (!detail || currentSequence !== requestSequence) return;
     Object.assign(formModel, {
       id: detail.id,
@@ -254,6 +258,20 @@ async function submit() {
 }
 
 onMounted(() => Promise.all([loadDetail(), loadCategories(), permissionsStore.getPermissions()]));
+
+// 缓存恢复进入本页时组件不重新挂载；query.id 变化即切换编辑目标，重置表单后重新加载
+// （含编辑↔新增之间的切换）。首次挂载后 activated 也会触发，此时 id 未变化直接跳过。
+onActivated(() => {
+  const nextId = resolveEditId();
+  if (nextId === editId.value) {
+    return;
+  }
+
+  editId.value = nextId;
+  loadFailed.value = false;
+  Object.assign(formModel, createEmptyForm());
+  void loadDetail();
+});
 </script>
 
 <style lang="scss" scoped>

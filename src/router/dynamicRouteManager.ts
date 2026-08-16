@@ -1,3 +1,4 @@
+import type { Component, ComponentOptions } from "vue";
 import type { Router, RouteRecordRaw } from "vue-router";
 import type { PermissionMenuOutput } from "@/api/permissions.ts";
 import { viewModules } from "@/router/viewModules.ts";
@@ -95,8 +96,8 @@ function registerRoutes(menus: Array<PermissionMenuOutput>, router: Router) {
   }
 
   pages.forEach(x => {
-    const component = viewModules[x.vueComponentPath];
-    if (!component) {
+    const loader = viewModules[x.vueComponentPath];
+    if (!loader) {
       console.error(
         `动态路由组件不存在，已跳过：routeName=${x.routeName}, routePath=${x.routePath}, vueComponentPath=${x.vueComponentPath}`
       );
@@ -110,10 +111,18 @@ function registerRoutes(menus: Array<PermissionMenuOutput>, router: Router) {
         ...x.metaData,
         titleKey: `menu.${x.code}`,
       },
-      component,
+      // 组件名对齐 routeName：viewModules 的文件名高度重名（list/edit 等），
+      // 无法作为组件级缓存标识；页签缓存（keep-alive include）依赖路由名匹配组件。
+      component: () => loader().then(component => withRouteName(component, x.routeName)),
     };
     router.addRoute("layout", route);
   });
+}
+
+/** 将视图组件的名称改写为路由名称；同一 loader 仅解析一次，改写是幂等的。 */
+function withRouteName(component: Component, routeName: string): Component {
+  (component as ComponentOptions).name = routeName;
+  return component;
 }
 
 function findDuplicate(values: Array<string>) {

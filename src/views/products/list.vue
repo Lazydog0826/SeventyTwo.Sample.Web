@@ -38,6 +38,8 @@
         :scroll-x="hasActions ? 1150 : 900"
         remote
         striped
+        flex-height
+        style="height: 100%"
       >
         <template #empty><n-empty :description="emptyDescription" /></template>
       </n-data-table>
@@ -337,6 +339,32 @@ onMounted(() => Promise.all([loadProducts(), permissionsStore.getPermissions()])
 <style lang="scss" scoped>
 .product-list-page {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex: 1 1 auto;
+
+  > :deep(.n-card) {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex: 1 1 0;
+    min-width: 0;
+
+    .n-card-header {
+      flex: 0 0 auto;
+    }
+    .n-card-content {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 0;
+      overflow: hidden;
+
+      .toolbar {
+        flex: 0 0 auto;
+      }
+    }
+  }
 }
 .toolbar {
   display: flex;
