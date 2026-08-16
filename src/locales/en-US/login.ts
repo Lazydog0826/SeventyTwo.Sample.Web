@@ -5,6 +5,8 @@ export default {
   demoDescription: "This system is for demonstration only",
   demoAccount: "Account: superadmin",
   demoPassword: "Password: 123456",
+  demoFillHint: "Click to fill demo credentials",
+  demoFilled: "Demo credentials filled",
   account: "Account",
   accountPlaceholder: "Enter your account or email",
   accountRequired: "Please enter your account",

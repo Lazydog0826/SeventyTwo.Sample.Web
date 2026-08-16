@@ -1,5 +1,5 @@
 <template>
-  <main :class="{ 'login-page--dark': isDark }" :lang="locale" class="login-page">
+  <main :lang="locale" class="login-page">
     <div class="login-toolbar">
       <n-button
         :aria-label="t(isDark ? 'theme.switchToLight' : 'theme.switchToDark')"
@@ -33,12 +33,6 @@
           <h1>{{ t("login.welcome") }}</h1>
           <n-text depth="3">{{ t("login.subtitle") }}</n-text>
         </header>
-
-        <n-alert class="demo-notice" type="info">
-          <p class="demo-description">{{ t("login.demoDescription") }}</p>
-          <p class="demo-credential">{{ t("login.demoAccount") }}</p>
-          <p class="demo-credential">{{ t("login.demoPassword") }}</p>
-        </n-alert>
 
         <n-form
           ref="formRef"
@@ -85,6 +79,13 @@
             {{ t("login.createAccount") }}
           </n-button>
         </footer>
+
+        <div class="demo-notice">
+          <span>{{ t("login.demoDescription") }}</span>
+          <button :title="t('login.demoFillHint')" class="demo-fill" type="button" @click="fillDemoCredentials">
+            {{ t("login.demoAccount") }} · {{ t("login.demoPassword") }}
+          </button>
+        </div>
       </n-card>
 
       <n-text depth="3">© 2026 SeventyTwo</n-text>
@@ -94,7 +95,7 @@
 
 <script lang="ts" setup>
 import type { FormInst, FormRules } from "naive-ui";
-import { NAlert, NButton, NCard, NDropdown, NForm, NFormItem, NIcon, NInput, NText } from "naive-ui";
+import { NButton, NCard, NDropdown, NForm, NFormItem, NIcon, NInput, NText } from "naive-ui";
 import { Languages, Moon, Sun } from "@lucide/vue";
 import { computed, inject, reactive, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -127,6 +128,13 @@ const languageOptions = [
 const handleLanguageChange = (key: string | number) => {
   locale.value = String(key);
   localStorage.setItem("locale", locale.value);
+};
+
+// 与后端种子数据一致的演示账号，点击凭据一键填入，省去手动复制。
+const fillDemoCredentials = () => {
+  formValue.account = "superadmin";
+  formValue.password = "123456";
+  window.$message.success(t("login.demoFilled"));
 };
 
 const handleLogin = async () => {
@@ -166,24 +174,15 @@ const handleLogin = async () => {
   box-sizing: border-box;
   place-items: center;
   padding: 24px;
-  background: #f5f7f9;
-}
-
-.login-page--dark {
-  background: #101014;
-}
-
-.login-page--dark .login-header h1 {
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.login-card {
-  border-radius: 16px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  background: var(--color-bg-page);
 }
 
 .login-content {
-  width: min(100%, 480px);
+  width: min(100%, 400px);
+}
+
+.login-card {
+  border-radius: 12px;
 }
 
 .login-toolbar {
@@ -197,28 +196,14 @@ const handleLogin = async () => {
 }
 
 .login-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 28px;
-}
-
-.login-header h1 {
-  margin: 0;
-  font-size: 28px;
-}
-
-.demo-notice {
   margin-bottom: 24px;
-}
 
-.demo-description {
-  margin: 0 0 8px;
-}
-
-.demo-credential {
-  margin: 0;
+  h1 {
+    margin: 0 0 6px;
+    color: var(--color-gray-10);
+    font-size: 22px;
+    line-height: 1.3;
+  }
 }
 
 .form-options {
@@ -234,6 +219,33 @@ const handleLogin = async () => {
   justify-content: center;
   gap: 4px;
   margin-top: 24px;
+}
+
+// 演示凭据作为卡片底部的补充说明，不与表单争夺注意力；凭据行可点击一键填入。
+.demo-notice {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-gray-2);
+  font-size: 13px;
+  color: var(--color-gray-6);
+}
+
+.demo-fill {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--color-gray-7);
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.2s;
+
+  &:hover {
+    color: var(--color-primary-6);
+  }
 }
 
 .login-content > .n-text {
