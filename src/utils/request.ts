@@ -29,6 +29,9 @@ interface PendingRequest {
 }
 
 // 刷新 Token 的后端接口路径，用于区分普通接口 401 和刷新接口自身的 401。
+// 规范：下方判断使用 pathname 全等比较，要求 VITE_API_BASE_URL 不得带路径前缀
+// （反向代理必须把前缀剥离后再转发）；若将来需要支持带前缀部署，应改为 endsWith 判断，
+// 否则刷新接口自身的 401 会退化为普通重试分支，多一次无效请求且跳转登录时机延后。
 const RefreshTokenApiPath = "/api/users/RefreshToken";
 // 前端登录页路径，认证彻底失效时跳转到此页面。
 const AuthPagePath = "/login";

@@ -4,8 +4,9 @@ import { isAuthIndependentRoute } from "@/router/dynamicRouteLoader.ts";
 
 /** 注册路由跳转守卫，统一处理无权限、默认页面及未匹配路由。 */
 export function routeRedirect(router: Router, dynamicRouteManager: DynamicRouteManager) {
-  // 规范：新增或修改守卫应直接返回导航结果，不再使用 Vue Router 5 已弃用的 next 回调；
-  // 现有守卫迁移时需保持异步动态路由注册、replace 语义和完整 URL 不变。
+  // 规范：守卫统一通过 next()/next(目标路径)/next(false) 控制导航结果，且返回值须为
+  // next(...) 的返回值以保证语义一致；修改守卫时需保持异步动态路由注册、replace 语义
+  // 和完整 URL 不变。
   router.beforeEach(async (to, _from, next) => {
     // 静态页面不依赖菜单权限，避免无权限用户无法访问登录页和错误页。
     if (isAuthIndependentRoute(to.name)) {
