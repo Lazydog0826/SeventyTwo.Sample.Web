@@ -39,7 +39,7 @@
 
         <div class="error-actions">
           <n-button size="large" @click="router.back()">{{ t("notFound.goBack") }}</n-button>
-          <n-button size="large" type="primary" @click="router.push('/home')">
+          <n-button size="large" type="primary" @click="router.push('/')">
             {{ t("notFound.goHome") }}
           </n-button>
         </div>
