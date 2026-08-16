@@ -22,16 +22,16 @@
             'column-settings__item--after': dropIndex === index + 1 && index === orderedItems.length - 1,
           }"
           :draggable="handleIndex === index"
-          @dragstart="onDragStart($event, index)"
-          @dragover="onDragOver($event, index)"
-          @drop="onDrop"
           @dragend="onDragEnd"
+          @dragover="onDragOver($event, index)"
+          @dragstart="onDragStart($event, index)"
+          @drop="onDrop"
         >
           <n-icon
             class="column-settings__handle"
             @mousedown="handleIndex = index"
-            @mouseup="handleIndex = null"
             @mouseleave="handleIndex = null"
+            @mouseup="handleIndex = null"
           >
             <GripVertical :size="14" :stroke-width="1.5"></GripVertical>
           </n-icon>
