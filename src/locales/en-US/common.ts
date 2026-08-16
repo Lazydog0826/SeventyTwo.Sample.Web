@@ -19,6 +19,11 @@ export const language = {
   switch: "Switch language",
 };
 
+export const fullscreen = {
+  enter: "Enter fullscreen",
+  exit: "Exit fullscreen",
+};
+
 export const notFound = {
   title: "Page not found",
   description: "The page you requested does not exist, has moved, or is temporarily unavailable.",

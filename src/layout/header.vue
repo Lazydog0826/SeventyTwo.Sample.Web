@@ -8,6 +8,21 @@
 
     <div class="header-actions">
       <n-button
+        :aria-label="t(isFullscreen ? 'fullscreen.exit' : 'fullscreen.enter')"
+        :title="t(isFullscreen ? 'fullscreen.exit' : 'fullscreen.enter')"
+        circle
+        quaternary
+        @click="toggleFullscreen"
+      >
+        <template #icon>
+          <n-icon>
+            <Minimize v-if="isFullscreen" :size="16" :stroke-width="1"></Minimize>
+            <Maximize v-else :size="16" :stroke-width="1"></Maximize>
+          </n-icon>
+        </template>
+      </n-button>
+
+      <n-button
         :aria-label="t(isDark ? 'theme.switchToLight' : 'theme.switchToDark')"
         :title="t(isDark ? 'theme.switchToLight' : 'theme.switchToDark')"
         circle
@@ -16,8 +31,8 @@
       >
         <template #icon>
           <n-icon>
-            <Sun v-if="isDark"></Sun>
-            <Moon v-else></Moon>
+            <Sun v-if="isDark" :size="16" :stroke-width="1"></Sun>
+            <Moon v-else :size="16" :stroke-width="1"></Moon>
           </n-icon>
         </template>
       </n-button>
@@ -26,7 +41,7 @@
         <n-button :aria-label="t('language.switch')" :title="t('language.switch')" circle quaternary>
           <template #icon>
             <n-icon>
-              <Languages></Languages>
+              <Languages :size="16" :stroke-width="1"></Languages>
             </n-icon>
           </template>
         </n-button>
@@ -46,8 +61,8 @@
 
 <script lang="ts" setup>
 import { type DropdownOption, NAvatar, NButton, NDropdown, NIcon, NLayoutHeader, NSkeleton } from "naive-ui";
-import { Languages, Moon, Sun } from "@lucide/vue";
-import { computed, inject, ref, type Ref } from "vue";
+import { Languages, Maximize, Minimize, Moon, Sun } from "@lucide/vue";
+import { computed, inject, onMounted, onUnmounted, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { logout as logoutApi } from "@/api/users.ts";
 import logoUrl from "@/assets/seventytwo-logo.svg";
@@ -72,6 +87,25 @@ const { isDark, toggleTheme } = inject<{
   isDark: Ref<boolean>;
   toggleTheme: () => void;
 }>("theme")!;
+
+// 全屏状态由 fullscreenchange 事件驱动，保证用户按 ESC 退出时图标同步。
+const isFullscreen = ref(false);
+
+function syncFullscreenState() {
+  isFullscreen.value = Boolean(document.fullscreenElement);
+}
+
+function toggleFullscreen() {
+  if (document.fullscreenElement) {
+    void document.exitFullscreen();
+  } else {
+    // 全屏请求可能被浏览器策略拒绝，无需向用户提示。
+    void document.documentElement.requestFullscreen().catch(() => {});
+  }
+}
+
+onMounted(() => document.addEventListener("fullscreenchange", syncFullscreenState));
+onUnmounted(() => document.removeEventListener("fullscreenchange", syncFullscreenState));
 
 void userStore.getInfo();
 

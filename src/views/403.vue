@@ -10,8 +10,8 @@
       >
         <template #icon>
           <n-icon>
-            <Sun v-if="isDark"></Sun>
-            <Moon v-else></Moon>
+            <Sun v-if="isDark" :size="16" :stroke-width="1"></Sun>
+            <Moon v-else :size="16" :stroke-width="1"></Moon>
           </n-icon>
         </template>
       </n-button>
@@ -20,7 +20,7 @@
         <n-button :aria-label="t('language.switch')" :title="t('language.switch')" circle quaternary>
           <template #icon>
             <n-icon>
-              <Languages></Languages>
+              <Languages :size="16" :stroke-width="1"></Languages>
             </n-icon>
           </template>
         </n-button>

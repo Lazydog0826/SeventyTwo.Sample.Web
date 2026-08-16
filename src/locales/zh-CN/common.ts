@@ -19,6 +19,11 @@ export const language = {
   switch: "切换语言",
 };
 
+export const fullscreen = {
+  enter: "进入全屏",
+  exit: "退出全屏",
+};
+
 export const notFound = {
   title: "页面未找到",
   description: "你访问的页面不存在、已被移动，或暂时无法访问。",
