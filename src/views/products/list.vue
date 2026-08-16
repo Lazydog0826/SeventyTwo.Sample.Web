@@ -85,7 +85,7 @@
         </n-grid>
 
         <!-- 操作区先分左右两块：左侧业务操作（左对齐）、右侧统一操作（右对齐）；每块内部用 n-space 排布。
-             上架/下架/删除/刷新/设置均为占位（disabled），仅预留布局。 -->
+             上架/下架/删除/设置均为占位（disabled），仅预留布局。 -->
         <div class="action-bar">
           <n-grid :x-gap="16" :y-gap="12" cols="1 s:2" responsive="screen">
             <n-gi>
@@ -106,7 +106,12 @@
                     </n-icon>
                   </template>
                 </n-button>
-                <n-button :aria-label="t('products.actions.refresh')" :title="t('products.actions.refresh')" disabled>
+                <n-button
+                  :aria-label="t('products.actions.refresh')"
+                  :disabled="actionLoading"
+                  :title="t('products.actions.refresh')"
+                  @click="refreshProducts"
+                >
                   <template #icon>
                     <n-icon>
                       <RefreshCw :size="16" :stroke-width="1.5"></RefreshCw>
@@ -429,6 +434,12 @@ function searchProducts() {
   appliedKeyword.value = keyword.value.trim();
   appliedStatus.value = statusFilter.value;
   pagination.page = 1;
+  void loadProducts();
+}
+
+// 刷新：保持当前页码与已应用的筛选条件，仅重新拉取列表数据。
+function refreshProducts() {
+  if (actionLoading.value) return;
   void loadProducts();
 }
 
