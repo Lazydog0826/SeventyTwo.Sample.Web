@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { nextTick, ref } from "vue";
 import type { RouteLocationNormalizedLoaded } from "vue-router";
 
 /** 已打开页签的展示信息。 */
@@ -60,6 +60,47 @@ export const useTabsStore = defineStore("tabs", () => {
     return nextTab ? nextTab.path : "/";
   }
 
+  /**
+   * 批量关闭页签并销毁其页面缓存（右键菜单的关闭左侧/右侧/其他/全部）。
+   * 跳转策略与 removeTab 一致：仅当当前激活页签也在关闭范围内时才返回跳转
+   * 路径，优先原位置右侧第一个存活页签，其次左侧最后一个；全部关闭时返回
+   * "/"，由路由重定向守卫落到用户默认页。
+   */
+  function removeTabs(names: string[], currentName: string): string | null {
+    const closing = new Set(names);
+    // 附带原索引后再过滤：移除前先定位跳转目标，避免原位置信息丢失。
+    const remainTabs = visitedTabs.value
+      .map((tab, index) => ({ tab, index }))
+      .filter(({ tab }) => !closing.has(tab.name));
+    const currentIndex = visitedTabs.value.findIndex(tab => tab.name === currentName);
+
+    visitedTabs.value = remainTabs.map(({ tab }) => tab);
+    cachedNames.value = cachedNames.value.filter(name => !closing.has(name));
+
+    if (currentIndex < 0 || !closing.has(currentName)) {
+      return null;
+    }
+    const nextTab = remainTabs.find(({ index }) => index > currentIndex)?.tab ?? remainTabs[remainTabs.length - 1]?.tab;
+    return nextTab?.path ?? "/";
+  }
+
+  /**
+   * 重新加载指定页签：先将其移出缓存列表销毁 keep-alive 实例，待销毁生效后
+   * 再恢复缓存资格，页面下次挂载时即创建新实例并重新加载数据。
+   * 移除与恢复必须间隔一个渲染周期：同步改回时 include 监听只能看到最终值，缓存不会被销毁。
+   * 当前激活页签仍挂载在视图中，需由调用方（content.vue）额外更换渲染 key 促成立即重建。
+   */
+  async function reloadTab(name: string): Promise<void> {
+    if (!cachedNames.value.includes(name)) {
+      return;
+    }
+    // 重建实例时页面会完整加载数据，提前消费过期标记，避免残留到之后的缓存恢复引发多余刷新。
+    consumeStale(name);
+    cachedNames.value = cachedNames.value.filter(cached => cached !== name);
+    await nextTick();
+    cachedNames.value.push(name);
+  }
+
   /** 标记指定页签的数据已过期；下一次该页签从缓存恢复时由页面自行刷新。 */
   function markStale(name: string) {
     if (!staleNames.value.includes(name)) {
@@ -88,6 +129,8 @@ export const useTabsStore = defineStore("tabs", () => {
     cachedNames,
     addTab,
     removeTab,
+    removeTabs,
+    reloadTab,
     markStale,
     consumeStale,
     reset,

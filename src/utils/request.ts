@@ -65,7 +65,9 @@ function showErrorMessage(content: string) {
 }
 
 function translateBackendMessage(message: string) {
-  return i18n.global.te(message) ? i18n.global.t(message) : message;
+  // 后端返回的消息键统一挂在 backendMessages 命名空间下（与文案文件结构对齐），查询时补前缀。
+  const key = `backendMessages.${message}`;
+  return i18n.global.te(key) ? i18n.global.t(key) : message;
 }
 
 /**

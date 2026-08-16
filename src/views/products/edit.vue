@@ -144,7 +144,7 @@ const formRules = computed<FormRules>(() => ({
     validator: (_rule, value) => {
       if (typeof value !== "number" || value <= 0) return new Error(t("products.validation.price"));
       // 上限校验复用后端错误消息键,与接口报错文案保持一致。
-      return value <= maxPrice ? true : new Error(t("product.priceOutOfRange"));
+      return value <= maxPrice ? true : new Error(t("backendMessages.product.priceOutOfRange"));
     },
     trigger: ["input", "blur"],
   },
