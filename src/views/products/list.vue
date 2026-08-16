@@ -99,7 +99,12 @@
             </n-gi>
             <n-gi>
               <n-space justify="end">
-                <n-button :aria-label="t('products.actions.delete')" :title="t('products.actions.delete')" disabled>
+                <n-button
+                  :aria-label="t('products.actions.delete')"
+                  :title="t('products.actions.delete')"
+                  disabled
+                  quaternary
+                >
                   <template #icon>
                     <n-icon>
                       <Trash2 :size="16" :stroke-width="1.5"></Trash2>
@@ -110,6 +115,7 @@
                   :aria-label="t('products.actions.refresh')"
                   :disabled="actionLoading"
                   :title="t('products.actions.refresh')"
+                  quaternary
                   @click="refreshProducts"
                 >
                   <template #icon>
@@ -118,13 +124,28 @@
                     </n-icon>
                   </template>
                 </n-button>
-                <n-button :aria-label="t('products.actions.settings')" :title="t('products.actions.settings')" disabled>
-                  <template #icon>
-                    <n-icon>
-                      <Settings2 :size="16" :stroke-width="1.5"></Settings2>
-                    </n-icon>
+                <ColumnSettings
+                  :hidden-keys="hiddenKeys"
+                  :items="columnSettingItems"
+                  :ordered-keys="orderedKeys"
+                  @move="moveColumn"
+                  @reset="resetColumns"
+                  @toggle="toggleColumn"
+                >
+                  <template #trigger>
+                    <n-button
+                      :aria-label="t('products.actions.settings')"
+                      :title="t('products.actions.settings')"
+                      quaternary
+                    >
+                      <template #icon>
+                        <n-icon>
+                          <Settings :size="16" :stroke-width="1.5"></Settings>
+                        </n-icon>
+                      </template>
+                    </n-button>
                   </template>
-                </n-button>
+                </ColumnSettings>
               </n-space>
             </n-gi>
           </n-grid>
@@ -137,7 +158,7 @@
         :loading="loading"
         :pagination="pagination"
         :row-key="row => row.id"
-        :scroll-x="hasActions ? 1150 : 900"
+        :scroll-x="scrollX"
         flex-height
         remote
         striped
@@ -174,6 +195,7 @@
 <script lang="ts" setup>
 import { computed, h, onMounted, reactive, ref } from "vue";
 import {
+  type DataTableColumn,
   type DataTableColumns,
   NButton,
   NCard,
@@ -190,7 +212,7 @@ import {
   NTag,
   type PaginationProps,
 } from "naive-ui";
-import { ChevronDown, ChevronUp, RefreshCw, Settings2, Trash2 } from "@lucide/vue";
+import { ChevronDown, ChevronUp, RefreshCw, Settings, Trash2 } from "@lucide/vue";
 import {
   changeProductStatus,
   deleteProduct,
@@ -199,6 +221,8 @@ import {
   productStatus,
   type ProductStatus,
 } from "@/api/products.ts";
+import ColumnSettings from "@/components/ColumnSettings.vue";
+import { useColumnSettings } from "@/composables/useColumnSettings.ts";
 import { useRefreshOnActivated } from "@/composables/useRefreshOnActivated.ts";
 import { PermissionCode } from "@/constants/permissions.ts";
 import { usePermissionsStore } from "@/stores/permissions.ts";
@@ -257,93 +281,140 @@ const statusOptions = computed(() => [
   { label: t("products.statuses.offShelf"), value: productStatus.offShelf },
 ]);
 
+// 列设置范围：可配置列为 name/actions 之外的 5 列；固定列（name 最左、actions 最右）不参与配置，
+// 避免用户调整固定列导致布局错乱，也避免 actions 列与权限逻辑耦合。
+const configurableColumnKeys = ["code", "price", "unit", "description", "status"] as const;
+
+// name 列固定最左，不参与列设置。
+const nameColumn = computed<DataTableColumn<ProductOutput>>(() => ({
+  title: t("products.columns.name"),
+  key: "name",
+  minWidth: 200,
+  fixed: "left",
+}));
+
+// 可配置列定义（key → 列定义），render 逻辑与拆分前一致；computed 保证语言切换后标题响应式更新。
+// key 合法性由 useColumnSettings 的 sanitize 保证（visibleKeys 必为 configurableColumnKeys 子集），
+// 因此 Record 值类型直接收敛为非空列定义。
+const configurableColumnMap = computed<Record<string, DataTableColumn<ProductOutput>>>(() => ({
+  code: { title: t("products.columns.code"), key: "code", minWidth: 160, render: row => renderText(row.code, 140) },
+  price: {
+    title: t("products.columns.price"),
+    key: "price",
+    minWidth: 110,
+    render: row => `￥${row.price.toFixed(2)}`,
+  },
+  unit: {
+    title: t("products.columns.unit"),
+    key: "unit",
+    minWidth: 90,
+    render: row => renderText(row.unit ?? "", 70),
+  },
+  description: {
+    title: t("products.columns.description"),
+    key: "description",
+    minWidth: 220,
+    render: row => renderText(row.description ?? "", 200),
+  },
+  status: {
+    title: t("products.columns.status"),
+    key: "status",
+    minWidth: 100,
+    render: row =>
+      h(
+        NTag,
+        { type: row.status === productStatus.onShelf ? "success" : "error", bordered: false },
+        {
+          default: () =>
+            t(row.status === productStatus.onShelf ? "products.statuses.onShelf" : "products.statuses.offShelf"),
+        }
+      ),
+  },
+}));
+
+// 列设置状态（顺序 + 显隐），localStorage 持久化，storage key 按页面唯一。
+const { orderedKeys, hiddenKeys, visibleKeys, toggleColumn, moveColumn, resetColumns } = useColumnSettings({
+  storageKey: "columnSettings.productsList",
+  defaultOrder: [...configurableColumnKeys],
+});
+
+// 列设置面板展示项：全量可配置列（默认顺序），组件内部按 orderedKeys 排序展示。
+const columnSettingItems = computed(() =>
+  configurableColumnKeys.map(key => ({ key, title: t(`products.columns.${key}`) }))
+);
+
+// actions 列固定最右且按权限动态追加，不参与列设置。
+const actionsColumn = computed<DataTableColumn<ProductOutput>>(() => ({
+  title: t("products.columns.actions"),
+  key: "actions",
+  minWidth: 200,
+  fixed: "right",
+  render: row =>
+    h(NSpace, null, {
+      default: () => [
+        canUpdate.value
+          ? h(
+              NButton,
+              {
+                text: true,
+                type: "primary",
+                disabled: actionLoading.value,
+                onClick: () => openEdit(row),
+              },
+              { default: () => t("products.actions.edit") }
+            )
+          : null,
+        canUpdate.value
+          ? h(
+              NButton,
+              {
+                text: true,
+                type: row.status === productStatus.onShelf ? "warning" : "success",
+                disabled: actionLoading.value,
+                onClick: () => changeStatus(row),
+              },
+              {
+                default: () =>
+                  t(row.status === productStatus.onShelf ? "products.actions.offShelf" : "products.actions.onShelf"),
+              }
+            )
+          : null,
+        canDelete.value
+          ? h(
+              NButton,
+              {
+                text: true,
+                type: "error",
+                disabled: actionLoading.value,
+                onClick: () => openDelete(row),
+              },
+              { default: () => t("products.actions.delete") }
+            )
+          : null,
+      ],
+    }),
+}));
+
 const columns = computed<DataTableColumns<ProductOutput>>(() => {
-  const result: DataTableColumns<ProductOutput> = [
-    { title: t("products.columns.name"), key: "name", minWidth: 200, fixed: "left" },
-    { title: t("products.columns.code"), key: "code", minWidth: 160, render: row => renderText(row.code, 140) },
-    {
-      title: t("products.columns.price"),
-      key: "price",
-      minWidth: 110,
-      render: row => `￥${row.price.toFixed(2)}`,
-    },
-    { title: t("products.columns.unit"), key: "unit", minWidth: 90, render: row => renderText(row.unit ?? "", 70) },
-    {
-      title: t("products.columns.description"),
-      key: "description",
-      minWidth: 220,
-      render: row => renderText(row.description ?? "", 200),
-    },
-    {
-      title: t("products.columns.status"),
-      key: "status",
-      minWidth: 100,
-      render: row =>
-        h(
-          NTag,
-          { type: row.status === productStatus.onShelf ? "success" : "error", bordered: false },
-          {
-            default: () =>
-              t(row.status === productStatus.onShelf ? "products.statuses.onShelf" : "products.statuses.offShelf"),
-          }
-        ),
-    },
-  ];
+  const result: DataTableColumns<ProductOutput> = [nameColumn.value];
+  for (const key of visibleKeys.value) {
+    result.push(configurableColumnMap.value[key]);
+  }
   if (hasActions.value) {
-    result.push({
-      title: t("products.columns.actions"),
-      key: "actions",
-      minWidth: 200,
-      fixed: "right",
-      render: row =>
-        h(NSpace, null, {
-          default: () => [
-            canUpdate.value
-              ? h(
-                  NButton,
-                  {
-                    text: true,
-                    type: "primary",
-                    disabled: actionLoading.value,
-                    onClick: () => openEdit(row),
-                  },
-                  { default: () => t("products.actions.edit") }
-                )
-              : null,
-            canUpdate.value
-              ? h(
-                  NButton,
-                  {
-                    text: true,
-                    type: row.status === productStatus.onShelf ? "warning" : "success",
-                    disabled: actionLoading.value,
-                    onClick: () => changeStatus(row),
-                  },
-                  {
-                    default: () =>
-                      t(
-                        row.status === productStatus.onShelf ? "products.actions.offShelf" : "products.actions.onShelf"
-                      ),
-                  }
-                )
-              : null,
-            canDelete.value
-              ? h(
-                  NButton,
-                  {
-                    text: true,
-                    type: "error",
-                    disabled: actionLoading.value,
-                    onClick: () => openDelete(row),
-                  },
-                  { default: () => t("products.actions.delete") }
-                )
-              : null,
-          ],
-        }),
-    });
+    result.push(actionsColumn.value);
   }
   return result;
+});
+
+// 横向滚动宽度随可见列动态计算：固定列与可见列的 minWidth 之和，避免列显隐后滚动宽度失配。
+const scrollX = computed(() => {
+  let width = 200; // name 列
+  for (const key of visibleKeys.value) {
+    // minWidth 类型上允许 string，这里仅累加数字值（页面列定义均为数字）。
+    const minWidth = configurableColumnMap.value[key].minWidth;
+    if (typeof minWidth === "number") width += minWidth;
+  }
+  return hasActions.value ? width + 200 : width;
 });
 
 function renderText(value: string, maxWidth: number) {
