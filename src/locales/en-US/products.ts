@@ -1,6 +1,12 @@
 export default {
-  title: "Products",
-  filters: { keyword: "Search by name or code", status: "Status" },
+  filters: {
+    keyword: "Search by name or code",
+    status: "Status",
+    category: "Category",
+    brand: "Brand",
+    barcode: "Barcode",
+    supplier: "Supplier",
+  },
   statuses: { onShelf: "On shelf", offShelf: "Off shelf" },
   columns: {
     name: "Name",
@@ -21,6 +27,10 @@ export default {
     save: "Save",
     search: "Search",
     reset: "Reset",
+    expand: "Expand",
+    collapse: "Collapse",
+    refresh: "Refresh",
+    settings: "Settings",
   },
   editor: {
     createTitle: "Create product",

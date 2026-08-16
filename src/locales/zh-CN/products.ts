@@ -1,6 +1,12 @@
 export default {
-  title: "商品列表",
-  filters: { keyword: "搜索商品名称或编码", status: "上架状态" },
+  filters: {
+    keyword: "搜索商品名称或编码",
+    status: "上架状态",
+    category: "商品分类",
+    brand: "品牌",
+    barcode: "条形码",
+    supplier: "供应商",
+  },
   statuses: { onShelf: "已上架", offShelf: "已下架" },
   columns: {
     name: "商品名称",
@@ -21,6 +27,10 @@ export default {
     save: "保存",
     search: "搜索",
     reset: "重置",
+    expand: "展开",
+    collapse: "收起",
+    refresh: "刷新",
+    settings: "设置",
   },
   editor: { createTitle: "新增商品", updateTitle: "编辑商品", loadFailed: "商品信息加载失败", backToList: "返回列表" },
   form: {

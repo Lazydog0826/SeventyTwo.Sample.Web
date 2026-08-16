@@ -1,32 +1,129 @@
 <template>
   <div class="product-list-page">
-    <n-card :bordered="false" :title="t('products.title')">
+    <n-card :bordered="false">
       <div class="toolbar">
-        <n-space :wrap="true">
-          <n-input
-            v-model:value="keyword"
-            :disabled="actionLoading"
-            :placeholder="t('products.filters.keyword')"
-            class="keyword-input"
-            clearable
-            @keyup.enter="searchProducts"
-          />
-          <n-select
-            v-model:value="statusFilter"
-            :disabled="actionLoading"
-            :options="statusOptions"
-            :placeholder="t('products.filters.status')"
-            class="status-select"
-            clearable
-          />
-          <n-button :disabled="actionLoading" type="primary" @click="searchProducts">
-            {{ t("products.actions.search") }}
-          </n-button>
-          <n-button :disabled="actionLoading" @click="resetFilters">{{ t("products.actions.reset") }}</n-button>
-        </n-space>
-        <n-button v-if="canCreate" :disabled="actionLoading" type="primary" @click="openCreate">
-          {{ t("products.actions.create") }}
-        </n-button>
+        <!-- 外层 5 列：条件区固定占前四列（放不下自动换行续排），第五列永远留给按钮组；
+             item-responsive 让 n-gi 的 span 支持 "1 s:4" 响应式写法，断点与原 640px 媒体查询一致。 -->
+        <n-grid :x-gap="16" :y-gap="16" cols="1 s:5" item-responsive responsive="screen">
+          <n-gi span="1 s:4">
+            <n-grid :x-gap="16" :y-gap="16" cols="2 s:4" responsive="screen">
+              <n-gi>
+                <n-input
+                  v-model:value="keyword"
+                  :disabled="actionLoading"
+                  :placeholder="t('products.filters.keyword')"
+                  clearable
+                  @keyup.enter="searchProducts"
+                />
+              </n-gi>
+              <n-gi>
+                <n-select
+                  v-model:value="statusFilter"
+                  :disabled="actionLoading"
+                  :options="statusOptions"
+                  :placeholder="t('products.filters.status')"
+                  clearable
+                />
+              </n-gi>
+              <!-- category/brand/barcode/supplier 仅为布局占位，不参与查询逻辑，仅绑定值以支持重置清空 -->
+              <n-gi>
+                <n-input
+                  v-model:value="categoryFilter"
+                  :disabled="actionLoading"
+                  :placeholder="t('products.filters.category')"
+                  clearable
+                />
+              </n-gi>
+              <n-gi>
+                <n-input
+                  v-model:value="brandFilter"
+                  :disabled="actionLoading"
+                  :placeholder="t('products.filters.brand')"
+                  clearable
+                />
+              </n-gi>
+              <!-- n-grid 对 v-show 的支持存在缺陷（首次隐藏后无法恢复显示），这里用 v-if 直接控制渲染 -->
+              <n-gi v-if="filterExpanded">
+                <n-input
+                  v-model:value="barcodeFilter"
+                  :disabled="actionLoading"
+                  :placeholder="t('products.filters.barcode')"
+                  clearable
+                />
+              </n-gi>
+              <n-gi v-if="filterExpanded">
+                <n-input
+                  v-model:value="supplierFilter"
+                  :disabled="actionLoading"
+                  :placeholder="t('products.filters.supplier')"
+                  clearable
+                />
+              </n-gi>
+            </n-grid>
+          </n-gi>
+          <n-gi>
+            <div class="filter-actions">
+              <n-button :disabled="actionLoading" type="primary" @click="searchProducts">
+                {{ t("products.actions.search") }}
+              </n-button>
+              <n-button :disabled="actionLoading" @click="resetFilters">{{ t("products.actions.reset") }}</n-button>
+              <n-button
+                :aria-label="t(filterExpanded ? 'products.actions.collapse' : 'products.actions.expand')"
+                :disabled="actionLoading"
+                :title="t(filterExpanded ? 'products.actions.collapse' : 'products.actions.expand')"
+                @click="filterExpanded = !filterExpanded"
+              >
+                <template #icon>
+                  <n-icon>
+                    <ChevronUp v-if="filterExpanded" :size="16" :stroke-width="1.5"></ChevronUp>
+                    <ChevronDown v-else :size="16" :stroke-width="1.5"></ChevronDown>
+                  </n-icon>
+                </template>
+              </n-button>
+            </div>
+          </n-gi>
+        </n-grid>
+
+        <!-- 操作区先分左右两块：左侧业务操作（左对齐）、右侧统一操作（右对齐）；每块内部用 n-space 排布。
+             上架/下架/删除/刷新/设置均为占位（disabled），仅预留布局。 -->
+        <div class="action-bar">
+          <n-grid :x-gap="16" :y-gap="12" cols="1 s:2" responsive="screen">
+            <n-gi>
+              <n-space>
+                <n-button v-if="canCreate" :disabled="actionLoading" type="primary" @click="openCreate">
+                  {{ t("products.actions.create") }}
+                </n-button>
+                <n-button disabled>{{ t("products.actions.onShelf") }}</n-button>
+                <n-button disabled>{{ t("products.actions.offShelf") }}</n-button>
+              </n-space>
+            </n-gi>
+            <n-gi>
+              <n-space justify="end">
+                <n-button :aria-label="t('products.actions.delete')" :title="t('products.actions.delete')" disabled>
+                  <template #icon>
+                    <n-icon>
+                      <Trash2 :size="16" :stroke-width="1.5"></Trash2>
+                    </n-icon>
+                  </template>
+                </n-button>
+                <n-button :aria-label="t('products.actions.refresh')" :title="t('products.actions.refresh')" disabled>
+                  <template #icon>
+                    <n-icon>
+                      <RefreshCw :size="16" :stroke-width="1.5"></RefreshCw>
+                    </n-icon>
+                  </template>
+                </n-button>
+                <n-button :aria-label="t('products.actions.settings')" :title="t('products.actions.settings')" disabled>
+                  <template #icon>
+                    <n-icon>
+                      <Settings2 :size="16" :stroke-width="1.5"></Settings2>
+                    </n-icon>
+                  </template>
+                </n-button>
+              </n-space>
+            </n-gi>
+          </n-grid>
+        </div>
       </div>
 
       <n-data-table
@@ -78,6 +175,9 @@ import {
   NDataTable,
   NEllipsis,
   NEmpty,
+  NGi,
+  NGrid,
+  NIcon,
   NInput,
   NModal,
   NSelect,
@@ -85,6 +185,7 @@ import {
   NTag,
   type PaginationProps,
 } from "naive-ui";
+import { ChevronDown, ChevronUp, RefreshCw, Settings2, Trash2 } from "@lucide/vue";
 import {
   changeProductStatus,
   deleteProduct,
@@ -105,6 +206,11 @@ const permissionsStore = usePermissionsStore();
 const products = ref<ProductOutput[]>([]);
 const keyword = ref("");
 const statusFilter = ref<ProductStatus | null>(null);
+// 占位筛选条件：仅支撑布局展示与重置清空，不参与查询。
+const categoryFilter = ref("");
+const brandFilter = ref("");
+const barcodeFilter = ref("");
+const supplierFilter = ref("");
 const appliedKeyword = ref("");
 const appliedStatus = ref<ProductStatus | null>(null);
 const loading = ref(false);
@@ -114,6 +220,8 @@ const changingStatusId = ref<string | null>(null);
 const actionLoading = computed(() => changingStatusId.value !== null || loading.value || deleting.value);
 const showDeleteConfirm = ref(false);
 const deletingProduct = ref<ProductOutput | null>(null);
+// 筛选区展开标记：控制第二行占位筛选条件的显示与隐藏。
+const filterExpanded = ref(false);
 const pagination = reactive<PaginationProps>({
   page: 1,
   pageSize: 20,
@@ -328,6 +436,10 @@ function resetFilters() {
   if (actionLoading.value) return;
   keyword.value = "";
   statusFilter.value = null;
+  categoryFilter.value = "";
+  brandFilter.value = "";
+  barcodeFilter.value = "";
+  supplierFilter.value = "";
   appliedKeyword.value = "";
   appliedStatus.value = null;
   pagination.page = 1;
@@ -353,9 +465,6 @@ useRefreshOnActivated(() => void loadProducts());
     flex: 1 1 0;
     min-width: 0;
 
-    .n-card-header {
-      flex: 0 0 auto;
-    }
     .n-card-content {
       display: flex;
       flex-direction: column;
@@ -370,24 +479,22 @@ useRefreshOnActivated(() => void loadProducts());
 }
 .toolbar {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   gap: 16px;
   margin-bottom: 20px;
-}
-.keyword-input {
-  width: 280px;
-}
-.status-select {
-  width: 160px;
-}
-@media (max-width: 640px) {
-  .toolbar {
-    align-items: stretch;
-    flex-direction: column;
+
+  // 按钮列内的排布；列定位与响应式由 n-grid 承担。
+  .filter-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
   }
-  .keyword-input,
-  .status-select {
-    width: 100%;
+
+  // 分割线颜色取卡片主题边框色，跟随明暗主题；上方 16px 由 toolbar 的 gap 提供。
+  .action-bar {
+    border-top: 1px solid var(--n-border-color);
+    padding-top: 16px;
   }
 }
 </style>
