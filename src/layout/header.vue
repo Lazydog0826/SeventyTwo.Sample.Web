@@ -93,8 +93,8 @@ import {
   NPopover,
   NSkeleton,
 } from "naive-ui";
-import { BellRing, Languages, Maximize, Minimize, Moon, Sun } from "@lucide/vue";
-import { computed, inject, onMounted, onUnmounted, ref, type Ref } from "vue";
+import { BellRing, KeyRound, Languages, LogOut, Maximize, Minimize, Moon, Settings, Sun, User } from "@lucide/vue";
+import { computed, h, inject, onMounted, onUnmounted, ref, type Component, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { logout as logoutApi } from "@/api/users.ts";
 import logoUrl from "@/assets/seventytwo-logo.svg";
@@ -105,10 +105,34 @@ const { t, locale } = useI18n();
 const isLoggingOut = ref(false);
 const userStore = useUserStore();
 const avatarInitial = computed(() => Array.from(userStore.user.username.trim())[0]?.toUpperCase() ?? "");
+
+// 下拉菜单图标统一走该渲染函数，保持与顶栏按钮一致的线性图标风格。
+function renderIcon(icon: Component) {
+  return () => h(NIcon, null, { default: () => h(icon, { size: 16, "stroke-width": 1.5 }) });
+}
+
+// 个人中心/账号设置/修改密码暂未实现，先以占位选项提供入口，选中后提示开发中。
 const userOptions = computed<Array<DropdownOption>>(() => [
+  {
+    label: t("common.profile"),
+    key: "profile",
+    icon: renderIcon(User),
+  },
+  {
+    label: t("common.accountSettings"),
+    key: "accountSettings",
+    icon: renderIcon(Settings),
+  },
+  {
+    label: t("common.changePassword"),
+    key: "changePassword",
+    icon: renderIcon(KeyRound),
+  },
+  { type: "divider", key: "divider" },
   {
     label: t("common.logout"),
     key: "logout",
+    icon: renderIcon(LogOut),
     disabled: isLoggingOut.value,
   },
 ]);
@@ -167,16 +191,25 @@ function handleLanguageChange(key: string | number) {
 }
 
 async function handleUserAction(key: string | number) {
-  if (key !== "logout" || isLoggingOut.value) {
+  if (key !== "logout") {
+    // 占位选项：功能尚未实现，仅提示，不影响现有流程。
+    window.$message.info(t("common.featurePending"));
+    return;
+  }
+
+  if (isLoggingOut.value) {
     return;
   }
 
   isLoggingOut.value = true;
+  // 退出请求期间展示常驻 loading 提示，跳转登录页前销毁，避免残留。
+  const loadingMessage = window.$message.loading(t("common.loggingOut"), { duration: 0 });
   try {
     await logoutApi();
   } catch {
     // 请求层已统一展示接口错误，前端仍需清除本地登录态。
   } finally {
+    loadingMessage.destroy();
     window.$accessToken = "";
     window.location.replace("/login");
   }

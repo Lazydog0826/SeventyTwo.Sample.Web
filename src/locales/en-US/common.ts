@@ -2,6 +2,12 @@
 export default {
   login: "Login",
   logout: "Logout",
+  loggingOut: "Logging out…",
+  // Placeholder options for the user dropdown; remove featurePending once implemented.
+  profile: "Profile",
+  accountSettings: "Account settings",
+  changePassword: "Change password",
+  featurePending: "This feature is under development",
   loading: "Loading",
   menuLoading: "Loading menu",
   expandSidebar: "Expand sidebar",

@@ -2,6 +2,12 @@
 export default {
   login: "登录",
   logout: "退出登录",
+  loggingOut: "正在退出登录…",
+  // 用户下拉菜单占位选项文案，功能实现后可移除 featurePending。
+  profile: "个人中心",
+  accountSettings: "账号设置",
+  changePassword: "修改密码",
+  featurePending: "功能开发中，敬请期待",
   loading: "加载中",
   menuLoading: "菜单加载中",
   expandSidebar: "展开侧边栏",
