@@ -1,6 +1,5 @@
 // noinspection JSUnusedGlobalSymbols
 export default {
-  title: "字典管理",
   dictionaryTitle: "字典列表",
   itemTitle: "字典项",
   filters: { keyword: "搜索编码或名称", status: "启用状态" },

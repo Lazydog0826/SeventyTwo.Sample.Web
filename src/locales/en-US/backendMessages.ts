@@ -3,6 +3,11 @@ export default {
   authentication: {
     refreshTokenInvalid: "The refresh token is invalid",
   },
+  // 对应后端 MessageKeys.Common：成功响应与未处理异常的兜底消息，由 request.ts 统一翻译。
+  common: {
+    success: "Operation successful",
+    internalError: "Internal server error",
+  },
   dataDictionary: {
     idRequired: "Data dictionary ID is required",
     codeRequired: "Data dictionary code is required",

@@ -1,6 +1,5 @@
 // noinspection JSUnusedGlobalSymbols
 export default {
-  title: "Data Dictionary Management",
   dictionaryTitle: "Dictionaries",
   itemTitle: "Dictionary Items",
   filters: { keyword: "Search code or name", status: "Status" },

@@ -8,8 +8,6 @@ export default {
     phone: "Phone",
     email: "Email",
     dataPermissionType: "Data permission",
-    organization: "Organization",
-    defaultPage: "Default page",
     status: "Status",
     actions: "Actions",
   },

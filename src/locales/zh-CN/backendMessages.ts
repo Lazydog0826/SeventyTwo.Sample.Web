@@ -3,6 +3,11 @@ export default {
   authentication: {
     refreshTokenInvalid: "刷新令牌无效",
   },
+  // 对应后端 MessageKeys.Common：成功响应与未处理异常的兜底消息，由 request.ts 统一翻译。
+  common: {
+    success: "操作成功",
+    internalError: "系统内部错误",
+  },
   dataDictionary: {
     idRequired: "数据字典 ID 不能为空",
     codeRequired: "数据字典编码不能为空",

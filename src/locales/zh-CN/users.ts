@@ -8,8 +8,6 @@ export default {
     phone: "手机",
     email: "邮箱",
     dataPermissionType: "数据权限",
-    organization: "所属机构",
-    defaultPage: "默认页面",
     status: "状态",
     actions: "操作",
   },

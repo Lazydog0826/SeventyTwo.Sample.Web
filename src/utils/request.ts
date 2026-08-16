@@ -130,7 +130,7 @@ export const kyInstance = ky.create({
           // 此时不能再次刷新，否则会形成刷新接口递归调用。
           if (new URL(request.url).pathname === RefreshTokenApiPath) {
             await redirectToAuthPage();
-            return Promise.reject(new Error("登录已过期,请重新登录"));
+            return Promise.reject(new Error(i18n.global.t("common.sessionExpired")));
           }
 
           // retryCount > 0 表示当前响应来自 ky.retry() 发起的强制重试。
@@ -138,7 +138,7 @@ export const kyInstance = ky.create({
           // 否则该请求会在“刷新 → 重试 → 401”之间持续循环。
           if (retryCount > 0) {
             await redirectToAuthPage();
-            return Promise.reject(new Error("刷新 Token 后请求仍返回 401"));
+            return Promise.reject(new Error(i18n.global.t("common.tokenRefreshStillUnauthorized")));
           }
 
           // 并发场景：请求 A、B 都携带旧 Token；A 先完成刷新并更新了全局 Token，

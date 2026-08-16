@@ -44,7 +44,6 @@ export default {
     title: "权限标题",
     type: "权限类型",
     parent: "上级权限",
-    root: "无上级权限",
     sortOrder: "排序",
     enable: "启用",
     icon: "图标",

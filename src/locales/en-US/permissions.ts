@@ -44,7 +44,6 @@ export default {
     title: "Title",
     type: "Type",
     parent: "Parent",
-    root: "No parent",
     sortOrder: "Order",
     enable: "Enabled",
     icon: "Icon",
