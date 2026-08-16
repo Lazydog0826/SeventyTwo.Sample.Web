@@ -71,6 +71,28 @@ function handleClose(name: string) {
     flex: 0 0 auto;
     // 标签栏使用容器底色，与页面灰底区分，深浅主题由语义变量自动适配。
     background-color: var(--color-bg-container);
+    // 负边距抵消 n-tabs 卡片的边框，避免标签栏与外层边缘出现缝隙。
+    margin-left: -1px;
+    margin-top: -1px;
+
+    // 标签卡片去圆角；未选中用容器底色、选中用页面底色与内容区衔接，深浅主题由语义变量自动适配。
+    :deep(.n-tabs-tab) {
+      border-radius: 0 !important;
+      background-color: var(--color-bg-container) !important;
+    }
+
+    :deep(.n-tabs-tab):nth-of-type(n + 2) {
+      margin-left: -1px !important;
+    }
+
+    :deep(.n-tabs-tab--active) {
+      background-color: var(--color-bg-page) !important;
+      border-bottom: none !important;
+    }
+
+    :deep(.n-tabs-tab-pad) {
+      display: none;
+    }
   }
 
   .layout-router-view {
