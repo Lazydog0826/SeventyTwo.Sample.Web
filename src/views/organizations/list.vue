@@ -330,7 +330,9 @@ function getRootId(id: string): string | null {
   let current = organizationById.value.get(id);
   const visited = new Set<string>();
   while (current?.parentId) {
-    if (!visited.add(current.id)) return null;
+    // 脏数据父链成环时终止上溯，避免死循环
+    if (visited.has(current.id)) return null;
+    visited.add(current.id);
     current = organizationById.value.get(current.parentId);
   }
   return current?.id ?? null;
