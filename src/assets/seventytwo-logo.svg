@@ -4,7 +4,8 @@
     <title id="logo-title">SeventyTwo</title>
     <desc id="logo-desc">由两条相连折带组成的 SeventyTwo 品牌标志</desc>
 
-    <g aria-hidden="true">
+    <!-- 图标绕自身中心 (45,48) 缩小，保持与文字的垂直居中关系 -->
+    <g aria-hidden="true" transform="translate(45 48) scale(0.82) translate(-45 -48)">
         <path d="M14 31L39 16L76 37L61 46L39 33L29 39L51 52L37 61L14 48V31Z" fill="#165DFF"/>
         <path d="M76 48V65L51 80L14 59L29 50L51 63L61 57L39 44L53 35L76 48Z" fill="#14C9C9"/>
     </g>

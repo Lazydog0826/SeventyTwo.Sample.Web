@@ -15,6 +15,10 @@ export const theme = {
   switchToDark: "Switch to dark theme",
 };
 
+export const language = {
+  switch: "Switch language",
+};
+
 export const notFound = {
   title: "Page not found",
   description: "The page you requested does not exist, has moved, or is temporarily unavailable.",

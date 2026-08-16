@@ -7,17 +7,6 @@
     </div>
 
     <div class="header-actions">
-      <n-dropdown :options="languageOptions" @select="handleLanguageChange">
-        <n-button quaternary size="small">
-          <template #icon>
-            <n-icon>
-              <Languages></Languages>
-            </n-icon>
-          </template>
-          {{ locale === "zh-CN" ? "简体中文" : "English" }}
-        </n-button>
-      </n-dropdown>
-
       <n-button
         :aria-label="t(isDark ? 'theme.switchToLight' : 'theme.switchToDark')"
         :title="t(isDark ? 'theme.switchToLight' : 'theme.switchToDark')"
@@ -32,6 +21,16 @@
           </n-icon>
         </template>
       </n-button>
+
+      <n-dropdown :options="languageOptions" @select="handleLanguageChange">
+        <n-button :aria-label="t('language.switch')" :title="t('language.switch')" circle quaternary>
+          <template #icon>
+            <n-icon>
+              <Languages></Languages>
+            </n-icon>
+          </template>
+        </n-button>
+      </n-dropdown>
 
       <n-dropdown :options="userOptions" trigger="click" @select="handleUserAction">
         <button :aria-label="userStore.user.username" class="user-summary" type="button">
@@ -100,7 +99,7 @@ async function handleUserAction(key: string | number) {
 
 <style lang="scss" scoped>
 .app-header {
-  height: 64px;
+  height: 60px;
   padding: 0 20px;
   display: flex;
   align-items: center;
@@ -115,7 +114,7 @@ async function handleUserAction(key: string | number) {
 }
 
 .header-actions {
-  gap: 12px;
+  gap: 16px;
 }
 
 .user-summary {

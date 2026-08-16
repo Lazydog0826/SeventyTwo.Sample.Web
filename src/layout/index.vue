@@ -27,6 +27,6 @@ const collapsed = ref(false);
 }
 
 .app-body {
-  height: calc(100vh - 64px);
+  height: calc(100vh - 60px);
 }
 </style>

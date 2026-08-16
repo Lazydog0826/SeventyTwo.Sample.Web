@@ -1,4 +1,4 @@
-import { common, defaultPageUnconfigured, noPermission, notFound, theme } from "./common";
+import { common, defaultPageUnconfigured, language, noPermission, notFound, theme } from "./common";
 import backendMessages from "./backendMessages";
 import dataDictionaries from "./dataDictionaries";
 import home from "./home";
@@ -15,6 +15,7 @@ export default {
   common,
   login,
   theme,
+  language,
   menu,
   organizations,
   dataDictionaries,

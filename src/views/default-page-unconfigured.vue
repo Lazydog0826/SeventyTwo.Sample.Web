@@ -17,13 +17,12 @@
       </n-button>
 
       <n-dropdown :options="languageOptions" @select="handleLanguageChange">
-        <n-button quaternary size="small">
+        <n-button :aria-label="t('language.switch')" :title="t('language.switch')" circle quaternary>
           <template #icon>
             <n-icon>
               <Languages></Languages>
             </n-icon>
           </template>
-          {{ locale === "zh-CN" ? "简体中文" : "English" }}
         </n-button>
       </n-dropdown>
     </div>
@@ -84,7 +83,7 @@ const handleLanguageChange = (key: string | number) => {
   z-index: 1;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 16px;
   top: 24px;
   right: 24px;
 }
