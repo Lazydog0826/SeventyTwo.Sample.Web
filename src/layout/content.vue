@@ -11,12 +11,12 @@
         ></n-tab>
       </n-tabs>
       <n-dropdown
-        placement="bottom-start"
-        trigger="manual"
         :options="contextMenuOptions"
         :show="contextMenu.show"
         :x="contextMenu.x"
         :y="contextMenu.y"
+        placement="bottom-start"
+        trigger="manual"
         @clickoutside="contextMenu.show = false"
         @select="handleContextMenuSelect"
       ></n-dropdown>
@@ -36,10 +36,10 @@
 
 <script lang="ts" setup>
 import { ArrowLeftToLine, ArrowRightToLine, ListX, RotateCw, SquareX, X } from "@lucide/vue";
-import { NDropdown, NLayoutContent, NTab, NTabs, type DropdownOption } from "naive-ui";
-import { computed, h, nextTick, reactive, ref, type Component, type VNode } from "vue";
+import { type DropdownOption, NDropdown, NLayoutContent, NTab, NTabs } from "naive-ui";
+import { type Component, computed, h, nextTick, reactive, ref, type VNode } from "vue";
 import { useI18n } from "vue-i18n";
-import { useRoute, useRouter, type RouteLocationNormalizedLoaded } from "vue-router";
+import { type RouteLocationNormalizedLoaded, useRoute, useRouter } from "vue-router";
 import { type TabItem, useTabsStore } from "@/stores/tabs.ts";
 
 const route = useRoute();
@@ -102,11 +102,26 @@ const contextMenuOptions = computed<DropdownOption[]>(() => [
   // 分割线区分“针对单个页签”与“针对一组页签”的操作。
   { key: "close-divider", type: "divider" },
   // 左/右侧无页签或仅剩自身时对应操作无意义，置灰避免误触。
-  { key: "closeLeft", label: t("tabs.closeLeft"), disabled: contextTabIndex.value <= 0, icon: menuIcon(ArrowLeftToLine) },
-  { key: "closeRight", label: t("tabs.closeRight"), disabled: contextTabIndex.value >= tabsStore.visitedTabs.length - 1, icon: menuIcon(ArrowRightToLine) },
+  {
+    key: "closeLeft",
+    label: t("tabs.closeLeft"),
+    disabled: contextTabIndex.value <= 0,
+    icon: menuIcon(ArrowLeftToLine),
+  },
+  {
+    key: "closeRight",
+    label: t("tabs.closeRight"),
+    disabled: contextTabIndex.value >= tabsStore.visitedTabs.length - 1,
+    icon: menuIcon(ArrowRightToLine),
+  },
   // 分割线区分“按方位关闭”与“剩余的整批关闭”操作。
   { key: "close-divider-2", type: "divider" },
-  { key: "closeOthers", label: t("tabs.closeOthers"), disabled: tabsStore.visitedTabs.length <= 1, icon: menuIcon(ListX) },
+  {
+    key: "closeOthers",
+    label: t("tabs.closeOthers"),
+    disabled: tabsStore.visitedTabs.length <= 1,
+    icon: menuIcon(ListX),
+  },
   { key: "closeAll", label: t("tabs.closeAll"), icon: menuIcon(SquareX) },
 ]);
 
