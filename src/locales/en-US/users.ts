@@ -30,6 +30,8 @@ export default {
     save: "Save",
     search: "Search",
     reset: "Reset",
+    refresh: "Refresh",
+    settings: "Settings",
   },
   editor: { createTitle: "New user", updateTitle: "Edit user" },
   form: {

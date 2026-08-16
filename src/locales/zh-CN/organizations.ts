@@ -4,7 +4,7 @@ export default {
   filters: { keyword: "搜索机构名称或编码", status: "机构状态" },
   columns: { name: "机构名称", code: "机构编码", sortOrder: "排序", status: "状态", actions: "操作" },
   statuses: { enabled: "启用", disabled: "禁用" },
-  actions: { create: "新增机构", edit: "编辑", delete: "删除", cancel: "取消", save: "保存" },
+  actions: { create: "新增机构", edit: "编辑", delete: "删除", cancel: "取消", save: "保存", refresh: "刷新", settings: "设置" },
   editor: { createTitle: "新增机构", updateTitle: "编辑机构" },
   form: { code: "机构编码", name: "机构名称", sortOrder: "排序", parent: "上级机构", enable: "启用" },
   placeholders: {

@@ -28,6 +28,8 @@ export default {
     save: "保存",
     search: "查询",
     reset: "重置",
+    refresh: "刷新",
+    settings: "设置",
     copy: "复制密码",
     close: "关闭",
   },

@@ -24,6 +24,8 @@ export default {
     cancel: "取消",
     search: "查询",
     reset: "重置",
+    refresh: "刷新",
+    settings: "设置",
   },
   editor: {
     createTitle: "新增字典",

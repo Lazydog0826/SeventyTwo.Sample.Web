@@ -4,7 +4,7 @@ export default {
   filters: { keyword: "Search organization name or code", status: "Organization status" },
   columns: { name: "Name", code: "Code", sortOrder: "Sort", status: "Status", actions: "Actions" },
   statuses: { enabled: "Enabled", disabled: "Disabled" },
-  actions: { create: "New organization", edit: "Edit", delete: "Delete", cancel: "Cancel", save: "Save" },
+  actions: { create: "New organization", edit: "Edit", delete: "Delete", cancel: "Cancel", save: "Save", refresh: "Refresh", settings: "Settings" },
   editor: { createTitle: "New organization", updateTitle: "Edit organization" },
   form: { code: "Code", name: "Name", sortOrder: "Sort", parent: "Parent organization", enable: "Enabled" },
   placeholders: {

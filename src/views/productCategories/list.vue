@@ -1,18 +1,74 @@
 <template>
   <div class="product-category-list-page">
-    <n-card :bordered="false" :title="t('productCategories.title')">
+    <n-card :bordered="false">
+      <!-- 布局规范与商品列表页一致：筛选区一行五列，不足五列用空项补齐。
+           树形数据为即时过滤（输入即过滤），因此筛选区无搜索/重置按钮。 -->
       <div class="toolbar">
-        <n-space :wrap="true">
-          <n-input
-            v-model:value="keyword"
-            :placeholder="t('productCategories.filters.keyword')"
-            class="keyword-input"
-            clearable
-          />
-        </n-space>
-        <n-button v-if="canCreate" :disabled="actionLoading" type="primary" @click="openCreate">
-          {{ t("productCategories.actions.create") }}
-        </n-button>
+        <n-grid :x-gap="16" :y-gap="16" :cols="5">
+          <n-gi>
+            <n-input
+              v-model:value="keyword"
+              :disabled="actionLoading"
+              :placeholder="t('productCategories.filters.keyword')"
+              clearable
+            />
+          </n-gi>
+          <n-gi />
+          <n-gi />
+          <n-gi />
+          <n-gi />
+        </n-grid>
+        <!-- 操作区左右分区：左侧业务操作（新建），右侧统一操作（刷新/列设置），与商品列表页一致。 -->
+        <div class="action-bar">
+          <n-grid :x-gap="16" :y-gap="12" cols="1 s:2" responsive="screen">
+            <n-gi>
+              <n-space>
+                <n-button v-if="canCreate" :disabled="actionLoading" type="primary" @click="openCreate">
+                  {{ t("productCategories.actions.create") }}
+                </n-button>
+              </n-space>
+            </n-gi>
+            <n-gi>
+              <n-space justify="end">
+                <n-button
+                  :aria-label="t('productCategories.actions.refresh')"
+                  :disabled="actionLoading"
+                  :title="t('productCategories.actions.refresh')"
+                  quaternary
+                  @click="refreshCategories"
+                >
+                  <template #icon>
+                    <n-icon>
+                      <RefreshCw :size="16" :stroke-width="1.5"></RefreshCw>
+                    </n-icon>
+                  </template>
+                </n-button>
+                <ColumnSettings
+                  :hidden-keys="hiddenKeys"
+                  :items="columnSettingItems"
+                  :ordered-keys="orderedKeys"
+                  @move="moveColumn"
+                  @reset="resetColumns"
+                  @toggle="toggleColumn"
+                >
+                  <template #trigger>
+                    <n-button
+                      :aria-label="t('productCategories.actions.settings')"
+                      :title="t('productCategories.actions.settings')"
+                      quaternary
+                    >
+                      <template #icon>
+                        <n-icon>
+                          <Settings :size="16" :stroke-width="1.5"></Settings>
+                        </n-icon>
+                      </template>
+                    </n-button>
+                  </template>
+                </ColumnSettings>
+              </n-space>
+            </n-gi>
+          </n-grid>
+        </div>
       </div>
 
       <n-data-table
@@ -21,9 +77,11 @@
         :data="filteredTree"
         :loading="loading"
         :row-key="row => row.id"
-        :scroll-x="hasActions ? 850 : 690"
+        :scroll-x="scrollX"
         :single-line="false"
+        flex-height
         striped
+        style="height: 100%"
       >
         <template #empty>
           <n-empty :description="emptyDescription" />
@@ -97,6 +155,7 @@
 <script lang="ts" setup>
 import { computed, h, onMounted, reactive, ref, watch } from "vue";
 import {
+  type DataTableColumn,
   type DataTableColumns,
   type DataTableRowKey,
   type FormInst,
@@ -108,6 +167,9 @@ import {
   NEmpty,
   NForm,
   NFormItem,
+  NGi,
+  NGrid,
+  NIcon,
   NInput,
   NInputNumber,
   NModal,
@@ -115,6 +177,7 @@ import {
   NTreeSelect,
   type TreeSelectOption,
 } from "naive-ui";
+import { RefreshCw, Settings } from "@lucide/vue";
 import {
   createProductCategory,
   deleteProductCategory,
@@ -124,6 +187,8 @@ import {
   type ProductCategoryMutationInput,
   updateProductCategory,
 } from "@/api/productCategories.ts";
+import ColumnSettings from "@/components/ColumnSettings.vue";
+import { useColumnSettings } from "@/composables/useColumnSettings.ts";
 import { PermissionCode } from "@/constants/permissions.ts";
 import { usePermissionsStore } from "@/stores/permissions.ts";
 import { useI18n } from "vue-i18n";
@@ -170,9 +235,13 @@ const categoryChildrenByParent = computed(() => {
   });
   return result;
 });
+// 全量树：供编辑弹窗的上级选项使用，不受筛选影响。
 const categoryTree = computed(() => buildCategoryTree(categories.value));
 const hasFilter = computed(() => Boolean(keyword.value.trim()));
-const filteredTree = computed(() => (hasFilter.value ? filterCategoryTree(categoryTree.value) : categoryTree.value));
+// 表格展示走扁平筛选链路：先在扁平数据上按标记法过滤（命中节点 + 上溯补全祖先链），再对保留集合建树。
+const filteredTree = computed(() =>
+  hasFilter.value ? buildCategoryTree(filterCategoryItems(categories.value)) : categoryTree.value
+);
 const emptyDescription = computed(() =>
   t(hasFilter.value ? "productCategories.empty.filtered" : "productCategories.empty.data")
 );
@@ -202,50 +271,90 @@ const formRules = computed<FormRules>(() => ({
   },
 }));
 
+// 列设置范围：可配置列为 name/actions 之外的 2 列；固定列（name 最左、actions 最右）不参与配置。
+const configurableColumnKeys = ["path", "sortOrder"] as const;
+
+// name 列固定最左，不参与列设置。
+const nameColumn = computed<DataTableColumn<ProductCategoryTreeNode>>(() => ({
+  title: t("productCategories.columns.name"),
+  key: "name",
+  minWidth: 280,
+  fixed: "left",
+}));
+
+// 可配置列定义（key → 列定义）；computed 保证语言切换后标题响应式更新。
+const configurableColumnMap = computed<Record<string, DataTableColumn<ProductCategoryTreeNode>>>(() => ({
+  path: {
+    title: t("productCategories.columns.path"),
+    key: "path",
+    minWidth: 320,
+    render: row => renderText(formatCategoryPath(row), 300),
+  },
+  sortOrder: { title: t("productCategories.columns.sortOrder"), key: "sortOrder", minWidth: 90 },
+}));
+
+// 列设置状态（顺序 + 显隐），localStorage 持久化，storage key 按页面唯一。
+const { orderedKeys, hiddenKeys, visibleKeys, toggleColumn, moveColumn, resetColumns } = useColumnSettings({
+  storageKey: "columnSettings.productCategoriesList",
+  defaultOrder: [...configurableColumnKeys],
+});
+
+// 列设置面板展示项：全量可配置列（默认顺序），组件内部按 orderedKeys 排序展示。
+const columnSettingItems = computed(() =>
+  configurableColumnKeys.map(key => ({ key, title: t(`productCategories.columns.${key}`) }))
+);
+
+// actions 列固定最右且按权限动态追加，不参与列设置。
+const actionsColumn = computed<DataTableColumn<ProductCategoryTreeNode>>(() => ({
+  title: t("productCategories.columns.actions"),
+  key: "actions",
+  minWidth: 140,
+  fixed: "right",
+  render: row =>
+    h(NSpace, null, {
+      default: () => [
+        canUpdate.value
+          ? h(
+              NButton,
+              {
+                text: true,
+                type: "primary",
+                disabled: actionLoading.value,
+                onClick: () => openEdit(row),
+              },
+              { default: () => t("productCategories.actions.edit") }
+            )
+          : null,
+        canDelete.value
+          ? h(
+              NButton,
+              { text: true, type: "error", disabled: actionLoading.value, onClick: () => openDelete(row) },
+              { default: () => t("productCategories.actions.delete") }
+            )
+          : null,
+      ],
+    }),
+}));
+
 const columns = computed<DataTableColumns<ProductCategoryTreeNode>>(() => {
-  const result: DataTableColumns<ProductCategoryTreeNode> = [
-    { title: t("productCategories.columns.name"), key: "name", minWidth: 280, fixed: "left" },
-    {
-      title: t("productCategories.columns.path"),
-      key: "path",
-      minWidth: 320,
-      render: row => renderText(formatCategoryPath(row), 300),
-    },
-    { title: t("productCategories.columns.sortOrder"), key: "sortOrder", minWidth: 90 },
-  ];
+  const result: DataTableColumns<ProductCategoryTreeNode> = [nameColumn.value];
+  for (const key of visibleKeys.value) {
+    result.push(configurableColumnMap.value[key]);
+  }
   if (hasActions.value) {
-    result.push({
-      title: t("productCategories.columns.actions"),
-      key: "actions",
-      minWidth: 140,
-      fixed: "right",
-      render: row =>
-        h(NSpace, null, {
-          default: () => [
-            canUpdate.value
-              ? h(
-                  NButton,
-                  {
-                    text: true,
-                    type: "primary",
-                    disabled: actionLoading.value,
-                    onClick: () => openEdit(row),
-                  },
-                  { default: () => t("productCategories.actions.edit") }
-                )
-              : null,
-            canDelete.value
-              ? h(
-                  NButton,
-                  { text: true, type: "error", disabled: actionLoading.value, onClick: () => openDelete(row) },
-                  { default: () => t("productCategories.actions.delete") }
-                )
-              : null,
-          ],
-        }),
-    });
+    result.push(actionsColumn.value);
   }
   return result;
+});
+
+// 横向滚动宽度随可见列动态计算：固定列与可见列的 minWidth 之和，避免列显隐后滚动宽度失配。
+const scrollX = computed(() => {
+  let width = 280; // name 列
+  for (const key of visibleKeys.value) {
+    const minWidth = configurableColumnMap.value[key].minWidth;
+    if (typeof minWidth === "number") width += minWidth;
+  }
+  return hasActions.value ? width + 140 : width;
 });
 
 function createEmptyForm(): ProductCategoryFormModel {
@@ -302,18 +411,41 @@ function collectDescendantIds(id: string): string[] {
   return children.flatMap(child => [child.id, ...collectDescendantIds(child.id)]);
 }
 
-function filterCategoryTree(nodes: ProductCategoryTreeNode[]): ProductCategoryTreeNode[] {
+// 扁平标记法过滤：线性扫描收集命中节点，再迭代上溯把祖先补进保留集合，
+// 未命中的父级作为命中节点的路径骨架保留；命中节点的未命中子级仍被过滤，与树形递归过滤行为一致。
+function filterCategoryItems(items: ProductCategoryListOutput[]): ProductCategoryListOutput[] {
   const normalizedKeyword = keyword.value.trim().toLocaleLowerCase();
-  return nodes.flatMap(node => {
-    const children = node.children ? filterCategoryTree(node.children) : [];
-    const matchesKeyword = !normalizedKeyword || node.name.toLocaleLowerCase().includes(normalizedKeyword);
-    if (!matchesKeyword && children.length === 0) return [];
-    return [{ ...node, children: children.length ? children : undefined }];
-  });
+  const matched = new Set(
+    items
+      .filter(item => !normalizedKeyword || item.name.toLocaleLowerCase().includes(normalizedKeyword))
+      .map(item => item.id)
+  );
+  const byId = new Map(items.map(item => [item.id, item]));
+  const keep = new Set(matched);
+  for (const id of matched) {
+    const visited = new Set<string>([id]);
+    for (let parentId = byId.get(id)?.parentId; parentId; parentId = byId.get(parentId)?.parentId ?? null) {
+      // 脏数据父链成环时终止上溯，避免死循环
+      if (visited.has(parentId)) break;
+      visited.add(parentId);
+      keep.add(parentId);
+    }
+  }
+  return items.filter(item => keep.has(item.id));
 }
 
+// 队列迭代（BFS）收集可展开节点，避免递归遍历。
 function collectExpandableKeys(nodes: ProductCategoryTreeNode[]): DataTableRowKey[] {
-  return nodes.flatMap(node => (node.children?.length ? [node.id, ...collectExpandableKeys(node.children)] : []));
+  const keys: DataTableRowKey[] = [];
+  const queue = [...nodes];
+  while (queue.length) {
+    const node = queue.shift()!;
+    if (node.children?.length) {
+      keys.push(node.id);
+      queue.push(...node.children);
+    }
+  }
+  return keys;
 }
 
 function openCreate() {
@@ -396,6 +528,12 @@ async function loadCategories() {
   }
 }
 
+// 刷新：保持当前筛选条件，仅重新拉取全量数据；树形数据加载后按筛选态恢复展开。
+function refreshCategories() {
+  if (actionLoading.value) return;
+  void loadCategories();
+}
+
 watch(keyword, () => {
   expandedRowKeys.value = collectExpandableKeys(filteredTree.value);
 });
@@ -406,23 +544,40 @@ onMounted(() => Promise.all([loadCategories(), permissionsStore.getPermissions()
 <style lang="scss" scoped>
 .product-category-list-page {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex: 1 1 auto;
+
+  > :deep(.n-card) {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex: 1 1 0;
+    min-width: 0;
+
+    .n-card-content {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 0;
+      overflow: hidden;
+
+      .toolbar {
+        flex: 0 0 auto;
+      }
+    }
+  }
 }
 .toolbar {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   gap: 16px;
   margin-bottom: 20px;
-}
-.keyword-input {
-  width: 280px;
-}
-@media (max-width: 640px) {
-  .toolbar {
-    align-items: stretch;
-    flex-direction: column;
-  }
-  .keyword-input {
-    width: 100%;
+
+  // 分割线颜色取卡片主题边框色，跟随明暗主题；上方 16px 由 toolbar 的 gap 提供。
+  .action-bar {
+    border-top: 1px solid var(--n-border-color);
+    padding-top: 16px;
   }
 }
 </style>

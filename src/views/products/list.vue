@@ -2,64 +2,43 @@
   <div class="product-list-page">
     <n-card :bordered="false">
       <div class="toolbar">
-        <!-- 外层 5 列：条件区固定占前四列（放不下自动换行续排），第五列永远留给按钮组；
-             item-responsive 让 n-gi 的 span 支持 "1 s:4" 响应式写法，断点与原 640px 媒体查询一致。 -->
-        <n-grid :x-gap="16" :y-gap="16" cols="1 s:5" item-responsive responsive="screen">
-          <n-gi span="1 s:4">
-            <n-grid :x-gap="16" :y-gap="16" cols="2 s:4" responsive="screen">
-              <n-gi>
-                <n-input
-                  v-model:value="keyword"
-                  :disabled="actionLoading"
-                  :placeholder="t('products.filters.keyword')"
-                  clearable
-                  @keyup.enter="searchProducts"
-                />
-              </n-gi>
-              <n-gi>
-                <n-select
-                  v-model:value="statusFilter"
-                  :disabled="actionLoading"
-                  :options="statusOptions"
-                  :placeholder="t('products.filters.status')"
-                  clearable
-                />
-              </n-gi>
-              <!-- category/brand/barcode/supplier 仅为布局占位，不参与查询逻辑，仅绑定值以支持重置清空 -->
-              <n-gi>
-                <n-input
-                  v-model:value="categoryFilter"
-                  :disabled="actionLoading"
-                  :placeholder="t('products.filters.category')"
-                  clearable
-                />
-              </n-gi>
-              <n-gi>
-                <n-input
-                  v-model:value="brandFilter"
-                  :disabled="actionLoading"
-                  :placeholder="t('products.filters.brand')"
-                  clearable
-                />
-              </n-gi>
-              <!-- n-grid 对 v-show 的支持存在缺陷（首次隐藏后无法恢复显示），这里用 v-if 直接控制渲染 -->
-              <n-gi v-if="filterExpanded">
-                <n-input
-                  v-model:value="barcodeFilter"
-                  :disabled="actionLoading"
-                  :placeholder="t('products.filters.barcode')"
-                  clearable
-                />
-              </n-gi>
-              <n-gi v-if="filterExpanded">
-                <n-input
-                  v-model:value="supplierFilter"
-                  :disabled="actionLoading"
-                  :placeholder="t('products.filters.supplier')"
-                  clearable
-                />
-              </n-gi>
-            </n-grid>
+        <!-- 筛选区一行五列：前四列为查询条件，按钮组固定在第一行最后一列；
+             条件不足五列时用空项补齐占位，展开的占位条件排到第二行并同样补齐。 -->
+        <n-grid :x-gap="16" :y-gap="16" :cols="5">
+          <n-gi>
+            <n-input
+              v-model:value="keyword"
+              :disabled="actionLoading"
+              :placeholder="t('products.filters.keyword')"
+              clearable
+              @keyup.enter="searchProducts"
+            />
+          </n-gi>
+          <n-gi>
+            <n-select
+              v-model:value="statusFilter"
+              :disabled="actionLoading"
+              :options="statusOptions"
+              :placeholder="t('products.filters.status')"
+              clearable
+            />
+          </n-gi>
+          <!-- category/brand/barcode/supplier 仅为布局占位，不参与查询逻辑，仅绑定值以支持重置清空 -->
+          <n-gi>
+            <n-input
+              v-model:value="categoryFilter"
+              :disabled="actionLoading"
+              :placeholder="t('products.filters.category')"
+              clearable
+            />
+          </n-gi>
+          <n-gi>
+            <n-input
+              v-model:value="brandFilter"
+              :disabled="actionLoading"
+              :placeholder="t('products.filters.brand')"
+              clearable
+            />
           </n-gi>
           <n-gi>
             <div class="filter-actions">
@@ -82,6 +61,27 @@
               </n-button>
             </div>
           </n-gi>
+          <!-- n-grid 对 v-show 的支持存在缺陷（首次隐藏后无法恢复显示），这里用 v-if 直接控制渲染；
+               空项跟随展开状态渲染，避免收起时残留空行。 -->
+          <n-gi v-if="filterExpanded">
+            <n-input
+              v-model:value="barcodeFilter"
+              :disabled="actionLoading"
+              :placeholder="t('products.filters.barcode')"
+              clearable
+            />
+          </n-gi>
+          <n-gi v-if="filterExpanded">
+            <n-input
+              v-model:value="supplierFilter"
+              :disabled="actionLoading"
+              :placeholder="t('products.filters.supplier')"
+              clearable
+            />
+          </n-gi>
+          <n-gi v-if="filterExpanded" />
+          <n-gi v-if="filterExpanded" />
+          <n-gi v-if="filterExpanded" />
         </n-grid>
 
         <!-- 操作区先分左右两块：左侧业务操作（左对齐）、右侧统一操作（右对齐）；每块内部用 n-space 排布。

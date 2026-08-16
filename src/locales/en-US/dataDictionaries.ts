@@ -24,6 +24,8 @@ export default {
     cancel: "Cancel",
     search: "Search",
     reset: "Reset",
+    refresh: "Refresh",
+    settings: "Settings",
   },
   editor: {
     createTitle: "New Dictionary",

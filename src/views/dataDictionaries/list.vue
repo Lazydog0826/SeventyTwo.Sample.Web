@@ -3,34 +3,92 @@
   <div class="data-dictionary-page">
     <n-grid :x-gap="16" :y-gap="16" cols="1 900:2" responsive="self">
       <n-grid-item>
-        <n-card :bordered="false" :title="t('dataDictionaries.dictionaryTitle')">
+        <n-card :bordered="false">
+          <!-- 布局规范与商品列表页一致：筛选区一行五列，搜索/重置按钮固定第一行最后一列，不足五列用空项补齐。 -->
           <div class="toolbar">
-            <n-space :wrap="true">
-              <n-input
-                v-model:value="keyword"
-                :disabled="actionLoading"
-                :placeholder="t('dataDictionaries.filters.keyword')"
-                class="keyword-input"
-                clearable
-              />
-              <n-select
-                v-model:value="statusFilter"
-                :disabled="actionLoading"
-                :options="statusOptions"
-                :placeholder="t('dataDictionaries.filters.status')"
-                class="status-select"
-                clearable
-              />
-              <n-button :disabled="actionLoading" type="primary" @click="searchDictionaries">
-                {{ t("dataDictionaries.actions.search") }}
-              </n-button>
-              <n-button :disabled="actionLoading" @click="resetFilters">
-                {{ t("dataDictionaries.actions.reset") }}
-              </n-button>
-            </n-space>
-            <n-button v-if="canCreate" :disabled="actionLoading" type="primary" @click="openCreateDictionary">
-              {{ t("dataDictionaries.actions.create") }}
-            </n-button>
+            <n-grid :x-gap="16" :y-gap="16" :cols="5">
+              <n-gi>
+                <n-input
+                  v-model:value="keyword"
+                  :disabled="actionLoading"
+                  :placeholder="t('dataDictionaries.filters.keyword')"
+                  clearable
+                  @keyup.enter="searchDictionaries"
+                />
+              </n-gi>
+              <n-gi>
+                <n-select
+                  v-model:value="statusFilter"
+                  :disabled="actionLoading"
+                  :options="statusOptions"
+                  :placeholder="t('dataDictionaries.filters.status')"
+                  clearable
+                />
+              </n-gi>
+              <n-gi />
+              <n-gi />
+              <n-gi>
+                <div class="filter-actions">
+                  <n-button :disabled="actionLoading" type="primary" @click="searchDictionaries">
+                    {{ t("dataDictionaries.actions.search") }}
+                  </n-button>
+                  <n-button :disabled="actionLoading" @click="resetFilters">
+                    {{ t("dataDictionaries.actions.reset") }}
+                  </n-button>
+                </div>
+              </n-gi>
+            </n-grid>
+            <!-- 操作区左右分区：左侧业务操作（新建），右侧统一操作（刷新/列设置），与商品列表页一致。 -->
+            <div class="action-bar">
+              <n-grid :x-gap="16" :y-gap="12" cols="1 s:2" responsive="screen">
+                <n-gi>
+                  <n-space>
+                    <n-button v-if="canCreate" :disabled="actionLoading" type="primary" @click="openCreateDictionary">
+                      {{ t("dataDictionaries.actions.create") }}
+                    </n-button>
+                  </n-space>
+                </n-gi>
+                <n-gi>
+                  <n-space justify="end">
+                    <n-button
+                      :aria-label="t('dataDictionaries.actions.refresh')"
+                      :disabled="actionLoading"
+                      :title="t('dataDictionaries.actions.refresh')"
+                      quaternary
+                      @click="refreshDictionaries"
+                    >
+                      <template #icon>
+                        <n-icon>
+                          <RefreshCw :size="16" :stroke-width="1.5"></RefreshCw>
+                        </n-icon>
+                      </template>
+                    </n-button>
+                    <ColumnSettings
+                      :hidden-keys="hiddenKeys"
+                      :items="columnSettingItems"
+                      :ordered-keys="orderedKeys"
+                      @move="moveColumn"
+                      @reset="resetColumns"
+                      @toggle="toggleColumn"
+                    >
+                      <template #trigger>
+                        <n-button
+                          :aria-label="t('dataDictionaries.actions.settings')"
+                          :title="t('dataDictionaries.actions.settings')"
+                          quaternary
+                        >
+                          <template #icon>
+                            <n-icon>
+                              <Settings :size="16" :stroke-width="1.5"></Settings>
+                            </n-icon>
+                          </template>
+                        </n-button>
+                      </template>
+                    </ColumnSettings>
+                  </n-space>
+                </n-gi>
+              </n-grid>
+            </div>
           </div>
           <n-data-table
             :columns="dictionaryColumns"
@@ -39,10 +97,12 @@
             :pagination="pagination"
             :row-key="(row: DataDictionaryListOutput) => row.id"
             :row-props="dictionaryRowProps"
-            :scroll-x="canUpdate || canDelete ? 878 : 748"
+            :scroll-x="scrollX"
             :single-line="false"
+            flex-height
             remote
             striped
+            style="height: 100%"
           >
             <template #empty><n-empty :description="dictionaryEmptyDescription" /></template>
           </n-data-table>
@@ -50,17 +110,13 @@
       </n-grid-item>
 
       <n-grid-item>
-        <n-card :bordered="false" :title="itemCardTitle">
-          <template #header-extra>
-            <n-button
-              v-if="selectedDictionary && canUpdate"
-              :disabled="actionLoading"
-              type="primary"
-              @click="openCreateItem"
-            >
+        <n-card :bordered="false">
+          <!-- 卡片无标题后，字典项新建按钮从 header-extra 迁入内容区顶部，与其他列表页操作区左对齐一致。 -->
+          <div v-if="selectedDictionary && canUpdate" class="item-actions">
+            <n-button :disabled="actionLoading" type="primary" @click="openCreateItem">
               {{ t("dataDictionaries.actions.createItem") }}
             </n-button>
-          </template>
+          </div>
           <n-data-table
             v-if="selectedDictionary"
             :columns="itemColumns"
@@ -69,7 +125,9 @@
             :row-key="(row: DataDictionaryItemOutput) => row.id"
             :scroll-x="canUpdate ? 600 : 470"
             :single-line="false"
+            flex-height
             striped
+            style="height: 100%"
           >
             <template #empty><n-empty :description="t('dataDictionaries.empty.items')" /></template>
           </n-data-table>
@@ -195,6 +253,7 @@
 import { computed, h, onMounted, reactive, ref } from "vue";
 import { HTTPError } from "ky";
 import {
+  type DataTableColumn,
   type DataTableColumns,
   type FormInst,
   type FormRules,
@@ -205,8 +264,10 @@ import {
   NEmpty,
   NForm,
   NFormItem,
+  NGi,
   NGrid,
   NGridItem,
+  NIcon,
   NInput,
   NInputNumber,
   NModal,
@@ -217,6 +278,7 @@ import {
   NTag,
   type PaginationProps,
 } from "naive-ui";
+import { RefreshCw, Settings } from "@lucide/vue";
 import {
   createDataDictionary,
   createDataDictionaryItem,
@@ -230,6 +292,8 @@ import {
   updateDataDictionary,
   updateDataDictionaryItem,
 } from "@/api/dataDictionaries.ts";
+import ColumnSettings from "@/components/ColumnSettings.vue";
+import { useColumnSettings } from "@/composables/useColumnSettings.ts";
 import { PermissionCode } from "@/constants/permissions.ts";
 import { usePermissionsStore } from "@/stores/permissions.ts";
 import { useI18n } from "vue-i18n";
@@ -312,11 +376,6 @@ const dictionaryEmptyDescription = computed(() =>
       : "dataDictionaries.empty.dictionaries"
   )
 );
-const itemCardTitle = computed(() =>
-  selectedDictionary.value
-    ? `${t("dataDictionaries.itemTitle")} · ${selectedDictionary.value.name}`
-    : t("dataDictionaries.itemTitle")
-);
 const dictionaryEditorTitle = computed(() =>
   t(dictionaryForm.id ? "dataDictionaries.editor.updateTitle" : "dataDictionaries.editor.createTitle")
 );
@@ -366,87 +425,136 @@ const itemRules = computed<FormRules>(() => ({
   ],
 }));
 
+// 列设置范围：可配置列为选择列/操作列之外的 5 列；固定列（选择列最左、actions 最右）不参与配置。
+const configurableColumnKeys = ["code", "name", "description", "itemCount", "enable"] as const;
+
+// 选择列固定最左，承担主从联动选中，不参与列设置。
+const selectionColumn = computed<DataTableColumn<DataDictionaryListOutput>>(() => ({
+  key: "selection",
+  minWidth: 48,
+  fixed: "left",
+  render: row =>
+    h(NRadio, {
+      checked: row.id === selectedDictionaryId.value,
+      disabled: actionLoading.value,
+      "aria-label": row.name,
+      onClick: (event: MouseEvent) => event.stopPropagation(),
+      onUpdateChecked: checked => {
+        if (checked) void selectDictionary(row.id);
+      },
+    }),
+}));
+
+// 可配置列定义（key → 列定义）；computed 保证语言切换后标题响应式更新。
+const configurableColumnMap = computed<Record<string, DataTableColumn<DataDictionaryListOutput>>>(() => ({
+  code: {
+    title: t("dataDictionaries.columns.code"),
+    key: "code",
+    minWidth: 160,
+    render: row => textCell(row.code, 140),
+  },
+  name: {
+    title: t("dataDictionaries.columns.name"),
+    key: "name",
+    minWidth: 160,
+    render: row => textCell(row.name, 140),
+  },
+  description: {
+    title: t("dataDictionaries.columns.description"),
+    key: "description",
+    minWidth: 200,
+    render: row => textCell(row.description ?? "-", 180),
+  },
+  itemCount: { title: t("dataDictionaries.columns.itemCount"), key: "itemCount", minWidth: 90 },
+  enable: {
+    title: t("dataDictionaries.columns.status"),
+    key: "enable",
+    minWidth: 90,
+    render: row =>
+      h(
+        NTag,
+        { type: row.enable ? "success" : "error", bordered: false },
+        { default: () => t(row.enable ? "dataDictionaries.statuses.enabled" : "dataDictionaries.statuses.disabled") }
+      ),
+  },
+}));
+
+// 列设置状态（顺序 + 显隐），localStorage 持久化，storage key 按页面唯一。
+const { orderedKeys, hiddenKeys, visibleKeys, toggleColumn, moveColumn, resetColumns } = useColumnSettings({
+  storageKey: "columnSettings.dataDictionariesList",
+  defaultOrder: [...configurableColumnKeys],
+});
+
+// 列设置面板展示项：全量可配置列（默认顺序），组件内部按 orderedKeys 排序展示。
+const columnSettingItems = computed(() =>
+  configurableColumnKeys.map(key => ({
+    key,
+    title: t(`dataDictionaries.columns.${key === "enable" ? "status" : key}`),
+  }))
+);
+
+// actions 列固定最右且按权限动态追加，不参与列设置。
+const dictionaryActionsColumn = computed<DataTableColumn<DataDictionaryListOutput>>(() => ({
+  title: t("dataDictionaries.columns.actions"),
+  key: "actions",
+  minWidth: 130,
+  fixed: "right",
+  render: row =>
+    h(NSpace, null, {
+      default: () => [
+        canUpdate.value
+          ? h(
+              NButton,
+              {
+                text: true,
+                type: "primary",
+                disabled: actionLoading.value,
+                onClick: (event: MouseEvent) => {
+                  event.stopPropagation();
+                  openEditDictionary(row);
+                },
+              },
+              { default: () => t("dataDictionaries.actions.edit") }
+            )
+          : null,
+        canDelete.value
+          ? h(
+              NButton,
+              {
+                text: true,
+                type: "error",
+                disabled: actionLoading.value,
+                onClick: (event: MouseEvent) => {
+                  event.stopPropagation();
+                  openDeleteDictionary(row);
+                },
+              },
+              { default: () => t("dataDictionaries.actions.delete") }
+            )
+          : null,
+      ],
+    }),
+}));
+
 const dictionaryColumns = computed<DataTableColumns<DataDictionaryListOutput>>(() => {
-  const columns: DataTableColumns<DataDictionaryListOutput> = [
-    {
-      key: "selection",
-      minWidth: 48,
-      fixed: "left",
-      render: row =>
-        h(NRadio, {
-          checked: row.id === selectedDictionaryId.value,
-          disabled: actionLoading.value,
-          "aria-label": row.name,
-          onClick: (event: MouseEvent) => event.stopPropagation(),
-          onUpdateChecked: checked => {
-            if (checked) void selectDictionary(row.id);
-          },
-        }),
-    },
-    { title: t("dataDictionaries.columns.code"), key: "code", minWidth: 160, render: row => textCell(row.code, 140) },
-    { title: t("dataDictionaries.columns.name"), key: "name", minWidth: 160, render: row => textCell(row.name, 140) },
-    {
-      title: t("dataDictionaries.columns.description"),
-      key: "description",
-      minWidth: 200,
-      render: row => textCell(row.description ?? "-", 180),
-    },
-    { title: t("dataDictionaries.columns.itemCount"), key: "itemCount", minWidth: 90 },
-    {
-      title: t("dataDictionaries.columns.status"),
-      key: "enable",
-      minWidth: 90,
-      render: row =>
-        h(
-          NTag,
-          { type: row.enable ? "success" : "error", bordered: false },
-          { default: () => t(row.enable ? "dataDictionaries.statuses.enabled" : "dataDictionaries.statuses.disabled") }
-        ),
-    },
-  ];
-  if (canUpdate.value || canDelete.value)
-    columns.push({
-      title: t("dataDictionaries.columns.actions"),
-      key: "actions",
-      minWidth: 130,
-      fixed: "right",
-      render: row =>
-        h(NSpace, null, {
-          default: () => [
-            canUpdate.value
-              ? h(
-                  NButton,
-                  {
-                    text: true,
-                    type: "primary",
-                    disabled: actionLoading.value,
-                    onClick: (event: MouseEvent) => {
-                      event.stopPropagation();
-                      openEditDictionary(row);
-                    },
-                  },
-                  { default: () => t("dataDictionaries.actions.edit") }
-                )
-              : null,
-            canDelete.value
-              ? h(
-                  NButton,
-                  {
-                    text: true,
-                    type: "error",
-                    disabled: actionLoading.value,
-                    onClick: (event: MouseEvent) => {
-                      event.stopPropagation();
-                      openDeleteDictionary(row);
-                    },
-                  },
-                  { default: () => t("dataDictionaries.actions.delete") }
-                )
-              : null,
-          ],
-        }),
-    });
-  return columns;
+  const result: DataTableColumns<DataDictionaryListOutput> = [selectionColumn.value];
+  for (const key of visibleKeys.value) {
+    result.push(configurableColumnMap.value[key]);
+  }
+  if (canUpdate.value || canDelete.value) {
+    result.push(dictionaryActionsColumn.value);
+  }
+  return result;
+});
+
+// 横向滚动宽度随可见列动态计算：固定列与可见列的 minWidth 之和，避免列显隐后滚动宽度失配。
+const scrollX = computed(() => {
+  let width = 48; // 选择列
+  for (const key of visibleKeys.value) {
+    const minWidth = configurableColumnMap.value[key].minWidth;
+    if (typeof minWidth === "number") width += minWidth;
+  }
+  return canUpdate.value || canDelete.value ? width + 130 : width;
 });
 
 const itemColumns = computed<DataTableColumns<DataDictionaryItemOutput>>(() => {
@@ -692,6 +800,12 @@ function resetFilters() {
   void loadDictionaries();
 }
 
+// 刷新：保持当前页码与已应用的筛选条件，仅重新拉取字典列表。
+function refreshDictionaries() {
+  if (actionLoading.value) return;
+  void loadDictionaries();
+}
+
 async function loadItems() {
   const sequence = ++itemLoadSequence;
   if (!selectedDictionaryId.value) {
@@ -757,30 +871,71 @@ onMounted(() => Promise.all([loadDictionaries(), permissionsStore.getPermissions
 <style lang="scss" scoped>
 .data-dictionary-page {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex: 1 1 auto;
+
+  > :deep(.n-grid) {
+    flex: 1 1 0;
+    min-height: 0;
+    // n-grid 为 CSS Grid：行高平分容器剩余高度；minmax(0,·) 防止内容把行撑高导致溢出。
+    grid-auto-rows: minmax(0, 1fr);
+  }
+
+  // grid-item 默认拉伸到行高，内部用 flex 让卡片撑满 item。
+  :deep(.n-grid-item) {
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+
+    > .n-card {
+      flex: 1 1 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+  }
+
+  :deep(.n-card .n-card-content) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+
+    .toolbar {
+      flex: 0 0 auto;
+    }
+  }
 }
 .toolbar {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   gap: 16px;
   margin-bottom: 20px;
-}
-.keyword-input {
-  width: 230px;
-}
-.status-select {
-  width: 140px;
+
+  // 按钮列内的排布；列定位与响应式由 n-grid 承担。
+  .filter-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  // 分割线颜色取卡片主题边框色，跟随明暗主题；上方 16px 由 toolbar 的 gap 提供。
+  .action-bar {
+    border-top: 1px solid var(--n-border-color);
+    padding-top: 16px;
+  }
 }
 :deep(.n-data-table-tr) {
   cursor: pointer;
 }
-@media (max-width: 640px) {
-  .toolbar {
-    align-items: stretch;
-    flex-direction: column;
-  }
-  .keyword-input,
-  .status-select {
-    width: 100%;
-  }
+// 字典项新建操作区：位于卡片内容顶部，不参与 flex 撑高，仅占据自然高度。
+.item-actions {
+  flex: 0 0 auto;
+  margin-bottom: 16px;
 }
 </style>

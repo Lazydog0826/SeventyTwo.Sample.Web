@@ -34,6 +34,8 @@ export default {
     delete: "Delete",
     cancel: "Cancel",
     save: "Save",
+    refresh: "Refresh",
+    settings: "Settings",
   },
   editor: {
     createTitle: "New Permission",

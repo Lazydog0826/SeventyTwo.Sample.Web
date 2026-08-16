@@ -34,6 +34,8 @@ export default {
     delete: "删除",
     cancel: "取消",
     save: "保存",
+    refresh: "刷新",
+    settings: "设置",
   },
   editor: {
     createTitle: "新增权限",
