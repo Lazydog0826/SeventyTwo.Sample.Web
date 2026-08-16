@@ -860,11 +860,12 @@ async function loadDefaultPages() {
 }
 onMounted(async () => {
   await permissionsStore.getPermissions();
-  const editorOptionsTask =
-    canCreate.value || canUpdate.value
-      ? await Promise.all([loadOrganizations(), loadDefaultPages()])
-      : await Promise.resolve();
-  await Promise.all([loadUsers(), editorOptionsTask]);
+  // 选项加载封装为子任务并在内部 await，外层不直接依赖其完成时机，与 loadUsers 并行执行
+  const loadEditorOptions = async () => {
+    if (!canCreate.value && !canUpdate.value) return;
+    await Promise.all([loadOrganizations(), loadDefaultPages()]);
+  };
+  await Promise.all([loadUsers(), loadEditorOptions()]);
 });
 </script>
 
