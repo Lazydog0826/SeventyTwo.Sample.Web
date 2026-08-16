@@ -1,3 +1,4 @@
+// noinspection JSUnusedGlobalSymbols
 export default {
   welcome: "欢迎回来，{username}",
   updatedAt: "更新于 {time}",

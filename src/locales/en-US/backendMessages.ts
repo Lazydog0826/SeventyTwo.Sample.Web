@@ -1,3 +1,4 @@
+// noinspection JSUnusedGlobalSymbols
 export default {
   authentication: {
     refreshTokenInvalid: "The refresh token is invalid",

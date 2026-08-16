@@ -1,3 +1,4 @@
+// noinspection JSUnusedGlobalSymbols
 export default {
   welcome: "欢迎回来",
   subtitle: "登录后继续访问你的工作空间",

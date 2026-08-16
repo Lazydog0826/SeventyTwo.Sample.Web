@@ -1,3 +1,4 @@
+// noinspection JSUnusedGlobalSymbols
 export default {
   title: "权限列表",
   filters: {

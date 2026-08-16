@@ -1,3 +1,4 @@
+// noinspection JSUnusedGlobalSymbols
 export default {
   welcome: "Welcome back, {username}",
   updatedAt: "Updated at {time}",

@@ -1,3 +1,4 @@
+// noinspection JSUnusedGlobalSymbols
 export default {
   title: "Users",
   filters: { keyword: "Search username, name, phone or email", status: "User status" },

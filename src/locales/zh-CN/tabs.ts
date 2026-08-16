@@ -1,3 +1,5 @@
+// noinspection JSUnusedGlobalSymbols
+
 export default {
   reload: "重新加载",
   close: "关闭当前页",

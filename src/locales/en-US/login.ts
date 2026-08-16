@@ -1,3 +1,4 @@
+// noinspection JSUnusedGlobalSymbols
 export default {
   welcome: "Welcome back",
   subtitle: "Sign in to continue to your workspace",

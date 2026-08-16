@@ -1,3 +1,4 @@
+// noinspection JSUnusedGlobalSymbols
 export default {
   title: "机构列表",
   filters: { keyword: "搜索机构名称或编码", status: "机构状态" },

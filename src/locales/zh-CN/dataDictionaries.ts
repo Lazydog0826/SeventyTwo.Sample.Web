@@ -1,3 +1,4 @@
+// noinspection JSUnusedGlobalSymbols
 export default {
   title: "字典管理",
   dictionaryTitle: "字典列表",

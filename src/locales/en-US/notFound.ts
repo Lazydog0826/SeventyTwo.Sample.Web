@@ -1,3 +1,4 @@
+// noinspection JSUnusedGlobalSymbols
 export default {
   title: "Page not found",
   description: "The page you requested does not exist, has moved, or is temporarily unavailable.",

@@ -1,3 +1,4 @@
+// noinspection JSUnusedGlobalSymbols
 export default {
   title: "Data Dictionary Management",
   dictionaryTitle: "Dictionaries",

@@ -1,3 +1,4 @@
+// noinspection JSUnusedGlobalSymbols
 export default {
   title: "商品类目",
   filters: { keyword: "搜索类目名称" },

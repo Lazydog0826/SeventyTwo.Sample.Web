@@ -1,3 +1,4 @@
+// noinspection JSUnusedGlobalSymbols
 export default {
   switchToLight: "Switch to light theme",
   switchToDark: "Switch to dark theme",

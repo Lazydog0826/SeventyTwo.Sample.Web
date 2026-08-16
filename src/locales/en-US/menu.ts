@@ -1,3 +1,4 @@
+// noinspection JSUnusedGlobalSymbols
 export default {
   home: "Home",
   permissions: "Permissions",

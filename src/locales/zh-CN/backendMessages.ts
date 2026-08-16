@@ -1,3 +1,4 @@
+// noinspection JSUnusedGlobalSymbols
 export default {
   authentication: {
     refreshTokenInvalid: "刷新令牌无效",

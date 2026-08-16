@@ -1,3 +1,4 @@
+// noinspection JSUnusedGlobalSymbols
 export default {
   reload: "Reload",
   close: "Close current tab",

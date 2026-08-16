@@ -1,3 +1,4 @@
+// noinspection JSUnusedGlobalSymbols
 export default {
   title: "Product Categories",
   filters: { keyword: "Search category name" },

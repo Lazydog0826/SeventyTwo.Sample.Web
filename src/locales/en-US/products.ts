@@ -1,3 +1,4 @@
+// noinspection JSUnusedGlobalSymbols
 export default {
   filters: {
     keyword: "Search by name or code",
