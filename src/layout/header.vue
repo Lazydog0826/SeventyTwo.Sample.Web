@@ -26,49 +26,7 @@
           </n-badge>
         </template>
 
-        <div class="notification-panel">
-          <div class="notification-header">
-            <div class="notification-title">
-              <span>{{ t("notifications.title") }}</span>
-              <n-tag v-if="unreadNotificationCount > 0" :bordered="false" round size="small" type="error">
-                {{ unreadNotificationCount > 99 ? "99+" : unreadNotificationCount }}
-              </n-tag>
-            </div>
-            <n-button
-              v-if="unreadNotificationCount > 0"
-              quaternary
-              size="tiny"
-              type="primary"
-              @click="markAllNotificationsRead"
-            >
-              {{ t("notifications.markAllRead") }}
-            </n-button>
-          </div>
-
-          <ul v-if="notifications.length > 0" class="notification-list">
-            <li
-              v-for="item in notifications"
-              :key="item.id"
-              :class="{ 'is-unread': !item.read }"
-              class="notification-item"
-            >
-              <span aria-hidden="true" class="notification-item-dot"></span>
-              <div class="notification-item-body">
-                <div class="notification-item-meta">
-                  <span class="notification-item-title">{{ item.title }}</span>
-                  <span class="notification-item-time">{{ item.time }}</span>
-                </div>
-                <p class="notification-item-content">{{ item.content }}</p>
-              </div>
-            </li>
-          </ul>
-          <div v-else class="notification-empty">
-            <n-icon :size="28">
-              <Inbox :size="28" :stroke-width="1.5"></Inbox>
-            </n-icon>
-            <p>{{ t("notifications.empty") }}</p>
-          </div>
-        </div>
+        <NotificationPanel :notifications="notifications" @mark-all-read="markAllNotificationsRead" />
       </n-popover>
 
       <n-button
@@ -134,13 +92,13 @@ import {
   NLayoutHeader,
   NPopover,
   NSkeleton,
-  NTag,
 } from "naive-ui";
-import { BellRing, Inbox, Languages, Maximize, Minimize, Moon, Sun } from "@lucide/vue";
+import { BellRing, Languages, Maximize, Minimize, Moon, Sun } from "@lucide/vue";
 import { computed, inject, onMounted, onUnmounted, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { logout as logoutApi } from "@/api/users.ts";
 import logoUrl from "@/assets/seventytwo-logo.svg";
+import NotificationPanel, { type NotificationItem } from "@/components/NotificationPanel.vue";
 import { useUserStore } from "@/stores/users.ts";
 
 const { t, locale } = useI18n();
@@ -160,14 +118,6 @@ const languageOptions: Array<DropdownOption> = [
 ];
 
 // 通知中心 demo：数据为本地 mock，后续接入通知接口时仅需替换数据来源与已读逻辑。
-interface NotificationItem {
-  id: number;
-  title: string;
-  content: string;
-  time: string;
-  read: boolean;
-}
-
 const notifications = ref<Array<NotificationItem>>([
   {
     id: 1,
@@ -282,117 +232,6 @@ async function handleUserAction(key: string | number) {
   width: 160px;
   height: 48px;
   flex: 0 0 160px;
-}
-
-// 弹层内容已通过 :content-style 去除 popover 默认内边距，
-// 由 panel 自行控制留白，保证分隔线与 hover 高亮通栏。
-.notification-panel {
-  display: flex;
-  flex-direction: column;
-}
-
-.notification-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 14px 8px;
-  // 分隔线样式与系统其他面板保持一致（见 home.vue 统计卡片）。
-  border-bottom: 1px solid color-mix(in srgb, var(--color-gray-3) 70%, transparent);
-}
-
-.notification-title {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 600;
-}
-
-.notification-list {
-  margin: 0;
-  // 上下留白，避免首尾条目的 hover 色块压到弹层圆角。
-  padding: 6px 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  max-height: 320px;
-  overflow-y: auto;
-}
-
-.notification-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 10px 14px;
-
-  &:hover {
-    background: var(--color-gray-2);
-  }
-}
-
-// 左侧状态点：默认透明占位保证已读条目对齐，未读时显示主题 error 色。
-.notification-item-dot {
-  flex-shrink: 0;
-  width: 6px;
-  height: 6px;
-  margin-top: 7px;
-  border-radius: 50%;
-  background: transparent;
-
-  .is-unread & {
-    background: var(--color-error-6);
-  }
-}
-
-.notification-item-body {
-  flex: 1;
-  min-width: 0;
-}
-
-.notification-item-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.notification-item-title {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-weight: 500;
-}
-
-.notification-item-time {
-  flex-shrink: 0;
-  font-size: 12px;
-  color: var(--color-gray-5);
-}
-
-.notification-item-content {
-  margin: 4px 0 0;
-  font-size: 13px;
-  color: var(--color-gray-7);
-  // 内容过长时最多展示两行，保持列表高度稳定。
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  line-clamp: 2;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-}
-
-.notification-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 24px 0;
-  color: var(--color-gray-5);
-
-  p {
-    margin: 0;
-  }
 }
 
 @media (max-width: 640px) {

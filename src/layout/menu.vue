@@ -3,7 +3,7 @@
     :collapsed="collapsed"
     :collapsed-width="64"
     :native-scrollbar="false"
-    :width="240"
+    :width="220"
     bordered
     collapse-mode="width"
   >
@@ -190,7 +190,7 @@ function handleUpdateValue(key: string, _menuOption: MenuOption) {
   bottom: 24px;
   left: 0;
   z-index: 1;
-  width: 240px;
+  width: 220px;
   display: flex;
   align-items: center;
   justify-content: center;
