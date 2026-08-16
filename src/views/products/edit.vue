@@ -95,6 +95,7 @@ import {
 } from "@/api/products.ts";
 import { PermissionCode } from "@/constants/permissions.ts";
 import { usePermissionsStore } from "@/stores/permissions.ts";
+import { useTabsStore } from "@/stores/tabs.ts";
 import { useI18n } from "vue-i18n";
 
 interface ProductFormModel extends ProductMutationInput {
@@ -110,6 +111,7 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const permissionsStore = usePermissionsStore();
+const tabsStore = useTabsStore();
 const categories = ref<ProductCategoryListOutput[]>([]);
 const detailLoading = ref(false);
 const loadFailed = ref(false);
@@ -250,6 +252,11 @@ async function submit() {
     } else {
       await createProduct(input);
       window.$message.success(t("products.messages.created"));
+    }
+    // 保存成功才标记列表页签数据过期，切回列表时刷新；取消返回不标记，继续复用缓存。
+    const listRoute = router.resolve("/products/list");
+    if (typeof listRoute.name === "string") {
+      tabsStore.markStale(listRoute.name);
     }
     goBack();
   } finally {

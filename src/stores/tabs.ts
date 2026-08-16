@@ -16,6 +16,8 @@ export const useTabsStore = defineStore("tabs", () => {
   const visitedTabs = ref<TabItem[]>([]);
   // 与 keep-alive 的 include 绑定；从中移除名称即销毁对应页面组件的缓存实例。
   const cachedNames = ref<string[]>([]);
+  // 数据已过期待刷新的页签名；页面在别处修改数据后标记，目标页签从缓存恢复时消费标记并刷新。
+  const staleNames = ref<string[]>([]);
 
   /** 导航到达业务页面后登记页签；已打开的页面不重复登记。 */
   function addTab(route: RouteLocationNormalizedLoaded) {
@@ -58,10 +60,27 @@ export const useTabsStore = defineStore("tabs", () => {
     return nextTab ? nextTab.path : "/";
   }
 
+  /** 标记指定页签的数据已过期；下一次该页签从缓存恢复时由页面自行刷新。 */
+  function markStale(name: string) {
+    if (!staleNames.value.includes(name)) {
+      staleNames.value.push(name);
+    }
+  }
+
+  /** 消费过期标记：返回该页签是否需要刷新。标记只生效一次，无论页面是否实际刷新。 */
+  function consumeStale(name: string) {
+    if (!staleNames.value.includes(name)) {
+      return false;
+    }
+    staleNames.value = staleNames.value.filter(stale => stale !== name);
+    return true;
+  }
+
   /** 清空全部页签与页面缓存；认证会话重置时调用，避免下一账号命中上一账号的缓存实例。 */
   function reset() {
     visitedTabs.value = [];
     cachedNames.value = [];
+    staleNames.value = [];
   }
 
   return {
@@ -69,6 +88,8 @@ export const useTabsStore = defineStore("tabs", () => {
     cachedNames,
     addTab,
     removeTab,
+    markStale,
+    consumeStale,
     reset,
   };
 });

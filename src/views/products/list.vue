@@ -36,9 +36,9 @@
         :pagination="pagination"
         :row-key="row => row.id"
         :scroll-x="hasActions ? 1150 : 900"
+        flex-height
         remote
         striped
-        flex-height
         style="height: 100%"
       >
         <template #empty><n-empty :description="emptyDescription" /></template>
@@ -93,6 +93,7 @@ import {
   productStatus,
   type ProductStatus,
 } from "@/api/products.ts";
+import { useRefreshOnActivated } from "@/composables/useRefreshOnActivated.ts";
 import { PermissionCode } from "@/constants/permissions.ts";
 import { usePermissionsStore } from "@/stores/permissions.ts";
 import { useI18n } from "vue-i18n";
@@ -334,6 +335,7 @@ function resetFilters() {
 }
 
 onMounted(() => Promise.all([loadProducts(), permissionsStore.getPermissions()]));
+useRefreshOnActivated(() => void loadProducts());
 </script>
 
 <style lang="scss" scoped>
