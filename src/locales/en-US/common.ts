@@ -24,6 +24,12 @@ export const fullscreen = {
   exit: "Exit fullscreen",
 };
 
+export const notifications = {
+  title: "Notifications",
+  markAllRead: "Mark all as read",
+  empty: "No notifications",
+};
+
 export const notFound = {
   title: "Page not found",
   description: "The page you requested does not exist, has moved, or is temporarily unavailable.",

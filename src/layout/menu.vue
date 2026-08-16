@@ -33,8 +33,8 @@
         >
           <template #icon>
             <n-icon>
-              <PanelLeftOpen v-if="collapsed"></PanelLeftOpen>
-              <PanelLeftClose v-else></PanelLeftClose>
+              <PanelLeftOpen v-if="collapsed" :size="16" :stroke-width="1"></PanelLeftOpen>
+              <PanelLeftClose v-else :size="16" :stroke-width="1"></PanelLeftClose>
             </n-icon>
           </template>
         </n-button>

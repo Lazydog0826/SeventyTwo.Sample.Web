@@ -506,7 +506,7 @@ function renderIconOption(option: SelectOption) {
   const name = String(option.value ?? "");
   const icon = lucideIconComponents[name];
   return h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } }, [
-    icon ? h(NIcon, { size: 18 }, { default: () => h(icon) }) : null,
+    icon ? h(NIcon, { size: 16 }, { default: () => h(icon, { size: 16, strokeWidth: 1 }) }) : null,
     h("span", name),
   ]);
 }
