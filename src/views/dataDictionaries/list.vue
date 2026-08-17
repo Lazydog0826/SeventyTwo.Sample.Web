@@ -138,6 +138,9 @@
 
     <n-modal
       v-model:show="showDictionaryEditor"
+      :closable="!submitting"
+      :close-on-esc="!submitting"
+      :mask-closable="!submitting"
       :title="dictionaryEditorTitle"
       preset="card"
       style="width: 560px; max-width: calc(100vw - 32px)"
@@ -168,7 +171,9 @@
       </n-form>
       <template #footer>
         <n-space justify="end">
-          <n-button @click="showDictionaryEditor = false">{{ t("dataDictionaries.actions.cancel") }}</n-button>
+          <n-button :disabled="submitting" @click="showDictionaryEditor = false">
+            {{ t("dataDictionaries.actions.cancel") }}
+          </n-button>
           <n-button :loading="submitting" type="primary" @click="submitDictionary">
             {{ t("dataDictionaries.actions.save") }}
           </n-button>
@@ -178,6 +183,9 @@
 
     <n-modal
       v-model:show="showItemEditor"
+      :closable="!submitting"
+      :close-on-esc="!submitting"
+      :mask-closable="!submitting"
       :title="itemEditorTitle"
       preset="card"
       style="width: 560px; max-width: calc(100vw - 32px)"
@@ -195,7 +203,9 @@
       </n-form>
       <template #footer>
         <n-space justify="end">
-          <n-button @click="showItemEditor = false">{{ t("dataDictionaries.actions.cancel") }}</n-button>
+          <n-button :disabled="submitting" @click="showItemEditor = false">
+            {{ t("dataDictionaries.actions.cancel") }}
+          </n-button>
           <n-button :loading="submitting" type="primary" @click="submitItem">
             {{ t("dataDictionaries.actions.save") }}
           </n-button>
@@ -655,9 +665,11 @@ function openDeleteItem(row: DataDictionaryItemOutput) {
 }
 
 async function submitDictionary() {
-  await dictionaryFormRef.value?.validate();
+  // submitting 在校验前同步置位：校验是异步过程，置位晚于校验会导致双击绕过按钮 loading 重复提交。
+  if (submitting.value) return;
   submitting.value = true;
   try {
+    await dictionaryFormRef.value?.validate();
     const input: DataDictionaryMutationInput = {
       code: dictionaryForm.code,
       name: dictionaryForm.name,
@@ -684,10 +696,12 @@ async function submitDictionary() {
 }
 
 async function submitItem() {
-  await itemFormRef.value?.validate();
-  if (!selectedDictionary.value || itemForm.sortOrder === null) return;
+  // submitting 在校验前同步置位：校验是异步过程，置位晚于校验会导致双击绕过按钮 loading 重复提交。
+  if (submitting.value) return;
   submitting.value = true;
   try {
+    await itemFormRef.value?.validate();
+    if (!selectedDictionary.value || itemForm.sortOrder === null) return;
     const input = {
       dictionaryId: selectedDictionary.value.id,
       value: itemForm.value,

@@ -107,6 +107,9 @@
 
     <n-modal
       v-model:show="showEditor"
+      :closable="!submitting"
+      :close-on-esc="!submitting"
+      :mask-closable="!submitting"
       :title="editorTitle"
       preset="card"
       style="width: 600px; max-width: calc(100vw - 32px)"
@@ -172,7 +175,7 @@
       </n-form>
       <template #footer>
         <n-space justify="end">
-          <n-button @click="showEditor = false">{{ t("permissions.actions.cancel") }}</n-button>
+          <n-button :disabled="submitting" @click="showEditor = false">{{ t("permissions.actions.cancel") }}</n-button>
           <n-button :loading="submitting" type="primary" @click="submitEditor">
             {{ t("permissions.actions.save") }}
           </n-button>
@@ -273,8 +276,10 @@ const loading = ref(false);
 const submitting = ref(false);
 const deleting = ref(false);
 const editingLoadingId = ref<string | null>(null);
-// 表格操作互斥：详情加载期间禁用全部操作按钮。
-const actionLoading = computed(() => editingLoadingId.value !== null);
+// 页面操作统一互斥：列表加载、提交、删除、详情加载任一进行中时禁用全部操作入口。
+const actionLoading = computed(
+  () => loading.value || submitting.value || deleting.value || editingLoadingId.value !== null
+);
 let editRequestSequence = 0;
 const permissions = ref<PermissionListOutput[]>([]);
 const expandedRowKeys = ref<DataTableRowKey[]>([]);
@@ -684,9 +689,11 @@ function openDelete(permission: PermissionListOutput) {
 }
 
 async function submitEditor() {
-  await formRef.value?.validate();
+  // submitting 在校验前同步置位：校验是异步过程，置位晚于校验会导致双击绕过按钮 loading 重复提交。
+  if (submitting.value) return;
   submitting.value = true;
   try {
+    await formRef.value?.validate();
     const input: PermissionMutationInput = {
       code: formModel.code,
       title: formModel.title,

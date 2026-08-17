@@ -234,9 +234,11 @@ function goBack() {
 }
 
 async function submit() {
-  await formRef.value?.validate();
+  // submitting 在校验前同步置位：校验是异步过程，置位晚于校验会导致双击绕过按钮 loading 重复提交。
+  if (submitting.value) return;
   submitting.value = true;
   try {
+    await formRef.value?.validate();
     const input: ProductMutationInput = {
       name: formModel.name.trim(),
       code: formModel.code.trim(),

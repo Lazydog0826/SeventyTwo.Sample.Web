@@ -99,6 +99,9 @@
 
     <n-modal
       v-model:show="showEditor"
+      :closable="!submitting"
+      :close-on-esc="!submitting"
+      :mask-closable="!submitting"
       :title="editorTitle"
       preset="card"
       style="width: 560px; max-width: calc(100vw - 32px)"
@@ -160,7 +163,7 @@
       </n-form>
       <template #footer>
         <n-space justify="end">
-          <n-button @click="showEditor = false">{{ t("users.actions.cancel") }}</n-button>
+          <n-button :disabled="submitting" @click="showEditor = false">{{ t("users.actions.cancel") }}</n-button>
           <n-button :loading="submitting" type="primary" @click="submitEditor">
             {{ t("users.actions.save") }}
           </n-button>
@@ -170,6 +173,9 @@
 
     <n-modal
       v-model:show="showAuthorization"
+      :closable="!authorizationSaving"
+      :close-on-esc="!authorizationSaving"
+      :mask-closable="!authorizationSaving"
       :title="t('users.authorization.title', { name: authorizingUser?.displayName ?? '' })"
       preset="card"
       style="width: 640px; max-width: calc(100vw - 32px)"
@@ -189,7 +195,9 @@
       </n-spin>
       <template #footer>
         <n-space justify="end">
-          <n-button @click="showAuthorization = false">{{ t("users.actions.cancel") }}</n-button>
+          <n-button :disabled="authorizationSaving" @click="showAuthorization = false">
+            {{ t("users.actions.cancel") }}
+          </n-button>
           <n-button
             :disabled="authorizationLoading"
             :loading="authorizationSaving"
@@ -846,9 +854,11 @@ async function saveAuthorization() {
   }
 }
 async function submitEditor() {
-  await formRef.value?.validate();
+  // submitting 在校验前同步置位：校验是异步过程，置位晚于校验会导致双击绕过按钮 loading 重复提交。
+  if (submitting.value) return;
   submitting.value = true;
   try {
+    await formRef.value?.validate();
     if (!formModel.orgId) return;
     if (formModel.id && formModel.version) {
       await updateUser({
