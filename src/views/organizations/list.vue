@@ -320,7 +320,7 @@ const configurableColumnMap = computed<Record<string, DataTableColumn<Organizati
     title: t("organizations.columns.code"),
     key: "code",
     minWidth: 220,
-    render: row => renderText(row.code, 200),
+    render: row => renderText(row.code),
   },
   sortOrder: { title: t("organizations.columns.sortOrder"), key: "sortOrder", minWidth: 90 },
   enable: {
@@ -404,8 +404,8 @@ function createEmptyForm(): OrganizationFormModel {
   return { id: null, version: null, code: "", name: "", enable: true, parentId: null, sortOrder: 0 };
 }
 
-function renderText(value: string, maxWidth: number) {
-  return h(NEllipsis, { tooltip: true, style: { maxWidth: `${maxWidth}px` } }, { default: () => value || "-" });
+function renderText(value: string) {
+  return h(NEllipsis, { tooltip: true }, { default: () => value || "-" });
 }
 
 function buildOrganizationTree(items: OrganizationListOutput[]): OrganizationTreeNode[] {

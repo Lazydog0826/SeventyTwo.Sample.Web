@@ -4,9 +4,9 @@
     <n-grid :x-gap="16" :y-gap="16" cols="1 900:2" responsive="self">
       <n-grid-item>
         <n-card :bordered="false">
-          <!-- 布局规范与商品列表页一致：筛选区一行五列，搜索/重置按钮固定第一行最后一列，不足五列用空项补齐。 -->
+          <!-- 宽度足够时一行三列；半宽卡片空间不足时切为单列，避免控件溢出后与相邻列重叠。 -->
           <div class="toolbar">
-            <n-grid :cols="5" :x-gap="16" :y-gap="16">
+            <n-grid :x-gap="16" :y-gap="16" cols="1 520:3" responsive="self">
               <n-gi>
                 <n-input
                   v-model:value="keyword"
@@ -25,8 +25,6 @@
                   clearable
                 />
               </n-gi>
-              <n-gi />
-              <n-gi />
               <n-gi>
                 <div class="filter-actions">
                   <n-button :disabled="actionLoading" type="primary" @click="searchDictionaries">
@@ -461,19 +459,19 @@ const configurableColumnMap = computed<Record<string, DataTableColumn<DataDictio
     title: t("dataDictionaries.columns.code"),
     key: "code",
     minWidth: 160,
-    render: row => textCell(row.code, 140),
+    render: row => textCell(row.code),
   },
   name: {
     title: t("dataDictionaries.columns.name"),
     key: "name",
     minWidth: 160,
-    render: row => textCell(row.name, 140),
+    render: row => textCell(row.name),
   },
   description: {
     title: t("dataDictionaries.columns.description"),
     key: "description",
     minWidth: 200,
-    render: row => textCell(row.description ?? "-", 180),
+    render: row => textCell(row.description ?? "-"),
   },
   itemCount: { title: t("dataDictionaries.columns.itemCount"), key: "itemCount", minWidth: 90 },
   enable: {
@@ -573,13 +571,13 @@ const itemColumns = computed<DataTableColumns<DataDictionaryItemOutput>>(() => {
       title: t("dataDictionaries.columns.value"),
       key: "value",
       minWidth: 180,
-      render: row => textCell(row.value, 160),
+      render: row => textCell(row.value),
     },
     {
       title: t("dataDictionaries.columns.label"),
       key: "label",
       minWidth: 200,
-      render: row => textCell(row.label, 180),
+      render: row => textCell(row.label),
     },
     { title: t("dataDictionaries.columns.sortOrder"), key: "sortOrder", minWidth: 90 },
   ];
@@ -613,8 +611,8 @@ function emptyDictionaryForm(): DictionaryFormModel {
 function emptyItemForm(): ItemFormModel {
   return { id: null, value: "", label: "", sortOrder: 0 };
 }
-function textCell(value: string, maxWidth: number) {
-  return h(NEllipsis, { tooltip: true, style: { maxWidth: `${maxWidth}px` } }, { default: () => value });
+function textCell(value: string) {
+  return h(NEllipsis, { tooltip: true }, { default: () => value });
 }
 function dictionaryRowProps(row: DataDictionaryListOutput) {
   return {
@@ -910,6 +908,10 @@ onMounted(() => Promise.all([loadDictionaries(), permissionsStore.getPermissions
       flex-direction: column;
       overflow: hidden;
     }
+  }
+
+  :deep(.n-card) {
+    height: 100%;
   }
 
   :deep(.n-card .n-card-content) {

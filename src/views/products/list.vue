@@ -297,7 +297,7 @@ const nameColumn = computed<DataTableColumn<ProductOutput>>(() => ({
 // key 合法性由 useColumnSettings 的 sanitize 保证（visibleKeys 必为 configurableColumnKeys 子集），
 // 因此 Record 值类型直接收敛为非空列定义。
 const configurableColumnMap = computed<Record<string, DataTableColumn<ProductOutput>>>(() => ({
-  code: { title: t("products.columns.code"), key: "code", minWidth: 160, render: row => renderText(row.code, 140) },
+  code: { title: t("products.columns.code"), key: "code", minWidth: 160, render: row => renderText(row.code) },
   price: {
     title: t("products.columns.price"),
     key: "price",
@@ -308,13 +308,13 @@ const configurableColumnMap = computed<Record<string, DataTableColumn<ProductOut
     title: t("products.columns.unit"),
     key: "unit",
     minWidth: 90,
-    render: row => renderText(row.unit ?? "", 70),
+    render: row => renderText(row.unit ?? ""),
   },
   description: {
     title: t("products.columns.description"),
     key: "description",
     minWidth: 220,
-    render: row => renderText(row.description ?? "", 200),
+    render: row => renderText(row.description ?? ""),
   },
   status: {
     title: t("products.columns.status"),
@@ -417,8 +417,8 @@ const scrollX = computed(() => {
   return hasActions.value ? width + 200 : width;
 });
 
-function renderText(value: string, maxWidth: number) {
-  return h(NEllipsis, { tooltip: true, style: { maxWidth: `${maxWidth}px` } }, { default: () => value || "-" });
+function renderText(value: string) {
+  return h(NEllipsis, { tooltip: true }, { default: () => value || "-" });
 }
 
 // 路径 "/products/edit" 对应后端 productsEdit 页面权限下发的 RoutePath。

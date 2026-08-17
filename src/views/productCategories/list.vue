@@ -295,7 +295,7 @@ const configurableColumnMap = computed<Record<string, DataTableColumn<ProductCat
     title: t("productCategories.columns.path"),
     key: "path",
     minWidth: 320,
-    render: row => renderText(formatCategoryPath(row), 300),
+    render: row => renderText(formatCategoryPath(row)),
   },
   sortOrder: { title: t("productCategories.columns.sortOrder"), key: "sortOrder", minWidth: 90 },
 }));
@@ -368,8 +368,8 @@ function createEmptyForm(): ProductCategoryFormModel {
   return { id: null, version: null, name: "", parentId: null, sortOrder: 0 };
 }
 
-function renderText(value: string, maxWidth: number) {
-  return h(NEllipsis, { tooltip: true, style: { maxWidth: `${maxWidth}px` } }, { default: () => value || "-" });
+function renderText(value: string) {
+  return h(NEllipsis, { tooltip: true }, { default: () => value || "-" });
 }
 
 // Path 由类目 ID 以“/”连接（顶级类目仅含自身 ID），展示时逐段映射为类目名称，如“家用电器 / 大家电 / 冰箱”。

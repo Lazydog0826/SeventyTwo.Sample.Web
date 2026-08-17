@@ -394,7 +394,7 @@ const configurableColumnMap = computed<Record<string, DataTableColumn<Permission
     title: t("permissions.columns.code"),
     key: "code",
     minWidth: 180,
-    render: row => renderText(row.code, 160),
+    render: row => renderText(row.code),
   },
   type: {
     title: t("permissions.columns.type"),
@@ -423,25 +423,25 @@ const configurableColumnMap = computed<Record<string, DataTableColumn<Permission
     title: t("permissions.columns.icon"),
     key: "icon",
     minWidth: 120,
-    render: row => renderText(row.icon, 100),
+    render: row => renderText(row.icon),
   },
   routePath: {
     title: t("permissions.columns.routePath"),
     key: "routePath",
     minWidth: 190,
-    render: row => renderText(row.routePath, 170),
+    render: row => renderText(row.routePath),
   },
   routeName: {
     title: t("permissions.columns.routeName"),
     key: "routeName",
     minWidth: 170,
-    render: row => renderText(row.routeName, 150),
+    render: row => renderText(row.routeName),
   },
   vueComponentPath: {
     title: t("permissions.columns.componentPath"),
     key: "vueComponentPath",
     minWidth: 260,
-    render: row => renderText(row.vueComponentPath, 240),
+    render: row => renderText(row.vueComponentPath),
   },
   metaData: {
     title: t("permissions.columns.metaData"),
@@ -554,8 +554,8 @@ function requiredForPage(field: "componentPath" | "routePath" | "routeName") {
   };
 }
 
-function renderText(value: string, maxWidth: number) {
-  return h(NEllipsis, { tooltip: true, style: { maxWidth: `${maxWidth}px` } }, { default: () => value || "-" });
+function renderText(value: string) {
+  return h(NEllipsis, { tooltip: true }, { default: () => value || "-" });
 }
 
 function buildPermissionTree(items: PermissionListOutput[]): PermissionTreeNode[] {
