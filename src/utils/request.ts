@@ -186,8 +186,9 @@ export const kyInstance = ky.create({
             try {
               // 刷新 Token 由 Cookie 自动携带；接口响应 data 为新的访问 Token。
               window.$accessToken = (await kyInstance.post<WebApiResponse<string>>(RefreshTokenApiPath).json()).data;
-              // HTTP 请求成功但未返回有效 Token，同样视为刷新失败。
+              // 正常情况下刷新成功必定返回有效 Token；此处防御异常响应，避免认证状态无法恢复。
               if (!window.$accessToken) {
+                // 认证状态已无法恢复，统一清理当前会话并跳转登录页，避免后续请求反复刷新。
                 await redirectToAuthPage();
                 throw new Error("授权 Token 无效");
               }
