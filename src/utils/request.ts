@@ -188,6 +188,7 @@ export const kyInstance = ky.create({
               window.$accessToken = (await kyInstance.post<WebApiResponse<string>>(RefreshTokenApiPath).json()).data;
               // HTTP 请求成功但未返回有效 Token，同样视为刷新失败。
               if (!window.$accessToken) {
+                await redirectToAuthPage();
                 throw new Error("授权 Token 无效");
               }
             } catch (error) {
