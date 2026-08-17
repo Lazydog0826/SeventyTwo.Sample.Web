@@ -181,17 +181,18 @@
       style="width: 640px; max-width: calc(100vw - 32px)"
     >
       <n-spin :show="authorizationLoading">
-        <n-tree
-          v-if="authorizationOptions.length"
-          :checked-keys="authorizationCheckedKeys"
-          :data="authorizationOptions"
-          :indeterminate-keys="authorizationIndeterminateKeys"
-          block-line
-          checkable
-          default-expand-all
-          @update:checked-keys="handleAuthorizationCheck"
-        />
-        <n-empty v-else :description="t('users.authorization.empty')" />
+        <div class="authorization-body">
+          <n-tree
+            v-if="authorizationOptions.length"
+            :checked-keys="authorizationCheckedKeys"
+            :data="authorizationOptions"
+            :indeterminate-keys="authorizationIndeterminateKeys"
+            block-line
+            checkable
+            @update:checked-keys="handleAuthorizationCheck"
+          />
+          <n-empty v-else :description="t('users.authorization.empty')" />
+        </div>
       </n-spin>
       <template #footer>
         <n-space justify="end">
@@ -1037,5 +1038,10 @@ onMounted(async () => {
 }
 .reset-password-value {
   margin-top: 16px;
+}
+// 授权弹框内容区固定高度，权限树超出时在区域内滚动，避免撑高弹框
+.authorization-body {
+  height: 400px;
+  overflow-y: auto;
 }
 </style>
