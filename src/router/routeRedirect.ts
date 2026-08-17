@@ -19,6 +19,11 @@ export function routeRedirect(router: Router, dynamicRouteManager: DynamicRouteM
     }
 
     if (to.path === "/") {
+      // 规范：defaultPagePath 来源于后端"页面权限的 RoutePath"，必须是非根路径的具体页面路径。
+      // 根路径 "/" 已被静态 layout 路由占用（动态注册侧 findDuplicate 会拒绝与静态路由重复的
+      // routePath，整组注册失败后走上方 403 分支），因此正常数据不会进入 next("/")；
+      // 但若后端因脏数据把 "/" 作为默认页返回，此处会形成无限重定向——后端写入页面权限时
+      // 必须校验 RoutePath 不得为 "/" 及其他静态路由路径。
       const defaultPagePath = dynamicRouteManager.defaultPagePath;
       const defaultRoute = defaultPagePath ? router.resolve(defaultPagePath) : null;
       if (defaultPagePath && defaultRoute?.matched.length) {
