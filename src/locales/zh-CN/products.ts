@@ -1,5 +1,7 @@
 // noinspection JSUnusedGlobalSymbols
 export default {
+  dataPermissionHint:
+    "本页面已实现用户数据权限类型过滤，支持：全部数据、本机构数据、本机构与下级机构数据、自己的数据。",
   filters: {
     keyword: "搜索商品名称或编码",
     status: "上架状态",

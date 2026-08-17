@@ -1,5 +1,7 @@
 // noinspection JSUnusedGlobalSymbols
 export default {
+  dataPermissionHint:
+    "This page filters products by the user's data permission type: all data, current organization, current organization and its sub-organizations, or own data.",
   filters: {
     keyword: "Search by name or code",
     status: "Status",
