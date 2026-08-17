@@ -259,7 +259,6 @@
 
 <script lang="ts" setup>
 import { computed, h, onMounted, reactive, ref } from "vue";
-import { HTTPError } from "ky";
 import {
   type DataTableColumn,
   type DataTableColumns,
@@ -317,8 +316,6 @@ interface ItemFormModel {
   sortOrder: number | null;
 }
 type StatusFilter = "enabled" | "disabled";
-
-const dataChangedMessage = "dataDictionary.dataChanged";
 
 const { t } = useI18n();
 const permissionsStore = usePermissionsStore();
@@ -685,9 +682,6 @@ async function submitDictionary() {
     }
     showDictionaryEditor.value = false;
     await loadDictionaries();
-  } catch (error) {
-    await reloadOnConflict(error);
-    throw error;
   } finally {
     submitting.value = false;
   }
@@ -717,9 +711,6 @@ async function submitItem() {
     );
     showItemEditor.value = false;
     await loadItems();
-  } catch (error) {
-    await reloadOnConflict(error);
-    throw error;
   } finally {
     submitting.value = false;
   }
@@ -758,9 +749,6 @@ async function confirmDeleteItem() {
     deletingItem.value = null;
     window.$message.success(t("dataDictionaries.messages.itemDeleted"));
     await loadItems();
-  } catch (error) {
-    await reloadOnConflict(error);
-    throw error;
   } finally {
     deleting.value = false;
   }
@@ -813,6 +801,7 @@ function resetFilters() {
 }
 
 // 刷新：保持当前页码与已应用的筛选条件，仅重新拉取字典列表。
+// 发生 409 数据变更冲突时仅由请求层提示，不自动刷新，避免覆盖用户未保存的内容；由用户关闭弹窗后手动刷新。
 function refreshDictionaries() {
   if (actionLoading.value) return;
   void loadDictionaries();
@@ -843,38 +832,6 @@ async function loadItems() {
 function applyDictionaryVersion(version: string) {
   const dictionary = selectedDictionary.value;
   if (dictionary) dictionary.version = version;
-}
-
-async function reloadOnConflict(error: unknown) {
-  if (
-    !(error instanceof HTTPError) ||
-    error.response.status !== 409 ||
-    !error.data ||
-    typeof error.data !== "object" ||
-    !("message" in error.data) ||
-    error.data.message !== dataChangedMessage
-  )
-    return;
-
-  const editingDictionaryId = dictionaryForm.id;
-  const editingItemId = itemForm.id;
-  const deletingItemId = deletingItem.value?.id ?? null;
-  await loadDictionaries();
-
-  if (showDictionaryEditor.value && editingDictionaryId) {
-    const currentDictionary = dictionaries.value.find(item => item.id === editingDictionaryId);
-    if (currentDictionary) Object.assign(dictionaryForm, currentDictionary);
-    else showDictionaryEditor.value = false;
-  }
-  if (showItemEditor.value && editingItemId) {
-    const currentItem = items.value.find(item => item.id === editingItemId);
-    if (currentItem) Object.assign(itemForm, currentItem);
-    else showItemEditor.value = false;
-  }
-  if (showItemDelete.value && deletingItemId) {
-    deletingItem.value = items.value.find(item => item.id === deletingItemId) ?? null;
-    if (!deletingItem.value) showItemDelete.value = false;
-  }
 }
 
 onMounted(() => Promise.all([loadDictionaries(), permissionsStore.getPermissions()]));
