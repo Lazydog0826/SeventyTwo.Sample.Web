@@ -2,6 +2,8 @@
 
 基于 Vue 3、TypeScript 和 Vite 构建的后台管理示例前端，配套 SeventyTwo Sample 后端使用。
 
+演示地址：<https://sample.web.dot-net.dev/>
+
 ## 功能
 
 - 用户登录、退出及登录后重定向
