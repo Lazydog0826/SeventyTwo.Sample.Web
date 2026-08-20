@@ -1,6 +1,6 @@
-import {defineStore} from "pinia";
-import {nextTick, ref} from "vue";
-import type {RouteLocationNormalizedLoaded} from "vue-router";
+import { defineStore } from "pinia";
+import { nextTick, ref } from "vue";
+import type { RouteLocationNormalizedLoaded } from "vue-router";
 
 /** 已打开页签的展示信息。 */
 export interface TabItem {

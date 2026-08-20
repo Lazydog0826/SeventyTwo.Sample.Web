@@ -35,13 +35,17 @@ export default {
   highlightsTitle: "Project highlights",
   highlightsIntro: "A full-stack admin sample covering authentication, authorization, and distributed consistency.",
   highlightAuthTitle: "Seamless dual-token renewal",
-  highlightAuthDescription: "Access and refresh tokens work with Redis sessions, atomic rotation, and a concurrent refresh queue.",
+  highlightAuthDescription:
+    "Access and refresh tokens work with Redis sessions, atomic rotation, and a concurrent refresh queue.",
   highlightPermissionTitle: "End-to-end permissions",
-  highlightPermissionDescription: "Dynamic RBAC spans APIs, routes, and actions, with organization and owner filters applied in queries.",
+  highlightPermissionDescription:
+    "Dynamic RBAC spans APIs, routes, and actions, with organization and owner filters applied in queries.",
   highlightDistributedTitle: "Distributed consistency",
-  highlightDistributedDescription: "Redis locks prevent cache stampedes while CAP messages synchronize invalidation across instances.",
+  highlightDistributedDescription:
+    "Redis locks prevent cache stampedes while CAP messages synchronize invalidation across instances.",
   highlightEngineeringTitle: "Engineering architecture",
-  highlightEngineeringDescription: "Layer-boundary tests, UUIDv7, optimistic locking, and cursor pagination balance clarity and performance.",
+  highlightEngineeringDescription:
+    "Layer-boundary tests, UUIDv7, optimistic locking, and cursor pagination balance clarity and performance.",
   highlightsHint: "Shown once in this browser",
   highlightsSources: "Source repositories",
   highlightsBackendSource: "Backend source",

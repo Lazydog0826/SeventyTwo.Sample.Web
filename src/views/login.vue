@@ -31,8 +31,8 @@
       :show="showHighlights"
       :title="t('login.highlightsTitle')"
       class="login-highlights-modal"
-      close-on-esc
       closable
+      close-on-esc
       mask-closable
       preset="card"
       style="width: 620px; max-width: calc(100vw - 32px)"
@@ -45,7 +45,7 @@
 
       <div class="highlights-grid">
         <article v-for="highlight in highlights" :key="highlight.title" class="highlight-item">
-          <div class="highlight-marker" aria-hidden="true"></div>
+          <div aria-hidden="true" class="highlight-marker"></div>
           <div>
             <h3>{{ highlight.title }}</h3>
             <p>{{ highlight.description }}</p>
