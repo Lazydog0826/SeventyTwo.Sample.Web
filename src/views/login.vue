@@ -27,6 +27,64 @@
       </n-dropdown>
     </div>
 
+    <n-modal
+      :show="showHighlights"
+      :title="t('login.highlightsTitle')"
+      class="login-highlights-modal"
+      close-on-esc
+      closable
+      mask-closable
+      preset="card"
+      style="width: 620px; max-width: calc(100vw - 32px)"
+      @update:show="handleHighlightsVisibilityChange"
+    >
+      <div class="highlights-heading">
+        <span class="highlights-kicker">SEVENTYTWO SAMPLE</span>
+        <p>{{ t("login.highlightsIntro") }}</p>
+      </div>
+
+      <div class="highlights-grid">
+        <article v-for="highlight in highlights" :key="highlight.title" class="highlight-item">
+          <div class="highlight-marker" aria-hidden="true"></div>
+          <div>
+            <h3>{{ highlight.title }}</h3>
+            <p>{{ highlight.description }}</p>
+          </div>
+        </article>
+      </div>
+
+      <div class="highlights-sources">
+        <span class="highlights-sources-label">{{ t("login.highlightsSources") }}</span>
+        <a
+          class="highlights-source-link"
+          href="https://github.com/Lazydog0826/SeventyTwo.Sample"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <span aria-hidden="true" class="highlights-source-arrow">↗</span>
+          {{ t("login.highlightsBackendSource") }}
+        </a>
+        <a
+          class="highlights-source-link"
+          href="https://github.com/Lazydog0826/SeventyTwo.Sample.Web"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <span aria-hidden="true" class="highlights-source-arrow">↗</span>
+          {{ t("login.highlightsFrontendSource") }}
+        </a>
+      </div>
+
+      <template #footer>
+        <div class="highlights-footer">
+          <n-text depth="3">{{ t("login.highlightsHint") }}</n-text>
+          <n-button type="primary" @click="closeHighlights">
+            {{ t("login.highlightsAction") }}
+          </n-button>
+        </div>
+      </template>
+    </n-modal>
+
     <div class="login-content">
       <div>
         <header class="login-header">
@@ -172,9 +230,9 @@
 
 <script lang="ts" setup>
 import type { FormInst, FormRules } from "naive-ui";
-import { NButton, NDropdown, NForm, NFormItem, NIcon, NInput, NText } from "naive-ui";
+import { NButton, NDropdown, NForm, NFormItem, NIcon, NInput, NModal, NText } from "naive-ui";
 import { Languages, Moon, Sun } from "@lucide/vue";
-import { computed, inject, onUnmounted, reactive, ref, type Ref } from "vue";
+import { computed, inject, onMounted, onUnmounted, reactive, ref, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import { login } from "@/api/users";
@@ -185,6 +243,44 @@ const router = useRouter();
 const accountFormRef = ref<FormInst | null>(null);
 const phoneFormRef = ref<FormInst | null>(null);
 const loading = ref(false);
+const HIGHLIGHTS_STORAGE_KEY = "seventytwo.login.highlights.seen.v1";
+const showHighlights = ref(false);
+const highlights = computed(() => [
+  {
+    title: t("login.highlightAuthTitle"),
+    description: t("login.highlightAuthDescription"),
+  },
+  {
+    title: t("login.highlightPermissionTitle"),
+    description: t("login.highlightPermissionDescription"),
+  },
+  {
+    title: t("login.highlightDistributedTitle"),
+    description: t("login.highlightDistributedDescription"),
+  },
+  {
+    title: t("login.highlightEngineeringTitle"),
+    description: t("login.highlightEngineeringDescription"),
+  },
+]);
+
+const handleHighlightsVisibilityChange = (show: boolean) => {
+  showHighlights.value = show;
+};
+
+const closeHighlights = () => {
+  showHighlights.value = false;
+};
+
+onMounted(() => {
+  if (localStorage.getItem(HIGHLIGHTS_STORAGE_KEY) === "1") {
+    return;
+  }
+
+  localStorage.setItem(HIGHLIGHTS_STORAGE_KEY, "1");
+  showHighlights.value = true;
+});
+
 const formValue = reactive({
   account: "",
   password: "",
@@ -488,6 +584,118 @@ const handleLogin = async () => {
   text-align: center;
 }
 
+.highlights-heading {
+  margin-bottom: 22px;
+
+  p {
+    margin: 8px 0 0;
+    color: var(--color-gray-7);
+    line-height: 1.65;
+  }
+}
+
+.highlights-kicker {
+  color: var(--color-primary-6);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.highlights-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.highlight-item {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  min-height: 108px;
+  box-sizing: border-box;
+  padding: 16px;
+  border: 1px solid var(--color-gray-2);
+  border-radius: 10px;
+  background: var(--color-bg-page);
+
+  h3 {
+    margin: 0 0 7px;
+    color: var(--color-gray-10);
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  p {
+    margin: 0;
+    color: var(--color-gray-7);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+}
+
+.highlight-marker {
+  flex: none;
+  width: 4px;
+  height: 28px;
+  border-radius: 2px;
+  background: var(--color-primary-6);
+}
+
+.highlights-sources {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-gray-2);
+}
+
+.highlights-sources-label {
+  margin-right: 2px;
+  color: var(--color-gray-6);
+  font-size: 12px;
+}
+
+.highlights-source-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  border: 1px solid var(--color-gray-3);
+  border-radius: 6px;
+  color: var(--color-gray-8);
+  font-size: 12px;
+  line-height: 1.2;
+  text-decoration: none;
+  transition:
+    border-color 160ms ease,
+    color 160ms ease;
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--color-primary-5);
+    color: var(--color-primary-6);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary-3);
+    outline-offset: 2px;
+  }
+}
+
+.highlights-source-arrow {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.highlights-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
 // 窄屏下让工具栏参与页面布局，避免与高度可变的登录卡片重叠。
 @media (max-width: 480px) {
   .login-page {
@@ -506,6 +714,28 @@ const handleLogin = async () => {
   .login-content {
     flex: none;
     margin-block: auto;
+  }
+
+  .highlights-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .highlight-item {
+    min-height: auto;
+  }
+
+  .highlights-footer {
+    align-items: stretch;
+    flex-direction: column;
+
+    .n-button {
+      align-self: flex-end;
+    }
+  }
+
+  :deep(.login-highlights-modal) {
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
   }
 }
 </style>
